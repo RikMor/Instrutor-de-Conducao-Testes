@@ -52,18 +52,20 @@ addEventListener('hashchange',route);
 // ---------- Testes
 function quizCfg(){const subs=[...new Set(T.map(t=>t.s))];
  main.innerHTML=`<h1 class="t">Fazer um teste</h1>${S&&S.live?'<p><a class="btn" href="#/quiz/run">▶ Continuar o teste em curso</a></p>':''}
-<div class="box"><b>Número de perguntas</b> <label>Perguntas: <input type="number" id="qn" value="100" min="1"> <small id="qmax"></small></label></div>
+<div class="box"><b>Modo</b><label><input type="radio" name="md" value="r" checked> Aleatório: <input type="number" id="qn" value="100" min="1"> perguntas <small id="qmax"></small></label><label><input type="radio" name="md" value="f"> Teste completo: todas as perguntas dos temas escolhidos, pela ordem original <small id="qall"></small></label></div>
 <div class="box"><b>Temas</b>`+subs.map(s=>`<div class="sub"><label><input type="checkbox" class="sc" data-s="${esc(s)}" checked> <b>${esc(s)}</b></label><div class="tl">`+
  T.map((t,i)=>t.s===s?`<label><input type="checkbox" class="tc" data-s="${esc(s)}" value="${i}" checked> ${esc(t.n)} (${t.c})</label>`:'').join('')+`</div></div>`).join('')+`</div>
 <div class="box"><b>Tempo</b><label><input type="radio" name="tm" value="1" checked> Com limite: <input type="number" id="qm" value="120" min="1"> minutos</label><label><input type="radio" name="tm" value="0"> Sem limite de tempo</label></div>
 <div class="box"><label><input type="checkbox" id="qi"> Mostrar a resposta certa logo depois de responder</label></div>
 <button class="btn p" id="go">Começar teste</button> <small id="qerr" style="color:var(--ko)"></small>`;
  const pool=()=>{const sel=new Set([...document.querySelectorAll('.tc:checked')].map(c=>+c.value));return Q.filter(q=>q.t.some(t=>sel.has(t)))};
- const upd=()=>{$('#qmax').textContent='(disponíveis: '+pool().length+')'};upd();
+ const full=()=>document.querySelector('[name=md]:checked').value==='f';
+ const upd=()=>{const n=pool().length;$('#qmax').textContent='(disponíveis: '+n+')';$('#qall').textContent='('+n+' perguntas)';$('#qn').disabled=full()};upd();
+ document.querySelectorAll('[name=md]').forEach(r=>r.onchange=upd);
  document.querySelectorAll('.sc').forEach(c=>c.onchange=()=>{document.querySelectorAll(`.tc[data-s="${c.dataset.s}"]`).forEach(x=>x.checked=c.checked);upd()});
  document.querySelectorAll('.tc').forEach(c=>c.onchange=upd);
- $('#go').onclick=()=>{const p=pool(),n=Math.min(+$('#qn').value||100,p.length);if(!p.length)return $('#qerr').textContent='Escolhe pelo menos um tema.';
-  for(let i=p.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[p[i],p[j]]=[p[j],p[i]]}
+ $('#go').onclick=()=>{const p=pool(),f=full(),n=f?p.length:Math.min(+$('#qn').value||100,p.length);if(!p.length)return $('#qerr').textContent='Escolhe pelo menos um tema.';
+  if(!f)for(let i=p.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[p[i],p[j]]=[p[j],p[i]]}
   const lim=document.querySelector('[name=tm]:checked').value==='1'?Math.max(1,+$('#qm').value||120)*60000:0;
   S={live:1,qs:p.slice(0,n),ans:[],i:0,t0:Date.now(),lim,imm:$('#qi').checked};location.hash='/quiz/run'}}
 const fmt=ms=>{const s=Math.max(0,Math.round(ms/1000));return(s>=3600?Math.floor(s/3600)+':':'')+String(Math.floor(s%3600/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
