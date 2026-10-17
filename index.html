@@ -47,11 +47,9 @@ main blockquote{margin:1rem 0;padding:.1rem 1rem;border-left:4px solid var(--bd)
 <script>
 const T=window.TESTS,Q=window.QS,$=s=>document.querySelector(s),main=$('#main');
 const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-let tm=null,S=null,P={};try{P=JSON.parse(localStorage.getItem('qp')||'{}')}catch(e){}
-const saveP=()=>{try{localStorage.setItem('qp',JSON.stringify(P))}catch(e){}};
-const tstat=i=>{const qs=Q.filter(q=>q.t.includes(i)),ok=qs.filter(q=>P[q.id]===1).length;return{ok,n:qs.length,full:qs.length>0&&ok===qs.length}};
+let tm=null,S=null;try{localStorage.removeItem('qp')}catch(e){}
 const unc=i=>Q.filter(q=>q.t.includes(i)&&q.u).length,ofi=i=>unc(i)?`<span class="bd">⚠️ ${unc(i)} em dúvida</span>`:'<span class="bd ok">✅ Correção oficial</span>';
-const tl=(t,i)=>{const x=tstat(i);return `<label${x.full?' class="full"':''}><input type="checkbox" class="tc" data-s="${esc(t.s)}" value="${i}" checked> ${esc(t.n)} (${x.n}) ${ofi(i)} ${x.full?'<span class="bd ok">🏆 todas acertadas</span>':x.ok?`<small>${x.ok}/${x.n} certas</small>`:''}</label>`};
+const tl=(t,i)=>`<label><input type="checkbox" class="tc" data-s="${esc(t.s)}" value="${i}" checked> ${esc(t.n)} (${Q.filter(q=>q.t.includes(i)).length}) ${ofi(i)}</label>`;
 
 function route(){if(window.mpActive)return;clearInterval(tm);if(S&&S.live&&location.hash==='#/quiz/run')return runView();if(location.hash!=='#/quiz')history.replaceState(null,'','#/quiz');quizCfg();scrollTo(0,0)}
 addEventListener('hashchange',route);
@@ -59,18 +57,17 @@ addEventListener('hashchange',route);
 function quizCfg(){const subs=[...new Set(T.map(t=>t.s))];
  main.innerHTML=`<h1 class="t">Fazer um teste</h1>${S&&S.live?'<p><a class="btn" href="#/quiz/run">▶ Continuar o teste em curso</a></p>':''}
 <div class="box"><b>Número de perguntas</b> <label>Perguntas: <input type="number" id="qn" value="100" min="1"> <small id="qmax"></small></label></div>
-<div class="box"><b>Temas</b> <small>— testes com todas acertadas: ${T.filter((_,i)=>tstat(i).full).length} de ${T.length}</small> <button class="btn" id="of" type="button">Selecionar só testes com correção oficial</button>`+subs.map(s=>`<div class="sub"><label><input type="checkbox" class="sc" data-s="${esc(s)}" checked> <b>${esc(s)}</b></label><div class="tl">`+
+<div class="box"><b>Temas</b>  <button class="btn" id="of" type="button">Selecionar só testes com correção oficial</button>`+subs.map(s=>`<div class="sub"><label><input type="checkbox" class="sc" data-s="${esc(s)}" checked> <b>${esc(s)}</b></label><div class="tl">`+
  T.map((t,i)=>t.s===s?tl(t,i):'').join('')+`</div></div>`).join('')+`</div>
 <div class="box"><b>Tempo</b><label><input type="radio" name="tm" value="1" checked> Com limite: <input type="number" id="qm" value="120" min="1"> minutos</label><label><input type="radio" name="tm" value="0"> Sem limite de tempo</label></div>
 <div class="box"><label><input type="checkbox" id="qi"> Mostrar a resposta certa logo depois de responder</label></div>
-<button class="btn p" id="go">Começar teste</button> <button class="btn" id="rst">Limpar progresso</button> <small id="qerr" style="color:var(--ko)"></small>`;
+<button class="btn p" id="go">Começar teste</button> <small id="qerr" style="color:var(--ko)"></small>`;
  const pool=()=>{const sel=new Set([...document.querySelectorAll('.tc:checked')].map(c=>+c.value));return Q.filter(q=>q.t.some(t=>sel.has(t)))};
  const upd=()=>{$('#qmax').textContent='(disponíveis: '+pool().length+')'};upd();
  document.querySelectorAll('.sc').forEach(c=>c.onchange=()=>{document.querySelectorAll(`.tc[data-s="${c.dataset.s}"]`).forEach(x=>x.checked=c.checked);upd()});
  document.querySelectorAll('.tc').forEach(c=>c.onchange=upd);
  $('#of').onclick=()=>{document.querySelectorAll('.tc').forEach(c=>c.checked=!unc(+c.value));document.querySelectorAll('.sc').forEach(c=>{const l=[...document.querySelectorAll(`.tc[data-s="${c.dataset.s}"]`)];c.checked=l.length>0&&l.every(x=>x.checked)});upd()};
  window.mpCfg&&window.mpCfg();
- $('#rst').onclick=()=>{if(confirm('Apagar o progresso dos testes?')){P={};saveP();quizCfg()}};
  $('#go').onclick=()=>{const p=pool(),n=Math.min(+$('#qn').value||100,p.length);if(!p.length)return $('#qerr').textContent='Escolhe pelo menos um tema.';
   for(let i=p.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[p[i],p[j]]=[p[j],p[i]]}
   const lim=document.querySelector('[name=tm]:checked').value==='1'?Math.max(1,+$('#qm').value||120)*60000:0;
@@ -89,13 +86,12 @@ function runView(){const q=S.qs[S.i],a=S.ans[S.i],lock=S.imm&&a!=null;
 const exHtml=q=>`<div class="ex"><b>Resposta certa: ${String.fromCharCode(97+q.a)})</b>${q.u?' <span class="bd">resposta não confirmada</span>':''}${q.e}</div>`;
 function finish(auto){const un=S.qs.length-S.ans.filter(x=>x!=null).length;
  if(!auto&&un&&!confirm(`Tens ${un} pergunta(s) por responder. Terminar mesmo assim?`))return;
- clearInterval(tm);S.live=0;const bf=T.map((_,i)=>tstat(i).full);S.qs.forEach((q,i)=>{if(S.ans[i]!=null)P[q.id]=S.ans[i]===q.a?1:0});saveP();
- const nf=T.map((t,i)=>!bf[i]&&tstat(i).full?t.s+' – '+t.n:'').filter(Boolean);const wr=S.qs.filter((q,i)=>S.ans[i]!==q.a),used=Date.now()-S.t0,ok=S.qs.filter((q,i)=>S.ans[i]===q.a).length,n=S.qs.length;
+ clearInterval(tm);S.live=0;const wr=S.qs.filter((q,i)=>S.ans[i]!==q.a),used=Date.now()-S.t0,ok=S.qs.filter((q,i)=>S.ans[i]===q.a).length,n=S.qs.length;
  main.innerHTML=`<h1 class="t">Resultado</h1>${auto?'<p><b>O tempo terminou.</b></p>':''}<div class="res">${ok}/${n} <small>(${Math.round(ok/n*100)}%)</small></div><p>Certas: ${ok} · Erradas: ${n-ok-un} · Por responder: ${un} · Tempo: ${fmt(Math.min(used,S.lim||used))}</p>
-${nf.length?'<p>🏆 Todas acertadas em: <b>'+nf.map(esc).join(', ')+'</b></p>':''}<p><a class="btn p" href="#/quiz">Novo teste</a> <button class="btn" id="all">Mostrar todas</button> ${wr.length?`<button class="btn p" id="rt">🔁 Refazer as erradas (${wr.length})</button>`:''}</p><div id="rv"></div>`;
+<p>${wr.length?`<button class="btn p" id="rt">🔁 Refazer as erradas (${wr.length})</button>`:'<a class="btn p" href="#/quiz">Novo teste</a>'}</p><div id="rv"></div>`;
  const show=all=>$('#rv').innerHTML=S.qs.map((q,i)=>({q,i,a:S.ans[i]})).filter(x=>all||x.a!==x.q.a).map(({q,i,a})=>`<div class="ri"><b>${i+1}.</b> <span class="qt">${esc(q.q)}</span>`+
   q.o.map((o,k)=>`<div class="opt ${k===q.a?'ok':k===a?'ko':''}"><b>${String.fromCharCode(97+k)})</b> ${esc(o)}${k===a?' ← a tua resposta':''}</div>`).join('')+(a==null?'<small>Sem resposta.</small>':'')+exHtml(q)+'</div>').join('')||'<p>Sem erros. 🎉</p>';
- show(false);$('#all').onclick=()=>show(true);
+ show(false);
  if($('#rt'))$('#rt').onclick=()=>{const p=wr.slice();for(let i=p.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[p[i],p[j]]=[p[j],p[i]]}S={live:1,qs:p,ans:[],i:0,t0:Date.now(),lim:S.lim,imm:S.imm};history.pushState(null,'','#/quiz/run');runView();scrollTo(0,0)};scrollTo(0,0)}
 route();
 </script>
