@@ -1,98 +1,40 @@
 <!DOCTYPE html>
-<html lang="pt-PT"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Testes — Instrutor de Condução</title>
+<html lang="pt-PT"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Instrutor de Condução</title>
 <style>
-:root{--bg:#fff;--fg:#1c2330;--mu:#5d6778;--bd:#dde2ea;--pa:#f4f6fa;--ac:#1d5fd1;--ok:#17803d;--ko:#c0392b;--wa:#b7791f}
-@media(prefers-color-scheme:dark){:root{--bg:#10151d;--fg:#e4e8ef;--mu:#9aa5b7;--bd:#263040;--pa:#171e29;--ac:#6ea3ff;--ok:#4cc27a;--ko:#ff7a6b;--wa:#e0b252}}
-*{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--fg)}
-a{color:var(--ac)}button,input{font:inherit;color:inherit}
-header{position:sticky;top:0;z-index:5;display:flex;gap:.6rem;align-items:center;padding:.6rem 1rem;background:var(--bg);border-bottom:1px solid var(--bd)}
-header h1{font-size:1.05rem;margin:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}header h1 a{color:inherit;text-decoration:none}
-header input{padding:.4rem .7rem;border:1px solid var(--bd);border-radius:8px;background:var(--pa);width:220px;max-width:40vw}
-.btn{padding:.45rem .9rem;border:1px solid var(--bd);border-radius:8px;background:var(--pa);cursor:pointer;text-decoration:none;display:inline-block}
-.btn.p{background:var(--ac);border-color:var(--ac);color:#fff}.btn:disabled{opacity:.5}
-#menu{display:none}
-.wrap{display:flex;align-items:flex-start}
-nav{width:310px;flex:none;position:sticky;top:53px;height:calc(100vh - 53px);overflow:auto;padding:.8rem;border-right:1px solid var(--bd);font-size:.9rem}
-nav details{margin-left:.7rem}nav>details{margin-left:0}nav summary{cursor:pointer;padding:.15rem 0}nav summary a{color:inherit;text-decoration:none;font-weight:600}
-nav a.n{display:block;padding:.12rem .5rem;margin-left:.7rem;color:var(--fg);text-decoration:none;border-radius:6px}nav a.on,nav a.n:hover{background:var(--pa);color:var(--ac)}
-main{flex:1;min-width:0;max-width:900px;margin:0 auto;padding:1.2rem 1.5rem 4rem}
-.bc{color:var(--mu);font-size:.85rem}h1.t{margin:.2rem 0 1rem}
-main table{border-collapse:collapse;display:block;overflow-x:auto;margin:1rem 0}main td,main th{border:1px solid var(--bd);padding:.35rem .6rem}main th{background:var(--pa)}
-main blockquote{margin:1rem 0;padding:.1rem 1rem;border-left:4px solid var(--bd);color:var(--mu)}
-.co{margin:1rem 0;border:1px solid var(--bd);border-left:4px solid var(--ac);border-radius:8px;padding:.5rem 1rem;background:var(--pa)}
-.co summary{cursor:pointer;font-weight:600}.co.warning{border-left-color:var(--wa)}.co.success{border-left-color:var(--ok)}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:.8rem;margin:1rem 0}
-.card{display:block;padding:1rem;border:1px solid var(--bd);border-radius:12px;background:var(--pa);color:inherit;text-decoration:none}.card:hover{border-color:var(--ac)}.card b{display:block}.card small{color:var(--mu)}
-.box{border:1px solid var(--bd);border-radius:12px;padding:1rem 1.2rem;margin:1rem 0;background:var(--pa)}
-.box label{display:block;margin:.25rem 0}.box input[type=number]{width:90px;padding:.3rem;border:1px solid var(--bd);border-radius:6px;background:var(--bg)}
-.sub{margin:.6rem 0}.sub .tl{margin-left:1.6rem;display:flex;flex-wrap:wrap;gap:0 1.2rem}
-.qbar{position:sticky;top:53px;background:var(--bg);padding:.5rem 0;display:flex;gap:1rem;align-items:center;border-bottom:1px solid var(--bd);z-index:4}.qbar .tm{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:700}
-.nav{display:flex;flex-wrap:wrap;gap:4px;margin:.8rem 0}.nav button{min-width:34px;padding:.15rem;border:1px solid var(--bd);border-radius:6px;background:var(--pa);cursor:pointer;font-size:.8rem}
-.nav .d{background:var(--ac);color:#fff;border-color:var(--ac)}.nav .c{outline:2px solid var(--fg)}
-.qt{font-size:1.1rem;white-space:pre-line;margin:.8rem 0}
-.opt{display:block;width:100%;text-align:left;margin:.4rem 0;padding:.6rem .9rem;border:1px solid var(--bd);border-radius:10px;background:var(--pa);cursor:pointer}
-.opt.s{border-color:var(--ac);box-shadow:inset 0 0 0 1px var(--ac)}.opt.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 18%,transparent)}.opt.ko{border-color:var(--ko);background:color-mix(in srgb,var(--ko) 18%,transparent)}
-.ex{margin:.6rem 0;padding:.2rem 1rem;border-left:4px solid var(--ok);background:var(--pa);border-radius:6px}
-.bd{display:inline-block;font-size:.8rem;padding:.1rem .5rem;border-radius:99px;border:1px solid var(--wa);color:var(--wa)}
-.bd.ok{border-color:var(--ok);color:var(--ok)}.tl label.full{font-weight:600}
-.res{font-size:2.2rem;font-weight:800}.ri{border-top:1px solid var(--bd);padding:.6rem 0}
-.hl{background:#ffe58a;color:#000}
-@media(max-width:850px){#menu{display:inline-block}nav{display:none;position:fixed;top:53px;left:0;right:0;bottom:0;width:auto;height:auto;background:var(--bg);z-index:6}nav.o{display:block}main{padding:1rem}}
-</style>
-</head><body>
-<header><h1><a href="#/quiz">📝 Testes — Instrutor de Condução</a></h1></header>
-<div class="wrap"><main id="main"></main></div>
-<script src="quiz.js"></script>
-<script>
-const T=window.TESTS,Q=window.QS,$=s=>document.querySelector(s),main=$('#main');
-const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-let tm=null,S=null;try{localStorage.removeItem('qp')}catch(e){}
-const unc=i=>Q.filter(q=>q.t.includes(i)&&q.u).length,ofi=i=>unc(i)?`<span class="bd">⚠️ ${unc(i)} em dúvida</span>`:'<span class="bd ok">✅ Correção oficial</span>';
-const tl=(t,i)=>`<label><input type="checkbox" class="tc" data-s="${esc(t.s)}" value="${i}" checked> ${esc(t.n)} (${Q.filter(q=>q.t.includes(i)).length}) ${ofi(i)}</label>`;
-
-function route(){if(window.mpActive)return;clearInterval(tm);if(S&&S.live&&location.hash==='#/quiz/run')return runView();if(location.hash!=='#/quiz')history.replaceState(null,'','#/quiz');quizCfg();scrollTo(0,0)}
-addEventListener('hashchange',route);
-// ---------- Testes
-function quizCfg(){const subs=[...new Set(T.map(t=>t.s))];
- main.innerHTML=`<h1 class="t">Fazer um teste</h1>${S&&S.live?'<p><a class="btn" href="#/quiz/run">▶ Continuar o teste em curso</a></p>':''}
-<div class="box"><b>Número de perguntas</b> <label>Perguntas: <input type="number" id="qn" value="100" min="1"> <small id="qmax"></small></label></div>
-<div class="box"><b>Temas</b>  <button class="btn" id="of" type="button">Selecionar só testes com correção oficial</button>`+subs.map(s=>`<div class="sub"><label><input type="checkbox" class="sc" data-s="${esc(s)}" checked> <b>${esc(s)}</b></label><div class="tl">`+
- T.map((t,i)=>t.s===s?tl(t,i):'').join('')+`</div></div>`).join('')+`</div>
-<div class="box"><b>Tempo</b><label><input type="radio" name="tm" value="1" checked> Com limite: <input type="number" id="qm" value="120" min="1"> minutos</label><label><input type="radio" name="tm" value="0"> Sem limite de tempo</label></div>
-<div class="box"><label><input type="checkbox" id="qi"> Mostrar a resposta certa logo depois de responder</label></div>
-<button class="btn p" id="go">Começar teste</button> <small id="qerr" style="color:var(--ko)"></small>`;
- const pool=()=>{const sel=new Set([...document.querySelectorAll('.tc:checked')].map(c=>+c.value));return Q.filter(q=>q.t.some(t=>sel.has(t)))};
- const upd=()=>{$('#qmax').textContent='(disponíveis: '+pool().length+')'};upd();
- document.querySelectorAll('.sc').forEach(c=>c.onchange=()=>{document.querySelectorAll(`.tc[data-s="${c.dataset.s}"]`).forEach(x=>x.checked=c.checked);upd()});
- document.querySelectorAll('.tc').forEach(c=>c.onchange=upd);
- $('#of').onclick=()=>{document.querySelectorAll('.tc').forEach(c=>c.checked=!unc(+c.value));document.querySelectorAll('.sc').forEach(c=>{const l=[...document.querySelectorAll(`.tc[data-s="${c.dataset.s}"]`)];c.checked=l.length>0&&l.every(x=>x.checked)});upd()};
- window.mpCfg&&window.mpCfg();
- $('#go').onclick=()=>{const p=pool(),n=Math.min(+$('#qn').value||100,p.length);if(!p.length)return $('#qerr').textContent='Escolhe pelo menos um tema.';
-  for(let i=p.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[p[i],p[j]]=[p[j],p[i]]}
-  const lim=document.querySelector('[name=tm]:checked').value==='1'?Math.max(1,+$('#qm').value||120)*60000:0;
-  S={live:1,qs:p.slice(0,n),ans:[],i:0,t0:Date.now(),lim,imm:$('#qi').checked};history.pushState(null,'','#/quiz/run');runView();scrollTo(0,0)}}
-const fmt=ms=>{const s=Math.max(0,Math.round(ms/1000));return(s>=3600?Math.floor(s/3600)+':':'')+String(Math.floor(s%3600/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
-function tick(){const e=Date.now()-S.t0,el=$('#tm');if(!el)return;if(S.lim){el.textContent='⏱ '+fmt(S.lim-e);if(e>=S.lim)finish(true)}else el.textContent='⏱ '+fmt(e)}
-function runView(){const q=S.qs[S.i],a=S.ans[S.i],lock=S.imm&&a!=null;
- main.innerHTML=`<div class="qbar"><b>Pergunta ${S.i+1}/${S.qs.length}</b><span class="tm" id="tm"></span><button class="btn" id="fin">Terminar</button></div>
-<div class="nav">${S.qs.map((_,i)=>`<button data-i="${i}" class="${S.ans[i]!=null?'d':''} ${i===S.i?'c':''}">${i+1}</button>`).join('')}</div>
-<div class="qt">${esc(q.q)}</div>`+q.o.map((o,i)=>`<button class="opt ${a===i?'s':''} ${lock?(i===q.a?'ok':a===i?'ko':''):''}" data-o="${i}"><b>${String.fromCharCode(97+i)})</b> ${esc(o)}</button>`).join('')+
- (lock?exHtml(q):'')+`<p><button class="btn" id="pv" ${S.i?'':'disabled'}>← Anterior</button> <button class="btn p" id="nx">${S.i<S.qs.length-1?'Seguinte →':'Terminar'}</button></p>`;
- main.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{S.i=+b.dataset.i;runView()});
- main.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{if(lock)return;S.ans[S.i]=+b.dataset.o;runView()});
- $('#pv').onclick=()=>{S.i--;runView()};$('#nx').onclick=()=>S.i<S.qs.length-1?(S.i++,runView()):finish();$('#fin').onclick=()=>finish();
- clearInterval(tm);tick();tm=setInterval(tick,1000)}
-const exHtml=q=>`<div class="ex"><b>Resposta certa: ${String.fromCharCode(97+q.a)})</b>${q.u?' <span class="bd">resposta não confirmada</span>':''}${q.e}</div>`;
-function finish(auto){const un=S.qs.length-S.ans.filter(x=>x!=null).length;
- if(!auto&&un&&!confirm(`Tens ${un} pergunta(s) por responder. Terminar mesmo assim?`))return;
- clearInterval(tm);S.live=0;const wr=S.qs.filter((q,i)=>S.ans[i]!==q.a),used=Date.now()-S.t0,ok=S.qs.filter((q,i)=>S.ans[i]===q.a).length,n=S.qs.length;
- main.innerHTML=`<h1 class="t">Resultado</h1>${auto?'<p><b>O tempo terminou.</b></p>':''}<div class="res">${ok}/${n} <small>(${Math.round(ok/n*100)}%)</small></div><p>Certas: ${ok} · Erradas: ${n-ok-un} · Por responder: ${un} · Tempo: ${fmt(Math.min(used,S.lim||used))}</p>
-<p>${wr.length?`<button class="btn p" id="rt">🔁 Refazer as erradas (${wr.length})</button>`:'<a class="btn p" href="#/quiz">Novo teste</a>'}</p><div id="rv"></div>`;
- const show=all=>$('#rv').innerHTML=S.qs.map((q,i)=>({q,i,a:S.ans[i]})).filter(x=>all||x.a!==x.q.a).map(({q,i,a})=>`<div class="ri"><b>${i+1}.</b> <span class="qt">${esc(q.q)}</span>`+
-  q.o.map((o,k)=>`<div class="opt ${k===q.a?'ok':k===a?'ko':''}"><b>${String.fromCharCode(97+k)})</b> ${esc(o)}${k===a?' ← a tua resposta':''}</div>`).join('')+(a==null?'<small>Sem resposta.</small>':'')+exHtml(q)+'</div>').join('')||'<p>Sem erros. 🎉</p>';
- show(false);
- if($('#rt'))$('#rt').onclick=()=>{const p=wr.slice();for(let i=p.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[p[i],p[j]]=[p[j],p[i]]}S={live:1,qs:p,ans:[],i:0,t0:Date.now(),lim:S.lim,imm:S.imm};history.pushState(null,'','#/quiz/run');runView();scrollTo(0,0)};scrollTo(0,0)}
-route();
-</script>
-<script type="module" src="multi.js"></script></body></html>
+:root{--bg:#fff;--fg:#1c2330;--mu:#5d6778;--bd:#dde2ea;--pa:#f4f6fa;--ac:#1d5fd1;--ac2:#b5532a}
+@media(prefers-color-scheme:dark){:root{--bg:#10151d;--fg:#e4e8ef;--mu:#9aa5b7;--bd:#263040;--pa:#171e29;--ac:#6ea3ff;--ac2:#e0824f}}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--fg);display:flex;align-items:center;justify-content:center;padding:1.2rem}
+main{width:100%;max-width:760px}
+h1{font-size:clamp(1.6rem,5vw,2.2rem);margin:0 0 .3rem;text-align:center}
+.sub{text-align:center;color:var(--mu);margin:0 0 1.6rem}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem}
+.card{display:flex;flex-direction:column;gap:.4rem;padding:1.4rem;border:1px solid var(--bd);border-top:5px solid var(--c);border-radius:14px;background:var(--pa);color:inherit;text-decoration:none;transition:transform .15s,border-color .15s}
+.card:hover,.card:focus-visible{transform:translateY(-3px);border-color:var(--c);outline:none}
+.card .em{font-size:2.6rem;line-height:1}
+.card b{font-size:1.2rem}
+.card span{color:var(--mu);font-size:.95rem}
+.card i{margin-top:auto;padding-top:.6rem;font-style:normal;font-weight:700;color:var(--c)}
+</style></head>
+<body>
+<main>
+<h1>🚗 Instrutor de Condução</h1>
+<p class="sub">Escolhe como queres estudar</p>
+<div class="cards">
+ <a class="card" style="--c:var(--ac)" href="testes.html">
+  <div class="em">📝</div>
+  <b>Testes — Instrutor de Condução</b>
+  <span>Testes convencionais por tema, com tempo, correção e modo multijogador.</span>
+  <i>Fazer um teste →</i>
+ </a>
+ <a class="card" style="--c:var(--ac2)" href="Torre_das_Cartas.html">
+  <div class="em">🏰</div>
+  <b>Torre do Código de Condução</b>
+  <span>Sobe a torre derrotando inimigos e vence cada andar respondendo às perguntas.</span>
+  <i>Subir a torre →</i>
+ </a>
+</div>
+</main>
+</body></html>
