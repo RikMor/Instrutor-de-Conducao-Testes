@@ -41,7 +41,7 @@ main blockquote{margin:1rem 0;padding:.1rem 1rem;border-left:4px solid var(--bd)
 @media(max-width:850px){#menu{display:inline-block}nav{display:none;position:fixed;top:53px;left:0;right:0;bottom:0;width:auto;height:auto;background:var(--bg);z-index:6}nav.o{display:block}main{padding:1rem}}
 </style>
 </head><body>
-<header><h1><a href="#/quiz">📝 Testes — Instrutor de Condução</a></h1></header>
+<header><h1><a href="testes.html" onclick="home(event)">📝 Testes — Instrutor de Condução</a></h1></header>
 <div class="wrap"><main id="main"></main></div>
 <script src="quiz.js"></script>
 <script>
@@ -51,7 +51,8 @@ let tm=null,S=null;try{localStorage.removeItem('qp')}catch(e){}
 const unc=i=>Q.filter(q=>q.t.includes(i)&&q.u).length,ofi=i=>unc(i)?`<span class="bd">⚠️ ${unc(i)} em dúvida</span>`:'<span class="bd ok">✅ Correção oficial</span>';
 const tl=(t,i)=>`<label><input type="checkbox" class="tc" data-s="${esc(t.s)}" value="${i}" checked> ${esc(t.n)} (${Q.filter(q=>q.t.includes(i)).length}) ${ofi(i)}</label>`;
 
-function route(){if(window.mpActive)return;clearInterval(tm);if(S&&S.live&&location.hash==='#/quiz/run')return runView();if(location.hash!=='#/quiz')history.replaceState(null,'','#/quiz');quizCfg();scrollTo(0,0)}
+function route(){if(window.mpActive)return;clearInterval(tm);if(S&&S.live&&location.hash==='#/quiz/run')return runView();if(location.hash)history.replaceState(null,'',location.pathname+location.search);quizCfg();scrollTo(0,0)}
+function home(e){e.preventDefault();if(location.hash)history.pushState(null,'',location.pathname+location.search);route()}
 addEventListener('hashchange',route);
 // ---------- Testes
 function quizCfg(){const subs=[...new Set(T.map(t=>t.s))];
@@ -88,7 +89,7 @@ function finish(auto){const un=S.qs.length-S.ans.filter(x=>x!=null).length;
  if(!auto&&un&&!confirm(`Tens ${un} pergunta(s) por responder. Terminar mesmo assim?`))return;
  clearInterval(tm);S.live=0;const wr=S.qs.filter((q,i)=>S.ans[i]!==q.a),used=Date.now()-S.t0,ok=S.qs.filter((q,i)=>S.ans[i]===q.a).length,n=S.qs.length;
  main.innerHTML=`<h1 class="t">Resultado</h1>${auto?'<p><b>O tempo terminou.</b></p>':''}<div class="res">${ok}/${n} <small>(${Math.round(ok/n*100)}%)</small></div><p>Certas: ${ok} · Erradas: ${n-ok-un} · Por responder: ${un} · Tempo: ${fmt(Math.min(used,S.lim||used))}</p>
-<p>${wr.length?`<button class="btn p" id="rt">🔁 Refazer as erradas (${wr.length})</button>`:'<a class="btn p" href="#/quiz">Novo teste</a>'}</p><div id="rv"></div>`;
+<p>${wr.length?`<button class="btn p" id="rt">🔁 Refazer as erradas (${wr.length})</button>`:'<a class="btn p" href="testes.html" onclick="home(event)">Novo teste</a>'}</p><div id="rv"></div>`;
  const show=all=>$('#rv').innerHTML=S.qs.map((q,i)=>({q,i,a:S.ans[i]})).filter(x=>all||x.a!==x.q.a).map(({q,i,a})=>`<div class="ri"><b>${i+1}.</b> <span class="qt">${esc(q.q)}</span>`+
   q.o.map((o,k)=>`<div class="opt ${k===q.a?'ok':k===a?'ko':''}"><b>${String.fromCharCode(97+k)})</b> ${esc(o)}${k===a?' ← a tua resposta':''}</div>`).join('')+(a==null?'<small>Sem resposta.</small>':'')+exHtml(q)+'</div>').join('')||'<p>Sem erros. 🎉</p>';
  show(false);
