@@ -7,7 +7,7 @@
 
    Organização do ficheiro (de cima para baixo):
      1. Funções auxiliares e constantes (prémios, letras)
-     2. Escolha das perguntas elegíveis e da dificuldade
+     2. Perguntas (todas entram) e dificuldade
      3. Relíquias, portas e loja
      4. Som
      5. Ecrã inicial        (renderStart)
@@ -24,7 +24,6 @@
    ========================================================================== */
 
 (() => {
-
   // QS = todas as perguntas (de quiz.js).
   const QS = window.QS || [];
   const app = document.getElementById('app'),
@@ -69,53 +68,41 @@
   // LT = letras das opções.
   const LT = 'ABCD';
 
-  /* ---------- perguntas elegíveis ---------- */
-  // Fora: perguntas com 2 opções, que dependem de imagens/tabelas, ou cujas opções/explicação
-  // referem outras opções ("todas as anteriores", "alínea b)") — deixam de fazer sentido ao baralhar.
-  const BAD_Q =
-    /\b(figura|figuras|imagem|imagens|ilustra\w*|fotografia|desenho|ao lado|seguinte sinal|este sinal|estes sinais|esta placa|tabela|gráfico)\b/i;
+  /* ---------- perguntas ---------- */
+  // ELIG = perguntas do jogo. Entram TODAS as de quiz.js (repetidas e de 2 opções incluídas).
+  const ELIG = QS;
+
+  // Há perguntas cujas opções ou explicação citam outras opções ("todas as anteriores",
+  // "alínea b)", "a e c"). Se as opções fossem baralhadas deixavam de fazer sentido,
+  // por isso estas mantêm a ordem original (keepOrder).
   const BAD_O =
     /\b(todas|nenhuma|ambas|anteriores|acima|abaixo|alínea)\b|opç|\b[abcd]\)|\b[abcd]\s*(e|ou)\s*[abcd]\b/i;
   const BAD_E = /\b(alínea|letra)\b|opç|\b[abcd]\)/i;
+  const keepOrder = (q) => q.o.some((o) => BAD_O.test(o)) || BAD_E.test(q.e || '');
 
-  // ELIG = perguntas que servem para este jogo (sem repetidas e sem as excluídas acima).
-  const ELIG = (() => {
-    const seen = new Set(),
-      out = [];
-    for (const q of QS) {
-      const k = q.q.trim().toLowerCase();
-      if (seen.has(k)) continue;
-      seen.add(k);
-      if (
-        q.o.length < 3 ||
-        BAD_Q.test(q.q) ||
-        q.o.some((o) => BAD_O.test(o)) ||
-        BAD_E.test(q.e || '')
-      )
-        continue;
-      out.push(q);
-    }
-    return out;
-  })();
   // Dificuldade estimada: mais opções, enunciado mais longo e opções mais longas = mais difícil.
   const score = (q) =>
     q.o.length * 14 + q.q.length / 5 + q.o.reduce((a, o) => a + o.length, 0) / q.o.length / 4;
 
-  // Prepara uma pergunta para jogar: baralha as opções e marca qual é a certa (ok).
-  const prep = (q) => ({
-    q: q.q,
-    e: q.e || '',
-    u: q.u,
-    s: q.s,
-    o: shuffle(q.o.map((t, i) => ({ t, ok: i === q.a }))),
-  });
+  // Prepara uma pergunta para jogar: marca qual é a opção certa (ok) e baralha as opções,
+  // exceto nas perguntas que citam outras opções (keepOrder).
+  const prep = (q) => {
+    const opcoes = q.o.map((t, i) => ({ t, ok: i === q.a }));
+    return {
+      q: q.q,
+      e: q.e || '',
+      u: q.u,
+      s: q.s,
+      o: keepOrder(q) ? opcoes : shuffle(opcoes),
+    };
+  };
 
   // POOL = perguntas deste jogo, da mais fácil para a mais difícil.
   let POOL = [];
 
   // Escolhe a próxima pergunta. Quanto mais alto o nível, mais para o fim da lista POOL
   // (mais difícil) é a escolha; perguntas elite/boss são um pouco mais difíceis.
-  // Dentro dessa zona escolhe à sorte, evitando as já vistas.
+  // Dentro dessa zona escolhe à sorte, evitando as já vistas (g.seen guarda os id).
   function pickQ() {
     const g = G,
       n = POOL.length;
@@ -123,13 +110,13 @@
     const w = Math.max(4, Math.round(n * 0.12)),
       c = Math.round(t * (n - 1)),
       win = () => POOL.slice(Math.max(0, c - w), c + w + 1);
-    let cand = win().filter((q) => !g.seen.has(q.q));
+    let cand = win().filter((q) => !g.seen.has(q.id));
     if (!cand.length) {
       g.seen.clear();
       cand = win();
     }
     const q = cand[rnd(0, cand.length - 1)];
-    g.seen.add(q.q);
+    g.seen.add(q.id);
     return prep(q);
   }
 
@@ -427,8 +414,10 @@ ${best ? `<p class="best">O teu melhor prémio neste dispositivo: <b>${money(bes
     )
       .reverse()
       .join('');
+    // O 50:50 só funciona com 3 ou mais opções visíveis (com 2 mostraria logo a certa).
+    const sem5050 = (k) => k === 'f' && q && q.o.length - g.gone.size <= 2;
     const ll = (k, ic, lb) =>
-      `<button class="ll${!g.ch[k] ? ' used' : ''}" data-ll="${k}" ${!g.ch[k] || !live ? 'disabled' : ''} aria-label="${lb}${!g.ch[k] ? ' (já usada)' : ''}"><span class="ic" aria-hidden="true">${ic}</span><span>${lb}${g.ch[k] > 1 ? ' ×' + g.ch[k] : ''}</span></button>`;
+      `<button class="ll${!g.ch[k] ? ' used' : ''}" data-ll="${k}" ${!g.ch[k] || !live || sem5050(k) ? 'disabled' : ''}${sem5050(k) && g.ch[k] ? ' title="Só com 3 ou mais opções"' : ''} aria-label="${lb}${!g.ch[k] ? ' (já usada)' : ''}"><span class="ic" aria-hidden="true">${ic}</span><span>${lb}${g.ch[k] > 1 ? ' ×' + g.ch[k] : ''}</span></button>`;
     const L = g.sel != null ? LT[g.sel] : '';
     const right = q ? q.o.findIndex((o) => o.ok) : 0;
     let info = '';
@@ -575,6 +564,7 @@ ${best ? `<p class="best">O teu melhor prémio neste dispositivo: <b>${money(bes
 
   // Usa uma ajuda: 'f' = 50:50 (tira metade das erradas), 'a' = público (percentagens),
   // 't' = amigo (palpite). O público e o amigo acertam menos nas perguntas difíceis.
+  // O 50:50 não é usado (nem gasto) quando só restam 2 opções.
   function lifeline(k) {
     const g = G;
     if (!g || !g.ch[k] || (g.phase !== 'ask' && g.phase !== 'confirm')) return;
@@ -582,6 +572,7 @@ ${best ? `<p class="best">O teu melhor prémio neste dispositivo: <b>${money(bes
       tier = g.lvl < 5 ? 0 : g.lvl < 10 ? 1 : 2,
       R = q.o.map((_, i) => i).filter((i) => !g.gone.has(i)),
       c = R.find((i) => q.o[i].ok);
+    if (k === 'f' && R.length <= 2) return;
     g.ch[k]--;
     SFX.ll();
     if (k === 'f') {
