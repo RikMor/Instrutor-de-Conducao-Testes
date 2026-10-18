@@ -762,6 +762,6 @@ ${best ? `<p class="best">O teu melhor prémio neste dispositivo: <b>${money(bes
 
   if (!QS.length) {
     app.innerHTML =
-      '<p style="padding:2rem">Não foi possível carregar as perguntas (quiz.js). Confirma que o ficheiro está na mesma pasta que esta página.</p>';
+      '<p style="padding:2rem">Não foi possível carregar as perguntas (js/quiz.js). Confirma que o ficheiro está na pasta js, ao lado dos outros.</p>';
   } else renderStart();
 })();
