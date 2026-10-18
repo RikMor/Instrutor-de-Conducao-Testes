@@ -1,147 +1,21 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Torre das Cartas</title>
-<style>
-:root{--bg:#f4efe6;--fg:#2a2118;--panel:#fffaf0;--line:#d8cbb4;--acc:#b5532a;--atk:#c0392b;--def:#2e75b6;--skl:#4a8a3c;--mut:#7a6c58;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17130f;--fg:#efe6d6;--panel:#241e17;--line:#43382b;--acc:#e0824f;--atk:#e5624f;--def:#5fa3e0;--skl:#7bc26a;--mut:#a39682}}
-:root[data-theme="dark"]{--bg:#17130f;--fg:#efe6d6;--panel:#241e17;--line:#43382b;--acc:#e0824f;--atk:#e5624f;--def:#5fa3e0;--skl:#7bc26a;--mut:#a39682}
-*{box-sizing:border-box}
-html,body{margin:0;min-height:100%;background:var(--bg);color:var(--fg);font-family:Georgia,'Times New Roman',serif}
-#app{max-width:760px;margin:0 auto;padding:14px}
-h1{font-size:2rem;margin:.3em 0}
-.top{display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:space-between;font-size:.95rem;padding:8px 12px;background:var(--panel);border:1px solid var(--line);border-radius:10px}
-.prog{display:flex;gap:4px;margin:10px 0}
-.prog i{flex:1;height:6px;border-radius:3px;background:var(--line)}
-.prog i.on{background:var(--acc)}
-.enemy{text-align:center;padding:16px;margin:10px 0;background:var(--panel);border:1px solid var(--line);border-radius:14px}
-.enemy .em{font-size:4rem;line-height:1}
-.bar{height:12px;background:var(--line);border-radius:6px;overflow:hidden;margin:8px auto;max-width:300px}
-.bar b{display:block;height:100%;background:var(--atk);transition:width .3s}
-.intent{font-weight:bold;margin-top:4px}
-.st{color:var(--mut);font-size:.85rem;min-height:1.2em}
-.log{text-align:center;color:var(--mut);min-height:1.4em;font-style:italic;margin:6px 0}
-.hand{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:10px 0}
-.card{width:128px;min-height:150px;padding:8px;border-radius:10px;border:2px solid var(--line);background:var(--panel);color:var(--fg);font:inherit;text-align:center;cursor:pointer;display:flex;flex-direction:column;gap:6px;align-items:center}
-.card:hover:not(:disabled){transform:translateY(-4px)}
-.card:disabled{opacity:.45;cursor:not-allowed}
-.card.a{border-color:var(--atk)}.card.d{border-color:var(--def)}.card.s{border-color:var(--skl)}
-.card .c{align-self:flex-start;background:var(--acc);color:#fff;border-radius:50%;width:24px;height:24px;line-height:24px;font-size:.85rem;font-weight:bold}
-.card .n{font-weight:bold}
-.card .t{font-size:.82rem;color:var(--mut)}
-.btn{background:var(--acc);color:#fff;border:0;border-radius:8px;padding:10px 20px;font:inherit;font-size:1rem;cursor:pointer}
-.btn.alt{background:var(--panel);color:var(--fg);border:1px solid var(--line)}
-.row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:12px 0}
-.ctr{text-align:center}
-.qbox{background:var(--panel);border:2px solid var(--acc);border-radius:12px;padding:14px;margin:10px 0}.qbox .qt{font-weight:bold;margin-bottom:10px}.opt{display:block;width:100%;text-align:left;margin:6px 0;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font:inherit;cursor:pointer}.opt:disabled{cursor:default}.blinds{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0}.poster{flex:1 1 150px;max-width:210px;padding:12px;text-align:center;border:2px solid var(--line);border-radius:14px;background:var(--panel)}.poster .em{font-size:3rem}.poster.cur{border-color:var(--acc);transform:translateY(-8px);box-shadow:0 8px 18px rgba(0,0,0,.3)}.poster.bossp.cur{border-color:var(--atk)}.poster.fut{opacity:.5}.poster.done{opacity:.65}.poster .pt{font-weight:bold;color:var(--acc)}.poster .pd{font-size:.85rem;color:var(--mut);margin:4px 0}
-.opt.sel{border-color:var(--acc);background:rgba(224,130,79,.25)}.btn:disabled{opacity:.5;cursor:not-allowed}.opt.ok{border-color:#2e8b4a;background:rgba(46,139,74,.22)}.opt.ko{border-color:#c0392b;background:rgba(192,57,43,.22)}.ex{font-size:.9rem;color:var(--mut);margin-top:8px}.ex p{margin:.3em 0}
-.enemy,.pl{position:relative}.fl{position:absolute;left:50%;top:25%;font-size:2.2rem;font-weight:bold;pointer-events:none;animation:fl 1s forwards;text-shadow:0 2px 6px rgba(0,0,0,.4)}.fl.e{color:var(--atk)}.fl.p{color:#e74c3c}@keyframes fl{from{transform:translate(-50%,0)}to{transform:translate(-50%,-70px);opacity:0}}.shk{animation:shk .3s}@keyframes shk{25%{transform:translateX(-9px)}75%{transform:translateX(9px)}}.em{display:inline-block;animation:bob 2s ease-in-out infinite}@keyframes bob{50%{transform:translateY(-6px)}}
-.fighter{position:relative;flex:1;max-width:48%;text-align:center;padding:12px 6px;background:var(--panel);border:1px solid var(--line);border-radius:14px}.fighter .em{font-size:3.6rem;line-height:1.1}.arena{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;margin:10px 0}.bar.g b{background:var(--skl)}
-.fan{display:flex;justify-content:center;align-items:flex-end;padding:26px 0 8px;min-height:190px}.fan .slot{margin:0 -12px;transform:rotate(var(--r)) translateY(var(--y));transform-origin:bottom center;transition:transform .15s}.fan .slot:hover{transform:translateY(-34px) scale(1.12);z-index:5}.fan .card{width:112px;min-height:150px;font-size:.8rem;padding:6px;box-shadow:0 4px 10px rgba(0,0,0,.25)}.fan .card:hover:not(:disabled){transform:none}
-.tbl{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:6px}.grp{display:flex;align-items:center;gap:8px}.pile{cursor:pointer;text-align:center;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px 10px;min-width:82px;font-size:.78rem}.pile b{display:block;font-size:1.3rem}.orb{width:60px;height:60px;border-radius:50%;background:var(--acc);color:#fff;font-weight:bold;display:flex;align-items:center;justify-content:center;font-size:1.05rem}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:50}.modal>div{background:var(--panel);color:var(--fg);width:92%;max-width:440px;max-height:80vh;overflow:auto;padding:16px;border-radius:12px}.modal .li{padding:5px 0;border-bottom:1px solid var(--line);font-size:.9rem}
-@media (max-width:560px){.fan .card{width:86px;min-height:128px;font-size:.66rem;padding:4px}.fan .slot{margin:0 -11px}.orb{width:50px;height:50px}.pile{min-width:70px;padding:4px 6px}}
-.pl{display:flex;justify-content:center;gap:16px;font-size:1.1rem}
-.homebar{max-width:760px;margin:0 auto;padding:12px 14px 0}.homebar a{display:inline-block;padding:6px 14px;border:1px solid var(--line);border-radius:99px;background:var(--panel);color:var(--fg);text-decoration:none;font-size:.9rem}.homebar a:hover{border-color:var(--acc)}.homebar a:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
-</style>
-</head>
-<body>
-<div class="homebar"><a href="index.html" onclick="return scr==='menu'||confirm('Sair da Torre? O progresso desta partida perde-se.')">Voltar ao início</a></div>
-<div id="app"></div>
-<script src="quiz.js"></script>
-<script>
-var QS=window.QS;var N=9;
-var hit=function(v){var d=v+G.str+Math.floor(G.sk/2);if(E.vuln>0)d=Math.floor(d*1.5);var a=Math.min(E.block,d);E.block-=a;E.hp-=d-a;FX.push(['e',d-a>0?'-'+(d-a):'🛡️']);msg='Causaste '+d+' de dano.'};
-var CARDS={
-golpe:{n:'Golpe',c:1,t:'a',d:'Causa 6 de dano.',f:function(){hit(6)}},
-defender:{n:'Defender',c:1,t:'d',d:'Ganha 5 de escudo.',f:function(){G.block+=5}},
-duplo:{n:'Golpe Duplo',c:1,t:'a',d:'Causa 4 de dano duas vezes.',f:function(){hit(4);hit(4)}},
-investida:{n:'Investida',c:2,t:'a',d:'Causa 14 de dano.',f:function(){hit(14)}},
-ferreo:{n:'Escudo de Ferro',c:2,t:'d',d:'Ganha 12 de escudo.',f:function(){G.block+=12}},
-furia:{n:'Fúria',c:0,t:'s',d:'Ganha 2 de força.',f:function(){G.str+=2}},
-cura:{n:'Cura',c:2,t:'s',d:'Recupera 8 de vida.',f:function(){G.hp=Math.min(G.max,G.hp+8)}},
-vuln:{n:'Expor',c:1,t:'s',d:'Inimigo vulnerável 2 turnos (+50% dano).',f:function(){E.vuln=3}},
-inspirar:{n:'Inspirar',c:1,t:'s',d:'Compra 2 cartas.',f:function(){draw(2)}},
-veneno:{n:'Veneno',c:1,t:'s',d:'Aplica 5 de veneno.',f:function(){E.poison+=5}},
-contra:{n:'Contra-ataque',c:1,t:'a',d:'Causa 5 de dano e ganha 5 de escudo.',f:function(){hit(5);G.block+=5}},
-explosao:{n:'Explosão',c:3,t:'a',d:'Causa 26 de dano.',f:function(){hit(26)}}
-};
-var TN={a:'Ataque',d:'Defesa',s:'Habilidade'};
-var POOL=['duplo','investida','ferreo','furia','cura','vuln','inspirar','veneno','contra','explosao'];
-var FOES={
-slime:{n:'Slime',e:'🟢',hp:24,p:[['a',6],['a',8],['d',6]]},
-goblin:{n:'Goblin',e:'👺',hp:32,p:[['a',7],['a',9],['b',2]]},
-esq:{n:'Esqueleto',e:'💀',hp:38,p:[['a',8],['d',8],['a',11]]},
-mago:{n:'Mago Sombrio',e:'🧙',hp:44,p:[['b',2],['a',10],['a',12],['d',8]]},
-rei:{n:'Rei Goblin',e:'👑',hp:65,p:[['a',9],['b',2],['a',13],['d',10]]},
-ogre:{n:'Ogre',e:'👹',hp:60,p:[['a',12],['d',10],['a',16]]},
-lobo:{n:'Lobo',e:'🐺',hp:30,p:[['a',5],['a',5],['a',13]]},
-boss:{n:'Dragão Ancião',e:'🐉',hp:110,p:[['a',12],['b',3],['a',18],['d',14],['a',22]]}
-};
-var FL=[{c:['slime','lobo','goblin'],b:'rei'},{c:['goblin','esq','mago'],b:'ogre'},{c:['esq','mago','lobo'],b:'boss'}];
-var G,E,scr='menu',msg='',opts=[],P=null,QQ=[],SUBJ='all',FX=[],AC=null;
-function beep(f){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();var o=AC.createOscillator(),g=AC.createGain();o.frequency.value=f;g.gain.value=.05;o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+.14)}catch(e){}}
-function doFx(){FX.forEach(function(f){var t=document.getElementById(f[0]=='e'?'en':'pl');if(!t)return;var s=document.createElement('span');s.className='fl '+f[0];s.textContent=f[1];t.appendChild(s);t.classList.remove('shk');void t.offsetWidth;t.classList.add('shk')});FX=[]}
-var RL={vida:{n:'💖 Coração de Pedra',d:'+15 vida máxima e cura 15.'},en:{n:'💎 Cristal de Energia',d:'+1 energia máxima.'},mao:{n:'🎒 Bolsa Extra',d:'Compras +1 carta por turno.'},forca:{n:'🥊 Luva de Ferro',d:'+2 de força permanente.'}};
-function pr(id){return 15+CARDS[id].c*12}
-function buy(id){var pc=pr(id);if(G.gold<pc)return;G.gold-=pc;G.deck.push(id);G.shop.splice(G.shop.indexOf(id),1);render()}
-function buyPot(){if(G.gold<25||!G.pot)return;G.gold-=25;G.pot=false;G.hp=Math.min(G.max,G.hp+20);render()}
-function plan(){var L=FL[Math.floor(G.node/3)],c=sh(L.c.slice());G.pl3=[c[0],c[1],L.b]}
-function blinds(){scr='blinds';msg='';render()}
-function leave(){G.node++;if(G.node%3==0)plan();blinds()}
-function relic(k){if(k=='vida'){G.max+=15;G.hp=Math.min(G.max,G.hp+15)}if(k=='en')G.me++;if(k=='mao')G.hs++;if(k=='forca')G.bs+=2;shop()}
-function esc(t){return String(t).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]})}
-function nextQ(){if(!QQ.length)QQ=sh(QS.filter(function(q){return SUBJ=='all'||q.s==SUBJ}));return QQ.pop()}
-function sh(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
-function draw(n){for(var i=0;i<n;i++){if(!G.dr.length){G.dr=sh(G.di);G.di=[]}if(!G.dr.length)return;G.hand.push(G.dr.pop())}}
-function start(sj){V=null;SUBJ=sj||'all';QQ=[];P=null;G={gold:0,ok:0,ko:0,sk:0,me:3,hs:5,bs:0,hp:70,max:70,str:0,block:0,en:3,node:0,deck:['golpe','golpe','golpe','golpe','defender','defender','defender','defender','vuln','inspirar'],dr:[],di:[],hand:[]};plan();blinds()}
-function enter(){var F=Math.floor(G.node/3),bs=G.node%3==2,L=FL[F],k=G.pl3[G.node%3],f=FOES[k],hp=Math.round(f.hp*(k=='boss'?1:1+.3*F));E={n:f.n,e:f.e,hp:hp,max:hp,p:f.p,i:0,block:0,str:F,vuln:0,poison:0};G.dr=sh(G.deck.slice());G.di=[];G.hand=[];G.str=G.bs;scr='battle';turn();msg='';render()}
-function shop(){G.shop=sh(POOL.slice()).slice(0,3);G.pot=true;scr='shop';msg='';render()}
-function turn(){G.block=0;G.en=G.me;G.di=G.di.concat(G.hand);G.hand=[];draw(G.hs)}
-function play(i){NG=false;var id=G.hand[i],c=CARDS[id];if(G.en<c.c||scr!='battle'||P)return;var q=nextQ(),o=q.o.map(function(t,k){return k});sh(o);P={i:i,q:q,o:o,done:false,ok:false,pick:-1};render()}
-function answer(k){if(P.done)return;P.sel=k;render()}
-function confirmA(){if(P.done||P.sel==null)return;var k=P.sel;P.done=true;P.pick=k;P.ok=(P.o[k]==P.q.a);if(P.ok){G.ok++;G.sk++}else{G.ko++;G.sk=0}beep(P.ok?660:170);render()}
-function resolve(){var i=P.i,id=G.hand[i],c=CARDS[id],ok=P.ok;P=null;G.en-=c.c;G.hand.splice(i,1);G.di.push(id);if(ok){msg='Resposta certa!';c.f();if(G.sk%3==0){G.en++;msg+=' 🔥 Sequência! +1 energia'}}else msg='Resposta errada: a carta falhou.';if(E.hp<=0)return win();render()}
-function endTurn(){NG=false;if(scr!='battle'||P)return;E.block=0;var out='';if(E.poison>0){E.hp-=E.poison;out+='Veneno causa '+E.poison+'. ';E.poison--;if(E.hp<=0)return win()}
-var m=E.p[E.i%E.p.length];E.i++;
-if(m[0]=='a'){var d=m[1]+E.str,a=Math.min(G.block,d);G.block-=a;G.hp-=d-a;FX.push(['p',d-a>0?'-'+(d-a):'🛡️']);out+=E.n+' ataca por '+d+'.'}
-else if(m[0]=='d'){E.block+=m[1];out+=E.n+' defende.'}
-else{E.str+=m[1];out+=E.n+' fica mais forte.'}
-if(E.vuln>0)E.vuln--;
-if(G.hp<=0){G.hp=0;scr='over';msg=out;return render()}
-turn();msg=out;render()}
-function win(){if(G.node==N-1){scr='win';return render()}
-var p=sh(POOL.slice()).slice(0,3);opts=p;scr='reward';G.gain=10+Math.floor(Math.random()*11)+G.node;G.gold+=G.gain;G.hp=Math.min(G.max,G.hp+4);msg='';render()}
-function pick(id){if(id)G.deck.push(id);if(G.node%3==2){opts=sh(Object.keys(RL)).slice(0,3);scr='rest';render()}else shop()}
-function rest(){G.hp=Math.min(G.max,G.hp+Math.ceil(G.max*.35));shop()}
-function cardEl(id,i,cb,dis){var c=CARDS[id];return '<button class="card '+c.t+'" '+(dis?'disabled ':'')+'onclick="'+cb+'"><span class="c">'+c.c+'</span><span class="n">'+c.n+'</span><span class="t">'+TN[c.t]+'</span><span>'+c.d+'</span></button>'}
-var NG=false;var V=null;function view(k){V=k;render()}function closeV(){V=null;render()}
-function modal(){var L=V=='deck'?G.deck:V=='dr'?G.dr:G.di,T=V=='deck'?'Baralho completo':V=='dr'?'Pilha de compra (ordem escondida)':'Pilha de descarte',c0={};L.forEach(function(id){c0[id]=(c0[id]||0)+1});var h='<div class="modal" onclick="closeV()"><div onclick="event.stopPropagation()"><h3>'+T+' · '+L.length+'</h3>';Object.keys(c0).sort().forEach(function(id){var c=CARDS[id];h+='<div class="li"><b>'+c0[id]+'× '+c.n+'</b> <span style="color:var(--mut)">('+c.c+'⚡) '+c.d+'</span></div>'});if(!L.length)h+='<p>Vazia.</p>';return h+'<div class="row"><button class="btn" onclick="closeV()">Fechar</button></div></div></div>'}
-function menu(){V=null;NG=false;P=null;scr='menu';render()}
-function newGame(){if(NG)return menu();NG=true;render()}
-function topbar(){var s='<div class="prog">';for(var i=0;i<N;i++)s+='<i class="'+(i<=G.node?'on':'')+'"></i>';s+='</div><div class="top"><span>Andar '+(Math.floor(G.node/3)+1)+'/3 · '+(G.node%3==2?'👑 Boss':'Combate '+(G.node%3+1))+'</span><span>❤️ '+G.hp+'/'+G.max+'</span><span>💪 '+G.str+'</span><span>🪙 '+G.gold+'</span><button class="btn alt" style="padding:3px 10px;font-size:.85rem" onclick="view(\'deck\')">📚 Baralho ('+G.deck.length+')</button><span>✅ '+G.ok+' ❌ '+G.ko+' 🔥 '+G.sk+'</span><button class="btn alt" style="padding:3px 10px;font-size:.85rem" onclick="newGame()">'+(NG?'Confirmar?':'Novo jogo')+'</button></div>';return s}
-function render(){var h='',a=document.getElementById('app');
-if(scr=='menu'){h='<div class="ctr"><h1>🗼 Torre das Cartas</h1><p>Sobe 3 andares: em cada um enfrentas 2 inimigos comuns e 1 boss, e depois de cada combate tens uma loja. Derrota o Dragão Ancião no fim. Para jogar uma carta tens de responder a uma pergunta do teste: se acertares, a carta funciona; se errares, falha. Se morreres, recomeças.</p><p><b>Escolhe a matéria:</b></p><div class="row" style="flex-direction:column;align-items:center"><button class="btn" onclick="start()">Todas ('+QS.length+')</button>';
-['Psicologia na Condução','Trânsito e Segurança Rodoviária','Código da Estrada e Mecânica'].forEach(function(m){h+='<button class="btn alt" onclick="start(\''+m+'\')">'+m+' ('+QS.filter(function(q){return q.s==m}).length+')</button>'});h+='</div></div>'}
-else if(scr=='battle'){var m=E.p[E.i%E.p.length],it=m[0]=='a'?'⚔️ Ataca '+(m[1]+E.str):m[0]=='d'?'🛡️ Defende '+m[1]:'✨ Reforça-se';
-var st=(E.block?'🛡️ '+E.block+' ':'')+(E.vuln?'🎯 Vulnerável '+E.vuln+' ':'')+(E.poison?'☠️ Veneno '+E.poison+' ':'')+(E.str?'💪 '+E.str:''),ps=(G.block?'🛡️ '+G.block+' ':'')+(G.str?'💪 '+G.str:'');
-h=topbar()+'<div class="arena"><div class="fighter" id="pl"><div class="em">🧙</div><b>Tu</b><div class="bar g"><b style="width:'+Math.max(0,G.hp/G.max*100)+'%"></b></div><div>❤️ '+G.hp+' / '+G.max+'</div><div class="st">'+(ps||'&nbsp;')+'</div></div><div class="fighter" id="en"><div class="intent">'+it+'</div><div class="em">'+E.e+'</div><b>'+E.n+'</b><div class="bar"><b style="width:'+Math.max(0,E.hp/E.max*100)+'%"></b></div><div>'+E.hp+' / '+E.max+'</div><div class="st">'+(st||'&nbsp;')+'</div></div></div><div class="log">'+msg+'</div>';
-if(P){var cd=CARDS[G.hand[P.i]];h+='<div class="qbox"><div class="t" style="color:var(--mut);font-size:.85rem">Carta: '+cd.n+' · '+esc(P.q.s)+'</div><div class="qt">'+esc(P.q.q)+'</div>';
-P.o.forEach(function(oi,k){var cl='';if(P.done){if(oi==P.q.a)cl=' ok';else if(k==P.pick)cl=' ko'}else if(k===P.sel)cl=' sel';h+='<button class="opt'+cl+'" '+(P.done?'disabled ':'')+'onclick="answer('+k+')">'+esc(P.q.o[oi])+'</button>'});
-if(!P.done)h+='<div class="row"><button class="btn" '+(P.sel==null?'disabled ':'')+'onclick="confirmA()">Confirmar resposta</button></div>';if(P.done){h+='<div class="ex"><b>'+(P.ok?'✅ Certo!':'❌ Errado.')+'</b>'+P.q.e+'</div><div class="row"><button class="btn" onclick="resolve()">Continuar</button></div>'}
-h+='</div>'}else{var n=G.hand.length;h+='<div class="fan">';
-G.hand.forEach(function(id,i){var o=i-(n-1)/2;h+='<div class="slot" style="--r:'+(o*5)+'deg;--y:'+(Math.abs(o)*Math.abs(o)*3)+'px">'+cardEl(id,i,'play('+i+')',CARDS[id].c>G.en)+'</div>'});h+='</div>'}
-h+='<div class="tbl"><div class="grp"><div class="orb">⚡ '+G.en+'/'+G.me+'</div><div class="pile" onclick="view(\'dr\')">📚 Compra<b>'+G.dr.length+'</b></div></div><div class="grp"><div class="pile" onclick="view(\'di\')">🗑️ Descarte<b>'+G.di.length+'</b></div><button class="btn" '+(P?'disabled ':'')+'onclick="endTurn()">Terminar turno</button></div></div>'}
-else if(scr=='blinds'){var F=Math.floor(G.node/3),sl=G.node%3;h=topbar()+'<div class="ctr"><h2>Andar '+(F+1)+'/3</h2><p>Escolhe o teu próximo desafio</p></div><div class="blinds">';G.pl3.forEach(function(k,i){var f=FOES[k],b=i==2,nn=F*3+i,hp=Math.round(f.hp*(k=='boss'?1:1+.3*F)),st=i<sl?'done':i==sl?'cur':'fut';h+='<div class="poster '+st+(b?' bossp':'')+'"><div class="pt">'+(b?'👑 BOSS':'Combate '+(i+1))+'</div><div class="em">'+f.e+'</div><b>'+f.n+'</b><div class="pd">❤️ '+hp+' · 💪 +'+F+'</div><div class="pd">Recompensa: 🪙 '+(10+nn)+'–'+(20+nn)+'</div>'+(i==sl?'<div class="row"><button class="btn" onclick="enter()">Enfrentar</button></div>':i<sl?'<div class="pd">✔ Derrotado</div>':'<div class="pd">🔒 Bloqueado</div>')+'</div>'});h+='</div>'}
-else if(scr=='shop'){h=topbar()+'<div class="ctr"><h2>🛒 Loja</h2><p>Tens 🪙 '+G.gold+'</p></div><div class="hand">';G.shop.forEach(function(id){var pc=pr(id);h+='<div class="ctr">'+cardEl(id,0,'buy(\''+id+'\')',G.gold<pc)+'<div>🪙 '+pc+'</div></div>'});h+='</div><div class="row">'+(G.pot?'<button class="btn alt" '+(G.gold<25?'disabled ':'')+'onclick="buyPot()">🧪 Poção (+20 vida) · 🪙 25</button>':'')+'<button class="btn" onclick="leave()">Sair da loja</button></div>'}
-else if(scr=='reward'){h=topbar()+'<div class="ctr"><h2>Vitória! +'+G.gain+' 🪙 Escolhe uma carta</h2></div><div class="hand">';opts.forEach(function(id,i){h+=cardEl(id,i,'pick(\''+id+'\')')});h+='</div><div class="row"><button class="btn alt" onclick="pick()">Saltar</button></div>'}
-else if(scr=='rest'){h=topbar()+'<div class="ctr"><h2>👑 Boss derrotado!</h2><p>Descansa (recupera 35% da vida) ou escolhe uma relíquia permanente.</p><div class="row"><button class="btn" onclick="rest()">Descansar</button></div><div class="hand">';opts.forEach(function(k){h+='<button class="card s" onclick="relic(\''+k+'\')"><span class="n">'+RL[k].n+'</span><span>'+RL[k].d+'</span></button>'});h+='</div></div>'}
-else if(scr=='over'){h='<div class="ctr"><h1>💀 Caíste no andar '+(G.node+1)+'</h1><p>'+msg+'</p><p>Respostas certas: '+G.ok+' · erradas: '+G.ko+'</p><div class="row"><button class="btn" onclick="menu()">Tentar de novo</button></div></div>'}
-else{h='<div class="ctr"><h1>🏆 Venceste o Dragão!</h1><p>Chegaste ao topo com '+G.hp+' de vida e '+G.deck.length+' cartas.</p><p>Respostas certas: '+G.ok+' · erradas: '+G.ko+'</p><div class="row"><button class="btn" onclick="menu()">Jogar outra vez</button></div></div>'}
-if(V)h+=modal();a.innerHTML=h;doFx()}
-render();
-</script>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Torre das Cartas</title>
+    <link rel="stylesheet" href="css/torre.css" />
+  </head>
+  <body>
+    <div class="homebar">
+      <a
+        href="index.html"
+        onclick="return scr==='menu'||confirm('Sair da Torre? O progresso desta partida perde-se.')"
+        >Voltar ao início</a
+      >
+    </div>
+    <div id="app"></div>
+    <script src="quiz.js"></script>
+    <script src="js/torre.js"></script>
+  </body>
 </html>
