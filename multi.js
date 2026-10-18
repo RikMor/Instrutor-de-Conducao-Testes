@@ -91,4 +91,4 @@ function hostCheck(){if(!host||!room||room.state!=='play'||room.mode!=='live')re
  if(!room.rev&&pl.length&&pl.every(p=>p.ans&&p.ans.n===room.cur))reveal()}
 function reveal(){if(!room||revd===room.cur)return;revd=room.cur;clearTimeout(hostT);updateDoc(rd(),{rev:true}).catch(console.error);
  revT=setTimeout(()=>{if(!room)return;const c=room.cur;updateDoc(rd(),c+1>=room.qids.length?{state:'done'}:{cur:c+1,rev:false}).catch(console.error)},5000)}
-if($('#go')&&!$('#mk'))window.mpCfg();
+if(window.mpMode&&$('#qn')&&!$('#mk'))window.mpCfg();
