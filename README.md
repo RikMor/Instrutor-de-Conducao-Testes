@@ -47,4 +47,6 @@ Cada pergunta é um objeto:
 - **Cores de cada página** — variáveis no `:root` do respetivo ficheiro em `css/`.
 - **Ligação ao Firebase** — início de `js/multi.js`.
 
+## Nota
 
+O multijogador precisa de internet (carrega o Firebase) e de as regras do Firestore estarem publicadas. O resto funciona sem ligação, desde que `quiz.js` esteja na mesma pasta que as páginas.
