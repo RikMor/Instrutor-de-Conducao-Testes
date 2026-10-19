@@ -278,6 +278,7 @@
 <div class="box"><b>Temas</b>${subs.map((s) => `<label><input type="checkbox" class="tp" value="${esc(s)}" ${CFG.sel.has(s) ? 'checked' : ''}> <span>${esc(s)} <small class="c" data-s="${esc(s)}"></small></span></label>`).join('')}</div>
 <div class="box"><label><input type="checkbox" id="wu" ${CFG.withU ? 'checked' : ''}> <span>Incluir perguntas com resposta não confirmada <small id="uc"></small></span></label></div>
 <p><button class="bigbtn" id="go" data-act="start">Começar o jogo</button> <small id="avail" style="margin-left:.6rem;color:var(--mu)"></small></p>
+<p><button class="bigbtn alt" id="mpb" data-act="multi">Multijogador (até 4)</button> <small style="margin-left:.6rem;color:var(--mu)">Todos contra todos, com os temas escolhidos acima.</small></p>
 ${best ? `<p class="best">O teu melhor prémio neste dispositivo: <b>${money(best)}</b></p>` : ''}</div>`;
     startInfo();
   }
@@ -298,6 +299,7 @@ ${best ? `<p class="best">O teu melhor prémio neste dispositivo: <b>${money(bes
         ? n + ' perguntas disponíveis'
         : 'Escolhe mais temas: são precisas pelo menos 15 perguntas.';
     $('#go').disabled = n < 15;
+    $('#mpb').disabled = n < 15;
   }
 
   // HTML do botão Som ligado/desligado.
@@ -715,6 +717,11 @@ ${best ? `<p class="best">O teu melhor prémio neste dispositivo: <b>${money(bes
       renderPlay();
     },
     sound: toggleSound,
+    // Abre o multijogador (módulo js/milionario-multi.js); não existe se o Firebase não carregou.
+    multi: () =>
+      window.mqOpen
+        ? window.mqOpen()
+        : alert('O multijogador não está disponível (precisa de ligação à internet).'),
     ladder: () => {
       G.ladder = !G.ladder;
       renderPlay();
@@ -759,6 +766,24 @@ ${best ? `<p class="best">O teu melhor prémio neste dispositivo: <b>${money(bes
     if (x >= 0 && (G.phase === 'ask' || G.phase === 'confirm')) pick(x);
     else if (x >= 0 && G.phase === 'doors' && x < G.doors.length) door(x);
   });
+
+  // Partilha com js/milionario-multi.js o que ele precisa deste ficheiro.
+  window.MILIONARIO = {
+    ELIG,
+    PRIZE,
+    score,
+    keepOrder,
+    shuffle,
+    esc,
+    cap,
+    money,
+    rnd,
+    app,
+    SFX,
+    store,
+    cfg: () => CFG,
+    renderStart,
+  };
 
   if (!QS.length) {
     app.innerHTML =

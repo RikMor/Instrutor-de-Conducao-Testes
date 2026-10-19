@@ -9,21 +9,23 @@ index.html              página inicial (escolher o que fazer)
 testes.html             testes por tema, sozinho ou em multijogador
 milionario.html         jogo "Quem quer ser milionário?"
 Torre_das_Cartas.html   jogo "Torre das Cartas"
-quiz.js                 DADOS: todas as perguntas e a lista de testes
 
 css/                    aspeto de cada página (um ficheiro por página)
   index.css  testes.css  milionario.css  torre.css
 
 js/                     comportamento de cada página
   testes.js             testes: configuração, perguntas, resultado
-  multi.js              multijogador (salas em tempo real, Firebase)
+  quiz.js               DADOS: todas as perguntas e a lista de testes
+  multi.js              multijogador dos testes (salas em tempo real, Firebase)
   milionario.js         jogo do milionário
+  milionario-multi.js   multijogador do milionário (até 4 jogadores, todos contra todos)
+  firebase-config.js    ligação ao Firebase, partilhada pelos dois multijogadores
   torre.js              jogo da torre
 ```
 
 Cada ficheiro `.html` só tem a estrutura da página; o CSS e o JavaScript estão nos ficheiros das pastas `css/` e `js/`. No topo de cada ficheiro JS há um resumo de como funciona e, antes de cada função, um comentário a explicar o que faz.
 
-## Formato das perguntas (`quiz.js`)
+## Formato das perguntas (`js/quiz.js`)
 
 Cada pergunta é um objeto:
 
@@ -40,13 +42,26 @@ Cada pergunta é um objeto:
 
 `quiz.js` não foi alterado: é um ficheiro de dados com cerca de 450 KB, pensado para ser gerado e não para ser lido.
 
+## Multijogador do milionário
+
+No ecrã inicial do milionário, o botão **Multijogador (até 4)** usa os temas escolhidos nesse ecrã.
+
+- Um jogador cria a sala e passa o código de 4 letras aos outros. São precisos entre 2 e 4 jogadores.
+- São 15 perguntas, cada vez mais difíceis, iguais para todos e ao mesmo tempo (o tempo por pergunta escolhe-se ao criar a sala).
+- Quem acerta ganha o valor da pergunta (de 100 € a 1.000.000 €) mais até 50% de bónus pela rapidez. Errar ou não responder não custa nada.
+- Ganha quem tiver mais dinheiro no fim; em caso de empate, quem acertou mais e respondeu mais depressa.
+- O anfitrião controla o avanço (e tem o botão "Pergunta seguinte"). Se o anfitrião sair, a sala é apagada.
+
+Usa a mesma coleção `rooms` do Firestore que o multijogador dos testes (com `game: 'milionario'` na sala), por isso as regras publicadas devem servir para os dois. Para testar no mesmo computador usa dois browsers diferentes (ou uma janela anónima): o Firebase dá o mesmo jogador a dois separadores do mesmo browser.
+
 ## Onde mudar o quê
 
 - **Prémios do milionário** — `PRIZE` e `SAFE` no início de `js/milionario.js`.
+- **Valor das perguntas e bónus no multijogador** — `valorDaRonda`, `BONUS_MAX`, `MAX_JOGADORES` e `PAUSA_REVELACAO_MS` no início de `js/milionario-multi.js`.
 - **Cartas, inimigos e andares da torre** — `CARDS`, `FOES` e `FL` em `js/torre.js`.
 - **Cores de cada página** — variáveis no `:root` do respetivo ficheiro em `css/`.
-- **Ligação ao Firebase** — início de `js/multi.js`.
+- **Ligação ao Firebase** — `js/firebase-config.js`.
 
 ## Nota
 
-O multijogador precisa de internet (carrega o Firebase) e de as regras do Firestore estarem publicadas. O resto funciona sem ligação, desde que `quiz.js` esteja na mesma pasta que as páginas.
+O multijogador precisa de internet (carrega o Firebase) e de as regras do Firestore estarem publicadas. O resto funciona sem ligação, desde que `js/quiz.js` esteja no sítio certo (as três páginas carregam-no de `js/quiz.js`).

@@ -42,16 +42,10 @@ import {
   collection,
   increment,
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+import { firebaseConfig } from './firebase-config.js';
 
-// Ligação ao projeto Firebase. Esta chave identifica o projeto e não é secreta; a proteção está nas regras do Firestore.
-const app = initializeApp({
-  apiKey: 'AIzaSyAQAbI8Ipib04YJIevhlrdY8H_TQee6l2Y',
-  authDomain: 'instrutor-de-codigo.firebaseapp.com',
-  projectId: 'instrutor-de-codigo',
-  storageBucket: 'instrutor-de-codigo.firebasestorage.app',
-  messagingSenderId: '659205376818',
-  appId: '1:659205376818:web:a88029ea8c02df049f652b',
-});
+// Ligação ao projeto Firebase (a configuração está em firebase-config.js).
+const app = initializeApp(firebaseConfig);
 
 // auth = autenticação, db = base de dados, QS = perguntas (de quiz.js).
 const auth = getAuth(app),
@@ -191,6 +185,7 @@ async function join() {
   try {
     const s = await getDoc(rd());
     if (!s.exists()) return err('Sala não encontrada.');
+    if (s.data().game === 'milionario') return err('Essa sala é do jogo Milionário.');
     if (s.data().state !== 'lobby') return err('Essa sala já começou.');
   } catch (e) {
     return err('Erro ao entrar (' + e.code + ').');
