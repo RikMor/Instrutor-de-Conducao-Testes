@@ -23,6 +23,7 @@
      rooms/{CÓDIGO}/players/{uid}  cada jogador:
          name, money (dinheiro), ok (certas), ms (tempo total a responder),
          joined (hora de entrada), ans ({ n: ronda, c: opção, g: ganho } ou null)
+     Salas e jogadores levam também "expira" (data): o Firebase apaga-os sozinho depois dela.
 
    Fluxo: mqOpen() -> criar() / entrar() -> entrarNaSala() -> desenhar() escolhe o ecrã:
           ecraSala() -> ecraJogo() (pergunta e revelação) -> ecraFinal()
@@ -46,8 +47,9 @@ import {
   onSnapshot,
   collection,
   increment,
+  Timestamp,
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
-import { firebaseConfig } from './firebase-config.js';
+import { firebaseConfig, VALIDADE_SALA_MS } from './firebase-config.js';
 
 /* ---------- Ligação ao jogo e constantes ---------- */
 
@@ -90,6 +92,9 @@ function iniciarSessao() {
   }
   return sessao;
 }
+
+// Data a partir da qual o Firebase pode apagar a sala ou o jogador (política TTL, ver README).
+const expiraEm = () => Timestamp.fromMillis(Date.now() + VALIDADE_SALA_MS);
 
 const refSala = () => doc(db, 'rooms', code);
 const refJogador = () => doc(db, 'rooms', code, 'players', uid);
@@ -227,6 +232,7 @@ async function criar() {
       if (!(await getDoc(refSala())).exists()) break;
     }
     await setDoc(refSala(), {
+      expira: expiraEm(),
       game: 'milionario',
       host: uid,
       state: 'lobby',
@@ -273,6 +279,7 @@ async function entrarNaSala(anfitriao) {
   bloqueado = false;
   try {
     await setDoc(refJogador(), {
+      expira: expiraEm(),
       name: nome,
       money: 0,
       ok: 0,

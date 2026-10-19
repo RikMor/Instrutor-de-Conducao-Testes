@@ -41,11 +41,15 @@ import {
   onSnapshot,
   collection,
   increment,
+  Timestamp,
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
-import { firebaseConfig } from './firebase-config.js';
+import { firebaseConfig, VALIDADE_SALA_MS } from './firebase-config.js';
 
 // Ligação ao projeto Firebase (a configuração está em firebase-config.js).
 const app = initializeApp(firebaseConfig);
+
+// Data a partir da qual o Firebase pode apagar a sala ou o jogador (política TTL, ver README).
+const expiraEm = () => Timestamp.fromMillis(Date.now() + VALIDADE_SALA_MS);
 
 // auth = autenticação, db = base de dados, QS = perguntas (de quiz.js).
 const auth = getAuth(app),
@@ -160,6 +164,7 @@ async function create() {
   );
   try {
     await setDoc(rd(), {
+      expira: expiraEm(),
       host: uid,
       hp,
       mode: document.querySelector('[name=mm]:checked').value,
@@ -208,7 +213,17 @@ async function enter(h, plays) {
   pl = [];
   view = null;
   if (plays)
-    await setDoc(pd(), { name, score: 0, ok: 0, n: 0, ms: 0, done: false, ans: null, a: {} });
+    await setDoc(pd(), {
+      expira: expiraEm(),
+      name,
+      score: 0,
+      ok: 0,
+      n: 0,
+      ms: 0,
+      done: false,
+      ans: null,
+      a: {},
+    });
   un = [
     onSnapshot(rd(), (d) => {
       if (!d.exists()) {

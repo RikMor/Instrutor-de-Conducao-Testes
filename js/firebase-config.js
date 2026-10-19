@@ -14,3 +14,8 @@ export const firebaseConfig = {
   messagingSenderId: '659205376818',
   appId: '1:659205376818:web:a88029ea8c02df049f652b',
 };
+
+// Quanto tempo uma sala e os seus jogadores ficam na base de dados. Cada documento leva um campo
+// "expira" (data) e o Firebase apaga-o sozinho depois dessa data, se tiveres ativado a política
+// TTL (ver README). Sem a política, o campo existe mas nada é apagado.
+export const VALIDADE_SALA_MS = 24 * 60 * 60 * 1000; // 24 horas

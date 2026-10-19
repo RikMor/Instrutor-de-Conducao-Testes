@@ -54,6 +54,20 @@ No ecrã inicial do milionário, o botão **Multijogador (até 4)** usa os temas
 
 Usa a mesma coleção `rooms` do Firestore que o multijogador dos testes (com `game: 'milionario'` na sala), por isso as regras publicadas devem servir para os dois. Para testar no mesmo computador usa dois browsers diferentes (ou uma janela anónima): o Firebase dá o mesmo jogador a dois separadores do mesmo browser.
 
+## Apagar salas antigas sozinho (fazer uma vez)
+
+As salas e os jogadores gravam um campo `expira` (24 horas depois de criados). Para o Firebase os apagar sozinho, ativa uma política TTL (Time-to-live) para cada uma destas duas coleções:
+
+1. Abre a Google Cloud Console no projeto `instrutor-de-codigo` e vai a **Firestore**, página **Time-to-live (TTL)**.
+2. Clica em **Criar política** e preenche: nome do grupo de coleções `rooms`, campo `expira`. Guarda.
+3. Repete com o grupo de coleções `players` e o campo `expira`. (Os jogadores são uma subcoleção, por isso precisam da sua própria política.)
+
+Notas:
+- O Firebase apaga os documentos algum tempo depois de expirarem, não à hora exata.
+- Salas criadas antes desta versão não têm o campo `expira` e nunca são apagadas por esta política; apaga-as à mão em Firestore Database > `rooms`.
+- As eliminações por TTL contam como eliminações normais no preço do Firestore (valores minúsculos para este uso).
+- A validade (24 horas) muda-se em `VALIDADE_SALA_MS`, em `js/firebase-config.js`.
+
 ## Onde mudar o quê
 
 - **Prémios do milionário** — `PRIZE` e `SAFE` no início de `js/milionario.js`.
