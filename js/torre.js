@@ -272,7 +272,7 @@ var FL = [
 //   scr   ecrã atual     msg   texto do registo de combate     opts  opções de recompensa
 //   P     pergunta em curso: { i: carta na mão, q: pergunta, o: ordem das opções,
 //                              sel: opção marcada, done: já confirmou, ok: acertou }
-//   QQ    fila de perguntas por usar     SUBJ  matéria escolhida ('all' = todas)
+//   QQ    fila de perguntas por usar     SEL   testes escolhidos (Set de índices de TESTS)
 //   FX    números de dano a mostrar      AC    contexto de áudio
 var G,
   E,
@@ -281,7 +281,11 @@ var G,
   opts = [],
   P = null,
   QQ = [],
-  SUBJ = 'all',
+  SEL = new Set(
+    window.TESTS.map(function (t, i) {
+      return i;
+    }),
+  ),
   FX = [],
   AC = null;
 
@@ -389,12 +393,12 @@ function esc(t) {
   });
 }
 
-// Próxima pergunta da matéria escolhida (baralha de novo quando a fila acaba).
+// Próxima pergunta dos testes escolhidos (baralha de novo quando a fila acaba).
 function nextQ() {
   if (!QQ.length)
     QQ = sh(
       QS.filter(function (q) {
-        return SUBJ == 'all' || q.s == SUBJ;
+        return Temas.tem(SEL, q);
       }),
     );
   return QQ.pop();
@@ -423,10 +427,10 @@ function draw(n) {
   }
 }
 
-// Começa um jogo novo com a matéria sj. Cria o jogador com o baralho inicial.
-function start(sj) {
+// Começa um jogo novo com os testes escolhidos no menu. Cria o jogador com o baralho inicial.
+function start() {
   V = null;
-  SUBJ = sj || 'all';
+  SEL = Temas.ler(document.getElementById('app'));
   QQ = [];
   P = null;
   G = {
@@ -786,26 +790,9 @@ function render() {
     a = document.getElementById('app');
   if (scr == 'menu') {
     h =
-      '<div class="ctr"><h1>🗼 Torre das Cartas</h1><p>Sobe 3 andares: em cada um enfrentas 2 inimigos comuns e 1 boss, e depois de cada combate tens uma loja. Derrota o Dragão Ancião no fim. Para jogar uma carta tens de responder a uma pergunta do teste: se acertares, a carta funciona; se errares, falha. Se morreres, recomeças.</p><p><b>Escolhe a matéria:</b></p><div class="row" style="flex-direction:column;align-items:center"><button class="btn" onclick="start()">Todas (' +
-      QS.length +
-      ')</button>';
-    [
-      'Psicologia na Condução',
-      'Trânsito e Segurança Rodoviária',
-      'Código da Estrada e Mecânica',
-    ].forEach(function (m) {
-      h +=
-        '<button class="btn alt" onclick="start(\'' +
-        m +
-        '\')">' +
-        m +
-        ' (' +
-        QS.filter(function (q) {
-          return q.s == m;
-        }).length +
-        ')</button>';
-    });
-    h += '</div></div>';
+      '<div class="ctr"><h1>🗼 Torre das Cartas</h1><p>Sobe 3 andares: em cada um enfrentas 2 inimigos comuns e 1 boss, e depois de cada combate tens uma loja. Derrota o Dragão Ancião no fim. Para jogar uma carta tens de responder a uma pergunta do teste: se acertares, a carta funciona; se errares, falha. Se morreres, recomeças.</p><p><b>Escolhe os temas:</b></p><div class="box">' +
+      Temas.html(SEL) +
+      '</div><div class="row" style="flex-direction:column;align-items:center"><button class="btn" id="go" onclick="start()">Começar</button><small id="avail"></small></div></div>';
   } else if (scr == 'battle') {
     var m = E.p[E.i % E.p.length],
       it =
@@ -1030,6 +1017,20 @@ function render() {
   }
   if (V) h += modal();
   a.innerHTML = h;
+  if (scr == 'menu') Temas.bind(a.querySelector('.tm'), tmInfo), tmInfo();
   doFx();
+}
+
+// Menu: mostra quantas perguntas há nos testes marcados e só deixa começar com pelo menos uma.
+function tmInfo() {
+  var a = document.getElementById('app'),
+    s = Temas.ler(a),
+    n = QS.filter(function (q) {
+      return Temas.tem(s, q);
+    }).length;
+  document.getElementById('avail').textContent = n
+    ? n + ' perguntas disponíveis'
+    : 'Escolhe pelo menos um teste.';
+  document.getElementById('go').disabled = !n;
 }
 render();

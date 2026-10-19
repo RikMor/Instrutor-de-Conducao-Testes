@@ -605,3 +605,14 @@ h1 {
   opacity: 1;
   visibility: visible;
 }
+
+/* caixa do menu de temas partilhado (css/temas.css) */
+.box {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.8rem 1rem;
+  margin: 1rem auto;
+  max-width: 720px;
+  text-align: left;
+  background: var(--panel);
+}

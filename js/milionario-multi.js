@@ -188,7 +188,7 @@ window.mqOpen = function () {
     iniciarSessao().then((u) => u && limparSalasExpiradas(db));
   }
   const c = M.cfg();
-  const n = ELIG.filter((q) => c.sel.has(q.s) && (c.withU || !q.u)).length;
+  const n = ELIG.filter((q) => Temas.tem(c.sel, q) && (c.withU || !q.u)).length;
   app.innerHTML = `<div class="top"><button class="tb" data-mp="voltar">← Voltar</button><span class="sp"></span></div>
 <div class="start"><h1>Multijogador</h1>
 <p class="lead">Até 4 jogadores, todos contra todos. A mesma pergunta para todos, ao mesmo tempo.</p>
@@ -225,7 +225,7 @@ const gerarCodigo = () =>
 async function criar() {
   if (!lerNome()) return erro('Escreve o teu nome.');
   const c = M.cfg();
-  const pool = ELIG.filter((q) => c.sel.has(q.s) && (c.withU || !q.u));
+  const pool = ELIG.filter((q) => Temas.tem(c.sel, q) && (c.withU || !q.u));
   if (pool.length < N_RONDAS) {
     return erro('Escolhe mais temas no ecrã anterior: são precisas pelo menos 15 perguntas.');
   }

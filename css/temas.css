@@ -1,0 +1,61 @@
+/* temas.css — estilo do menu de temas partilhado (js/temas.js).
+   Herda a cor do texto da página; as etiquetas têm cores próprias para o tema claro e escuro. */
+.tm {
+  --tm-ok: #17803d;
+  --tm-wa: #b7791f;
+  color: inherit;
+}
+.tm.dark {
+  --tm-ok: #4cc27a;
+  --tm-wa: #e0b252;
+}
+@media (prefers-color-scheme: dark) {
+  .tm {
+    --tm-ok: #4cc27a;
+    --tm-wa: #e0b252;
+  }
+}
+.tm .tm-h {
+  display: inline-block;
+  margin-right: 0.6rem;
+}
+.tm .tm-of {
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.tm .tm-sub {
+  margin: 0.6rem 0;
+}
+.tm .tm-tl {
+  margin-left: 1.6rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1.2rem;
+}
+.tm .tm-l {
+  display: block;
+  margin: 0.25rem 0;
+  cursor: pointer;
+}
+.tm .tm-bd {
+  display: inline-block;
+  font-size: 0.8rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 99px;
+  border: 1px solid var(--tm-wa);
+  color: var(--tm-wa);
+}
+.tm .tm-bd.ok {
+  border-color: var(--tm-ok);
+  color: var(--tm-ok);
+}
+.tm label b {
+  display: inline;
+  margin: 0;
+}

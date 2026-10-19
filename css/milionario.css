@@ -892,3 +892,9 @@ details summary {
     position: static;
   }
 }
+
+/* menu de temas partilhado (css/temas.css): etiquetas com as cores do fundo escuro */
+.box .tm {
+  --tm-ok: #4cc27a;
+  --tm-wa: #e0b252;
+}

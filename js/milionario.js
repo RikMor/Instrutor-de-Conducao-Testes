@@ -255,41 +255,36 @@
   //         hist      perguntas já respondidas     rl          true = modo com vidas e relíquias
   // CFG = escolhas do ecrã inicial (temas, incluir não confirmadas, modo).
   let G = null,
-    CFG = { sel: null, withU: false, mode: 'rl' };
+    CFG = { sel: null, withU: false, mode: 'rl' }; // sel = Set dos índices dos testes marcados
 
-  // Nº de perguntas elegíveis do tema s (wu = incluir as não confirmadas).
-  const cnt = (s, wu) => ELIG.filter((q) => q.s === s && (wu || !q.u)).length;
-
+    
   /* ---------- ecrã inicial ---------- */
 
   // Ecrã inicial: regras, escolha de temas e botão para começar.
   function renderStart() {
-    const subs = [...new Set(ELIG.map((q) => q.s))];
-    if (!CFG.sel) CFG.sel = new Set(subs);
+    if (!CFG.sel) CFG.sel = new Set(window.TESTS.map((t, i) => i));
     const best = +store.get('qqsm_best') || 0;
     app.innerHTML = `<div class="top"><a class="tb" href="index.html">Voltar ao início</a><span class="sp"></span>${soundBtn()}</div>
 <div class="start"><h1>Quem quer ser milionário?</h1>
 <p class="lead">15 perguntas do curso de instrutor de condução. Sobe a escada até ao milhão.</p>
 <ul class="rules"><li>A dificuldade sobe ao longo da escada.</li><li>Os patamares seguros são a pergunta 5 (1.000 €) e a pergunta 10 (32.000 €): se errares depois deles, ficas com esse valor.</li><li>Tens três ajudas, cada uma só uma vez: 50:50, o público e o amigo. O público e o amigo são simulados e também se enganam, sobretudo nas perguntas difíceis.</li><li>Podes desistir a qualquer momento e ficar com o prémio já ganho.</li></ul>
-<div class="box"><b>Temas</b>${subs.map((s) => `<label><input type="checkbox" class="tp" value="${esc(s)}" ${CFG.sel.has(s) ? 'checked' : ''}> <span>${esc(s)} <small class="c" data-s="${esc(s)}"></small></span></label>`).join('')}</div>
+<div class="box">${Temas.html(CFG.sel)}</div>
 <div class="box"><label><input type="checkbox" id="wu" ${CFG.withU ? 'checked' : ''}> <span>Incluir perguntas com resposta não confirmada <small id="uc"></small></span></label></div>
 <p><button class="bigbtn" id="go" data-act="start">Começar o jogo</button> <small id="avail" style="margin-left:.6rem;color:var(--mu)"></small></p>
 <p><button class="bigbtn alt" id="mpb" data-act="multi">Multijogador (até 4)</button> <small style="margin-left:.6rem;color:var(--mu)">Todos contra todos, com os temas escolhidos acima.</small></p>
 ${best ? `<p class="best">O teu melhor prémio neste dispositivo: <b>${money(best)}</b></p>` : ''}</div>`;
+    Temas.bind(app.querySelector('.tm'), startInfo);
     startInfo();
   }
 
   // Atualiza as contagens do ecrã inicial. O jogo precisa de pelo menos 15 perguntas.
   function startInfo() {
-    const sel = new Set([...document.querySelectorAll('.tp:checked')].map((c) => c.value)),
+    const sel = Temas.ler(app),
       wu = $('#wu').checked;
     CFG.sel = sel;
     CFG.withU = wu;
-    document
-      .querySelectorAll('.c')
-      .forEach((e) => (e.textContent = '(' + cnt(e.dataset.s, wu) + ')'));
     $('#uc').textContent = '(' + ELIG.filter((q) => q.u).length + ' no total)';
-    const n = ELIG.filter((q) => sel.has(q.s) && (wu || !q.u)).length;
+    const n = ELIG.filter((q) => Temas.tem(sel, q) && (wu || !q.u)).length;
     $('#avail').textContent =
       n >= 15
         ? n + ' perguntas disponíveis'
@@ -307,7 +302,7 @@ ${best ? `<p class="best">O teu melhor prémio neste dispositivo: <b>${money(bes
   // Começa um jogo: filtra pelos temas, ordena por dificuldade e cria o estado G.
   function startGame() {
     if (G && G.timer) clearTimeout(G.timer);
-    POOL = shuffle(ELIG.filter((q) => CFG.sel.has(q.s) && (CFG.withU || !q.u))).sort(
+    POOL = shuffle(ELIG.filter((q) => Temas.tem(CFG.sel, q) && (CFG.withU || !q.u))).sort(
       (a, b) => score(a) - score(b),
     );
     const rl = CFG.mode !== 'classic';
@@ -732,7 +727,7 @@ ${best ? `<p class="best">O teu melhor prémio neste dispositivo: <b>${money(bes
     if (f) f();
   });
   app.addEventListener('change', (e) => {
-    if (e.target.matches('.tp,#wu')) startInfo();
+    if (e.target.matches('#wu')) startInfo();
   });
   document.addEventListener('keydown', (e) => {
     if (!G || e.ctrlKey || e.metaKey || e.altKey) return;
