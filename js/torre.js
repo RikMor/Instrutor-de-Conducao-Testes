@@ -371,6 +371,7 @@ function leave() {
 
 // Aplica a relíquia escolhida e segue para a loja.
 function relic(k) {
+  G.rels.push(k);
   if (k == 'vida') {
     G.max += 15;
     G.hp = Math.min(G.max, G.hp + 15);
@@ -429,6 +430,7 @@ function start(sj) {
   QQ = [];
   P = null;
   G = {
+    rels: [],
     gold: 0,
     ok: 0,
     ko: 0,
@@ -672,7 +674,19 @@ function closeV() {
   render();
 }
 
-// HTML da janela que lista as cartas e quantas há de cada.
+// HTML de uma carta só para ver (sem clique), com o número de cópias no canto.
+function cardFace(id, n) {
+  var c = CARDS[id];
+  return (
+    '<div class="card ' + c.t + ' face">' +
+    (n > 1 ? '<span class="qty">×' + n + '</span>' : '') +
+    '<span class="c">' + c.c + '</span><span class="n">' + c.n +
+    '</span><span class="t">' + TN[c.t] + '</span><span>' + c.d + '</span></div>'
+  );
+}
+
+// HTML da janela que mostra as cartas (baralho, compra ou descarte) como cartas, agrupadas
+// por tipo e custo. Assim a pilha de compra não revela a ordem em que saem.
 function modal() {
   var L = V == 'deck' ? G.deck : V == 'dr' ? G.dr : G.di,
     T =
@@ -686,30 +700,22 @@ function modal() {
     c0[id] = (c0[id] || 0) + 1;
   });
   var h =
-    '<div class="modal" onclick="closeV()"><div onclick="event.stopPropagation()"><h3>' +
-    T +
-    ' · ' +
-    L.length +
-    '</h3>';
-  Object.keys(c0)
-    .sort()
-    .forEach(function (id) {
-      var c = CARDS[id];
-      h +=
-        '<div class="li"><b>' +
-        c0[id] +
-        '× ' +
-        c.n +
-        '</b> <span style="color:var(--mut)">(' +
-        c.c +
-        '⚡) ' +
-        c.d +
-        '</span></div>';
-    });
-  if (!L.length) h += '<p>Vazia.</p>';
-  return (
-    h + '<div class="row"><button class="btn" onclick="closeV()">Fechar</button></div></div></div>'
-  );
+    '<div class="modal" onclick="closeV()"><div class="mw" onclick="event.stopPropagation()"><h3>' +
+    T + ' · ' + L.length + '</h3>';
+  if (L.length) {
+    h += '<div class="pg">';
+    Object.keys(c0)
+      .sort(function (x, y) {
+        var a = CARDS[x],
+          b = CARDS[y];
+        return a.t < b.t ? -1 : a.t > b.t ? 1 : a.c - b.c || (a.n < b.n ? -1 : 1);
+      })
+      .forEach(function (id) {
+        h += cardFace(id, c0[id]);
+      });
+    h += '</div>';
+  } else h += '<p>Vazia.</p>';
+  return h + '<div class="row"><button class="btn" onclick="closeV()">Fechar</button></div></div></div>';
 }
 
 // Volta ao menu inicial.
@@ -729,6 +735,19 @@ function newGame() {
 }
 
 // Barra de progresso dos 9 combates + andar, vida, força, moedas, baralho e contadores.
+// HTML das relíquias que o jogador já tem (a descrição aparece ao passar o rato ou tocar).
+function relicsHtml() {
+  return (G.rels || [])
+    .map(function (k) {
+      var r = RL[k],
+        t = r.n + ': ' + r.d;
+      return (
+        '<span class="rl" data-tip="' + t + '" tabindex="0" aria-label="' + t + '">' + r.n.split(' ')[0] + '</span>'
+      );
+    })
+    .join('');
+}
+
 function topbar() {
   var s = '<div class="prog">';
   for (var i = 0; i < N; i++) s += '<i class="' + (i <= G.node ? 'on' : '') + '"></i>';
@@ -745,7 +764,9 @@ function topbar() {
     G.str +
     '</span><span>🪙 ' +
     G.gold +
-    '</span><button class="btn alt" style="padding:3px 10px;font-size:.85rem" onclick="view(\'deck\')">📚 Baralho (' +
+    '</span>' +
+    relicsHtml() +
+    '<button class="btn alt" style="padding:3px 10px;font-size:.85rem" onclick="view(\'deck\')">📚 Baralho (' +
     G.deck.length +
     ')</button><span>✅ ' +
     G.ok +

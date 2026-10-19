@@ -3,12 +3,13 @@
    --------------------------------------------------------------------------
    Regras: 15 perguntas, dificuldade a subir, patamares seguros na pergunta 5
    (1.000 €) e 10 (32.000 €), três ajudas (50:50, público, amigo) e possibilidade
-   de desistir. Há também vidas, moedas, relíquias, "portas" e loja (modo rl).
+   de desistir. Há também vidas, moedas, relíquias e uma loja (modo rl) que só aparece
+   depois dos boss (perguntas 5 e 10) e antes da última pergunta (depois da 14).
 
    Organização do ficheiro (de cima para baixo):
      1. Funções auxiliares e constantes (prémios, letras)
      2. Perguntas (todas entram) e dificuldade
-     3. Relíquias, portas e loja
+     3. Relíquias e loja
      4. Som
      5. Ecrã inicial        (renderStart)
      6. Jogo                (startGame, renderPlay, pick, lockIn, reveal, next, lifeline)
@@ -16,7 +17,7 @@
      8. Eventos             (cliques e teclado)
 
    Fases do jogo (G.phase):
-     doors -> shop -> ask -> confirm -> lock -> reveal -> (próxima pergunta) ... -> end
+     (shop, só depois das perguntas 5, 10 e 14) -> ask -> confirm -> lock -> reveal -> ... -> end
    Depois de qualquer mudança chama-se renderPlay(), que redesenha o ecrã todo.
 
    Dados das perguntas (de quiz.js): q = texto, o = opções, a = índice da certa,
@@ -101,12 +102,12 @@
   let POOL = [];
 
   // Escolhe a próxima pergunta. Quanto mais alto o nível, mais para o fim da lista POOL
-  // (mais difícil) é a escolha; perguntas elite/boss são um pouco mais difíceis.
+  // (mais difícil) é a escolha; as perguntas boss são um pouco mais difíceis.
   // Dentro dessa zona escolhe à sorte, evitando as já vistas (g.seen guarda os id).
   function pickQ() {
     const g = G,
       n = POOL.length;
-    let t = Math.min(1, g.lvl / 14 + (g.kind === 'elite' ? 0.18 : g.kind === 'boss' ? 0.08 : 0));
+    let t = Math.min(1, g.lvl / 14 + (g.kind === 'boss' ? 0.08 : 0));
     const w = Math.max(4, Math.round(n * 0.12)),
       c = Math.round(t * (n - 1)),
       win = () => POOL.slice(Math.max(0, c - w), c + w + 1);
@@ -155,27 +156,22 @@
     return l.length ? l[rnd(0, l.length - 1)] : null;
   };
 
-  // DOORS = caminhos possíveis entre perguntas: [emoji, nome, descrição].
-  const DOORS = {
-    q: ['❓', 'Pergunta normal', 'Ganhas moedas se acertares.'],
-    elite: ['🔥', 'Pergunta de risco', 'Mais difícil, mais moedas e uma hipótese de relíquia.'],
-    shop: ['🛒', 'Loja', 'Gasta moedas em relíquias e vidas. Depois segue uma pergunta normal.'],
-  };
-
   // HTML da barra com vidas, moedas e relíquias.
   const HUD = (g) =>
-    `<div class="hud"><span aria-label="${g.lives} vidas">${'❤️'.repeat(g.lives)}${'🖤'.repeat(Math.max(0, g.max - g.lives))}</span><span>🪙 ${g.coins}</span>${g.relics.map((k) => `<span class="rl" title="${RELICS[k][1]}: ${RELICS[k][2]}" tabindex="0" aria-label="${RELICS[k][1]}: ${RELICS[k][2]}">${RELICS[k][0]}</span>`).join('')}${g.flash ? `<small>${g.flash}</small>` : ''}</div>`;
+    `<div class="hud"><span aria-label="${g.lives} vidas">${'❤️'.repeat(g.lives)}${'🖤'.repeat(Math.max(0, g.max - g.lives))}</span><span>🪙 ${g.coins}</span>${g.relics.map((k) => `<span class="rl" data-tip="${RELICS[k][1]}: ${RELICS[k][2]}" tabindex="0" aria-label="${RELICS[k][1]}: ${RELICS[k][2]}">${RELICS[k][0]}</span>`).join('')}${g.flash ? `<small>${g.flash}</small>` : ''}</div>`;
 
-  // HTML do ecrã "Escolhe o teu caminho" (as portas).
-  const DH = () =>
-    `<p style="margin:0 0 .8rem">Escolhe o teu caminho:</p><div class="opts n${G.doors.length}">${G.doors.map((d, i) => `<button class="opt" data-door="${i}"><span class="ltr">${DOORS[d][0]}</span><span><b>${DOORS[d][1]}</b><br><small>${DOORS[d][2]}</small></span></button>`).join('')}</div>`;
+  // SHOP_AT = a loja aparece depois de acertar nestas perguntas (os boss 5 e 10, e a 14,
+  // antes da pergunta final). COST = preço na loja.
+  const SHOP_AT = [5, 10, 14];
+  const COST_RELIC = 45,
+    COST_HEART = 50;
 
   // HTML da loja (relíquias e vida).
   const SH = () =>
-    `<p style="margin:0 0 .8rem">Loja. Tens 🪙 ${G.coins}.</p><div class="opts n${G.shop.length}">${G.shop
+    `<p style="margin:0 0 .8rem">Loja (depois da pergunta ${G.lvl}). Tens 🪙 ${G.coins}.</p><div class="opts n${G.shop.length}">${G.shop
       .map((k) => {
         const h = k === 'heart',
-          c = h ? 60 : 50,
+          c = h ? COST_HEART : COST_RELIC,
           r = RELICS[k],
           nb = G.coins < c || (h && G.lives >= G.max);
         return `<button class="opt${nb ? ' nb' : ''}" data-buy="${k}" ${nb ? 'disabled' : ''}><span class="ltr">${h ? '❤️' : r[0]}</span><span><b>${h ? 'Uma vida' : r[1]}</b> (🪙 ${c})<br><small>${h ? 'Recupera 1 vida.' : r[2]}</small></span></button>`;
@@ -253,7 +249,7 @@
   //         lvl       pergunta atual (0 a 14)      lives/max   vidas atuais / máximo
   //         coins     moedas                       relics      relíquias que tem
   //         ch        ajudas que restam { f: 50:50, a: público, t: amigo }
-  //         kind      'normal' | 'elite' | 'boss'  phase       fase (ver topo do ficheiro)
+  //         kind      'normal' | 'boss'          phase       fase (ver topo do ficheiro)
   //         q         pergunta atual               sel         opção marcada
   //         gone      opções eliminadas pelo 50:50 info        resultado do público/amigo
   //         hist      perguntas já respondidas     rl          true = modo com vidas e relíquias
@@ -330,7 +326,6 @@ ${best ? `<p class="best">O teu melhor prémio neste dispositivo: <b>${money(bes
       retry: 0,
       notes: [],
       flash: '',
-      doors: [],
       shop: null,
       q: null,
       phase: 'ask',
@@ -347,20 +342,30 @@ ${best ? `<p class="best">O teu melhor prémio neste dispositivo: <b>${money(bes
     scrollTo(0, 0);
   }
 
-  // Entra numa pergunta. A cada 5.ª pergunta (5, 10, 15) é boss; nas outras o jogador
-  // escolhe um caminho (portas). Sem modo rl, vai direto para a pergunta.
+  // Entra numa pergunta. A cada 5.ª pergunta (5, 10, 15) é boss. Depois das perguntas
+  // 5, 10 e 14 (modo rl) aparece primeiro a loja; nas restantes vai direto para a pergunta.
   function enterRung() {
     const g = G;
     g.info = null;
     g.retry = 0;
-    if (g.rl && g.lvl % 5 !== 4) {
-      g.doors = shuffle(['q', 'elite', 'shop']);
-      g.phase = 'doors';
-      renderPlay();
-    } else startQ(g.lvl % 5 === 4 ? 'boss' : 'normal');
+    if (g.rl && SHOP_AT.includes(g.lvl)) openShop();
+    else startQ(kindOf());
   }
 
-  // Prepara e mostra uma pergunta do tipo kind (normal, elite ou boss).
+  // Tipo da pergunta atual: boss em cada 5.ª pergunta, normal nas outras.
+  const kindOf = () => (G.lvl % 5 === 4 ? 'boss' : 'normal');
+
+  // Abre a loja: duas relíquias que o jogador ainda não tem e uma vida.
+  function openShop() {
+    const g = G;
+    g.shop = shuffle(Object.keys(RELICS).filter((k) => !g.relics.includes(k)))
+      .slice(0, 2)
+      .concat('heart');
+    g.phase = 'shop';
+    renderPlay();
+  }
+
+  // Prepara e mostra uma pergunta do tipo kind (normal ou boss).
   function startQ(kind) {
     const g = G;
     g.kind = kind;
@@ -372,24 +377,10 @@ ${best ? `<p class="best">O teu melhor prémio neste dispositivo: <b>${money(bes
     renderPlay();
   }
 
-  // O jogador escolheu a porta i: pergunta normal, pergunta de risco ou loja.
-  function door(i) {
-    const g = G;
-    if (g.phase !== 'doors') return;
-    const d = g.doors[i];
-    if (d === 'shop') {
-      g.shop = shuffle(Object.keys(RELICS).filter((k) => !g.relics.includes(k)))
-        .slice(0, 2)
-        .concat('heart');
-      g.phase = 'shop';
-      renderPlay();
-    } else startQ(d === 'q' ? 'normal' : 'elite');
-  }
-
-  // Compra na loja: uma vida (60 moedas) ou uma relíquia (50 moedas).
+  // Compra na loja: uma vida (COST_HEART moedas) ou uma relíquia (COST_RELIC moedas).
   function buy(k) {
     const g = G,
-      c = k === 'heart' ? 60 : 50;
+      c = k === 'heart' ? COST_HEART : COST_RELIC;
     if (g.phase !== 'shop' || g.coins < c) return;
     if (k === 'heart') {
       if (g.lives >= g.max) return;
@@ -403,7 +394,7 @@ ${best ? `<p class="best">O teu melhor prémio neste dispositivo: <b>${money(bes
     renderPlay();
   }
 
-  // Desenha o ecrã de jogo conforme a fase: portas, loja ou pergunta (com ajudas, escada de
+  // Desenha o ecrã de jogo conforme a fase: loja ou pergunta (com ajudas, escada de
   // prémios, confirmação, resposta e explicação).
   function renderPlay() {
     const g = G,
@@ -441,15 +432,13 @@ ${best ? `<p class="best">O teu melhor prémio neste dispositivo: <b>${money(bes
       g.modal === 'walk'
         ? `<div class="ov"><div class="dlg" role="dialog" aria-modal="true"><p>Se desistires, ficas com <b>${money(walkAmt(g))}</b>. Tens a certeza?</p><div class="row"><button class="b go" data-act="walkyes" data-focus>Sim, desistir</button><button class="b" data-act="walkno">Continuar a jogar</button></div></div></div>`
         : '';
-    app.innerHTML = `<div class="top"><a class="tb" href="index.html">Início</a><span class="sp"></span>${soundBtn()}<button class="tb lad" data-act="ladder">Escada</button>${live || ph === 'doors' || ph === 'shop' ? '<button class="tb" data-act="walk">Desistir</button>' : ''}</div>
+    app.innerHTML = `<div class="top"><a class="tb" href="index.html">Início</a><span class="sp"></span>${soundBtn()}<button class="tb lad" data-act="ladder">Escada</button>${live || ph === 'shop' ? '<button class="tb" data-act="walk">Desistir</button>' : ''}</div>
 <div class="game"><section class="stage"><div class="meta"><span>Pergunta ${g.lvl + 1} de 15</span><b>Vale ${money(PRIZE[g.lvl])}</b></div>${g.rl ? HUD(g) : ''}
 <div class="lifes">${ll('f', '50:50', '50:50')}${ll('a', '👥', 'Público')}${ll('t', '📞', 'Amigo')}</div>${info}
 <div class="qarea">${
-      ph === 'doors'
-        ? DH()
-        : ph === 'shop'
-          ? SH()
-          : `<div class="qbox"><span>${esc(q.q)}</span></div>
+      ph === 'shop'
+        ? SH()
+        : `<div class="qbox"><span>${esc(q.q)}</span></div>
 <div class="opts n${q.o.length}${ph === 'lock' ? ' lock' : ''}">${q.o
               .map((o, i) => {
                 let c = 'opt';
@@ -507,7 +496,7 @@ ${best ? `<p class="best">O teu melhor prémio neste dispositivo: <b>${money(bes
     if (g.ok) {
       g.streak++;
       if (g.rl) {
-        let c = { normal: 10, elite: 25, boss: 40 }[g.kind] + Math.min(g.streak, 5) * 2;
+        let c = { normal: 15, boss: 50 }[g.kind] + Math.min(g.streak, 5) * 2;
         if (has('mealheiro')) c = Math.round(c * 1.5);
         g.coins += c;
         g.notes.push('+' + c + ' 🪙');
@@ -545,7 +534,7 @@ ${best ? `<p class="best">O teu melhor prémio neste dispositivo: <b>${money(bes
     }
     if (g.lvl === 14) return endGame('win');
     let f = '';
-    if (g.rl && ((g.kind === 'elite' && Math.random() < 0.5) || g.kind === 'boss')) {
+    if (g.rl && g.kind === 'boss') {
       const k = newRelic();
       if (k) {
         giveRelic(k);
@@ -697,7 +686,7 @@ ${best ? `<p class="best">O teu melhor prémio neste dispositivo: <b>${money(bes
   }
 
   // ACT = ações dos botões, ligadas pelo atributo data-act do HTML.
-  // Os listeners abaixo tratam os cliques (opções, ajudas, portas, loja) e o teclado (A-D / 1-4, Esc).
+  // Os listeners abaixo tratam os cliques (opções, ajudas, loja) e o teclado (A-D / 1-4, Esc).
   const ACT = {
     start: () => startGame(),
     final: lockIn,
@@ -726,7 +715,7 @@ ${best ? `<p class="best">O teu melhor prémio neste dispositivo: <b>${money(bes
       G.ladder = !G.ladder;
       renderPlay();
     },
-    leave: () => startQ('normal'),
+    leave: () => startQ(kindOf()),
     again: startGame,
     menu: () => {
       G = null;
@@ -738,7 +727,6 @@ ${best ? `<p class="best">O teu melhor prémio neste dispositivo: <b>${money(bes
     if (!b || b.disabled) return;
     if (b.dataset.i !== undefined) return pick(+b.dataset.i);
     if (b.dataset.ll) return lifeline(b.dataset.ll);
-    if (b.dataset.door !== undefined) return door(+b.dataset.door);
     if (b.dataset.buy) return buy(b.dataset.buy);
     const f = ACT[b.dataset.act];
     if (f) f();
@@ -764,7 +752,6 @@ ${best ? `<p class="best">O teu melhor prémio neste dispositivo: <b>${money(bes
       j = ['1', '2', '3', '4'].indexOf(k),
       x = i >= 0 ? i : j;
     if (x >= 0 && (G.phase === 'ask' || G.phase === 'confirm')) pick(x);
-    else if (x >= 0 && G.phase === 'doors' && x < G.doors.length) door(x);
   });
 
   // Partilha com js/milionario-multi.js o que ele precisa deste ficheiro.

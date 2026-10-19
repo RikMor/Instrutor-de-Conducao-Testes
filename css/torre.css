@@ -537,3 +537,71 @@ h1 {
   outline: 2px solid var(--acc);
   outline-offset: 2px;
 }
+
+/* ---------- Janela das pilhas com cartas desenhadas ---------- */
+.modal > div.mw {
+  max-width: 720px;
+}
+.pg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin: 10px 0;
+}
+.pg .card.face {
+  position: relative;
+  width: 118px;
+  min-height: 140px;
+  font-size: 0.8rem;
+  cursor: default;
+}
+.pg .card.face:hover {
+  transform: none;
+}
+.card .qty {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  padding: 1px 7px;
+  border-radius: 99px;
+  background: var(--fg);
+  color: var(--panel);
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+/* ---------- Relíquias na barra de cima (descrição ao passar o rato) ---------- */
+.top .rl {
+  position: relative;
+  cursor: help;
+  font-size: 1.2rem;
+}
+.top .rl::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  width: max-content;
+  max-width: min(240px, 70vw);
+  padding: 0.45rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid var(--skl);
+  background: #111827;
+  color: #fff;
+  font-size: 0.85rem;
+  line-height: 1.35;
+  text-align: left;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.12s;
+  z-index: 40;
+}
+.top .rl:hover::after,
+.top .rl:focus::after,
+.top .rl:focus-visible::after {
+  opacity: 1;
+  visibility: visible;
+}
