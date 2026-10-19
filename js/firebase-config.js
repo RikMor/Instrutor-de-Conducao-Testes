@@ -16,6 +16,6 @@ export const firebaseConfig = {
 };
 
 // Quanto tempo uma sala e os seus jogadores ficam na base de dados. Cada documento leva um campo
-// "expira" (data) e o Firebase apaga-o sozinho depois dessa data, se tiveres ativado a política
-// TTL (ver README). Sem a política, o campo existe mas nada é apagado.
+// "expira" (data) e, depois dela, a sala é apagada por limpeza-salas.js quando alguém abre o
+// multijogador. (A política TTL do Firebase não serve: exige o plano pago.)
 export const VALIDADE_SALA_MS = 24 * 60 * 60 * 1000; // 24 horas

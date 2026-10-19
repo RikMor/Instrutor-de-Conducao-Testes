@@ -23,7 +23,7 @@
      rooms/{CÓDIGO}/players/{uid}  cada jogador:
          name, money (dinheiro), ok (certas), ms (tempo total a responder),
          joined (hora de entrada), ans ({ n: ronda, c: opção, g: ganho } ou null)
-     Salas e jogadores levam também "expira" (data): o Firebase apaga-os sozinho depois dela.
+     Salas e jogadores levam também "expira" (data): são apagados por limpeza-salas.js depois dela.
 
    Fluxo: mqOpen() -> criar() / entrar() -> entrarNaSala() -> desenhar() escolhe o ecrã:
           ecraSala() -> ecraJogo() (pergunta e revelação) -> ecraFinal()
@@ -50,6 +50,7 @@ import {
   Timestamp,
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import { firebaseConfig, VALIDADE_SALA_MS } from './firebase-config.js';
+import { limparSalasExpiradas } from './limpeza-salas.js';
 
 /* ---------- Ligação ao jogo e constantes ---------- */
 
@@ -93,7 +94,7 @@ function iniciarSessao() {
   return sessao;
 }
 
-// Data a partir da qual o Firebase pode apagar a sala ou o jogador (política TTL, ver README).
+// Data a partir da qual o Firebase pode apagar a sala ou o jogador (apagada por limpeza-salas.js).
 const expiraEm = () => Timestamp.fromMillis(Date.now() + VALIDADE_SALA_MS);
 
 const refSala = () => doc(db, 'rooms', code);
@@ -182,6 +183,10 @@ function pergunta(r) {
 
 window.mqOpen = function () {
   registarEventos();
+  if (!limpezaFeita) {
+    limpezaFeita = true; // uma vez por visita à página
+    iniciarSessao().then((u) => u && limparSalasExpiradas(db));
+  }
   const c = M.cfg();
   const n = ELIG.filter((q) => c.sel.has(q.s) && (c.withU || !q.u)).length;
   app.innerHTML = `<div class="top"><button class="tb" data-mp="voltar">← Voltar</button><span class="sp"></span></div>
@@ -624,6 +629,7 @@ const ACOES = {
 };
 
 let eventosRegistados = false;
+let limpezaFeita = false;
 function registarEventos() {
   if (eventosRegistados) return;
   eventosRegistados = true;

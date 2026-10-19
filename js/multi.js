@@ -44,11 +44,12 @@ import {
   Timestamp,
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import { firebaseConfig, VALIDADE_SALA_MS } from './firebase-config.js';
+import { limparSalasExpiradas } from './limpeza-salas.js';
 
 // Ligação ao projeto Firebase (a configuração está em firebase-config.js).
 const app = initializeApp(firebaseConfig);
 
-// Data a partir da qual o Firebase pode apagar a sala ou o jogador (política TTL, ver README).
+// Data a partir da qual o Firebase pode apagar a sala ou o jogador (apagada por limpeza-salas.js).
 const expiraEm = () => Timestamp.fromMillis(Date.now() + VALIDADE_SALA_MS);
 
 // auth = autenticação, db = base de dados, QS = perguntas (de quiz.js).
@@ -104,6 +105,9 @@ let uid,
 const ready = signInAnonymously(auth)
   .then((c) => (uid = c.user.uid))
   .catch((e) => console.error(e));
+
+// Depois do login, apaga as salas expiradas (ver limpeza-salas.js).
+ready.then(() => uid && limparSalasExpiradas(db));
 
 // rd() = referência à sala; pd() = referência ao meu jogador.
 const rd = () => doc(db, 'rooms', code),

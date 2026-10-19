@@ -20,6 +20,7 @@ js/                     comportamento de cada página
   milionario.js         jogo do milionário
   milionario-multi.js   multijogador do milionário (até 4 jogadores, todos contra todos)
   firebase-config.js    ligação ao Firebase, partilhada pelos dois multijogadores
+  limpeza-salas.js      apaga salas expiradas (usado pelos dois multijogadores)
   torre.js              jogo da torre
 ```
 
@@ -54,18 +55,14 @@ No ecrã inicial do milionário, o botão **Multijogador (até 4)** usa os temas
 
 Usa a mesma coleção `rooms` do Firestore que o multijogador dos testes (com `game: 'milionario'` na sala), por isso as regras publicadas devem servir para os dois. Para testar no mesmo computador usa dois browsers diferentes (ou uma janela anónima): o Firebase dá o mesmo jogador a dois separadores do mesmo browser.
 
-## Apagar salas antigas sozinho (fazer uma vez)
+## Limpeza das salas antigas
 
-As salas e os jogadores gravam um campo `expira` (24 horas depois de criados). Para o Firebase os apagar sozinho, ativa uma política TTL (Time-to-live) para cada uma destas duas coleções:
+Cada sala e cada jogador gravam um campo `expira` (24 horas depois de criados). Quando alguém abre o multijogador (dos testes ou do milionário), `js/limpeza-salas.js` apaga até 10 salas já expiradas, juntamente com os jogadores delas.
 
-1. Abre a Google Cloud Console no projeto `instrutor-de-codigo` e vai a **Firestore**, página **Time-to-live (TTL)**.
-2. Clica em **Criar política** e preenche: nome do grupo de coleções `rooms`, campo `expira`. Guarda.
-3. Repete com o grupo de coleções `players` e o campo `expira`. (Os jogadores são uma subcoleção, por isso precisam da sua própria política.)
-
-Notas:
-- O Firebase apaga os documentos algum tempo depois de expirarem, não à hora exata.
-- Salas criadas antes desta versão não têm o campo `expira` e nunca são apagadas por esta política; apaga-as à mão em Firestore Database > `rooms`.
-- As eliminações por TTL contam como eliminações normais no preço do Firestore (valores minúsculos para este uso).
+- Não precisa de configurar nada no Firebase. A política TTL do Firebase não serve neste projeto porque exige o plano pago (faturação ativada).
+- Só apaga quando alguém abre o multijogador; se ninguém o abrir durante dias, as salas ficam até lá.
+- Salas criadas antes desta versão não têm `expira` e nunca são apagadas por aqui; apaga-as à mão em Firestore Database > `rooms` (primeiro a coleção `players`, depois a sala).
+- Se as regras do Firestore não permitirem apagar, a limpeza falha em silêncio e o jogo não é afetado.
 - A validade (24 horas) muda-se em `VALIDADE_SALA_MS`, em `js/firebase-config.js`.
 
 ## Onde mudar o quê
