@@ -59,3 +59,38 @@
   display: inline;
   margin: 0;
 }
+.tm .tm-btn {
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.tm .tm-pk {
+  margin-top: 0.8rem;
+  border-top: 1px solid rgba(128, 128, 128, 0.35);
+  padding-top: 0.6rem;
+}
+.tm .tm-pk summary {
+  cursor: pointer;
+}
+.tm .tm-pl details {
+  margin: 0.4rem 0;
+}
+.tm .tm-pl summary {
+  font-weight: 600;
+}
+.tm .tm-ql {
+  max-height: 22rem;
+  overflow: auto;
+  margin: 0.4rem 0 0.4rem 1rem;
+}
+.tm .tm-qr {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  font-size: 0.9rem;
+}
