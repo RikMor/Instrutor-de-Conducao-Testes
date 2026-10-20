@@ -104,7 +104,16 @@ window.quizPick = () => {
 // Desmarcar tira a pergunta do teste da sala; a mesma pergunta em vários testes é uma só.
 function pickList(upd) {
   const box = $('#qpl'),
-    cnt = () => ($('#qpc').textContent = EX.size ? '(' + EX.size + ' tiradas)' : '');
+    // Só mostra os testes marcados em Temas; o contador conta só as tiradas desses testes.
+    sel = () => new Set([...document.querySelectorAll('.tc:checked')].map((c) => +c.value)),
+    cnt = () => {
+      const s = sel(),
+        n = Q.filter((q) => EX.has(q.id) && q.t.some((t) => s.has(t))).length;
+      $('#qpc').textContent = n ? '(' + n + ' tiradas)' : '';
+      box.querySelectorAll('details').forEach((d) => (d.hidden = !s.has(+d.dataset.t)));
+      $('#qpn').hidden = s.size > 0;
+    };
+  window.syncPick = cnt;
   box.innerHTML = T.map((t, i) => `<details data-t="${i}"><summary>${esc(t.s)} — ${esc(t.n)} (${Q.filter((q) => q.t.includes(i)).length})</summary><div class="ql"></div></details>`).join('');
   box.querySelectorAll('details').forEach((d) => {
     d.ontoggle = () => {
@@ -167,7 +176,7 @@ function quizCfg() {
     `</div>
 <div class="box"><b>Tempo</b><label><input type="radio" name="tm" value="1" checked> Com limite: <input type="number" id="qm" value="120" min="1"> minutos</label><label><input type="radio" name="tm" value="0"> Sem limite de tempo</label></div>
 <div class="box"><b>Ordem das perguntas</b><label><input type="radio" name="qo" value="sh" checked> Baralhadas</label><label><input type="radio" name="qo" value="orig"> Pela ordem original dos testes</label></div>
-${mp ? '<details class="box" id="qpk"><summary><b>Escolher as perguntas à mão</b> <small id="qpc"></small></summary><p><small>Por defeito entram todas as perguntas dos testes marcados. Abre um teste e tira as que não queres.</small></p><div id="qpl"></div></details>' : ''}
+${mp ? '<details class="box" id="qpk"><summary><b>Escolher as perguntas à mão</b> <small id="qpc"></small></summary><p><small>Por defeito entram todas as perguntas dos testes marcados em Temas. Abre um teste e tira as que não queres.</small></p><p id="qpn" hidden><small>Marca primeiro um teste em Temas.</small></p><div id="qpl"></div></details>' : ''}
 ${mp ? '' : '<div class="box"><label><input type="checkbox" id="qi"> Mostrar a resposta certa logo depois de responder</label></div>'}
 ${mp ? '' : '<button class="btn p" id="go">Começar teste</button>'} <small id="qerr" style="color:var(--ko)"></small>`;
   const pool = () => {
@@ -176,7 +185,9 @@ ${mp ? '' : '<button class="btn p" id="go">Começar teste</button>'} <small id="
   };
   const upd = () => {
     $('#qmax').textContent = '(disponíveis: ' + pool().length + ')';
+    if (window.syncPick) window.syncPick();
   };
+  window.syncPick = null;
   upd();
   if (mp) pickList(upd);
   document.querySelectorAll('.sc').forEach(
