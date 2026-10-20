@@ -36,7 +36,8 @@ const esc = (s) =>
 //   MODE  'solo' | 'multi' | null (ecrã de escolha)
 let tm = null,
   S = null,
-  MODE = null;
+  MODE = null,
+  EX = new Set(); // ids das perguntas que o anfitrião tirou à mão (só no Multijogador)
 try {
   localStorage.removeItem('qp');
 } catch (e) {}
@@ -81,6 +82,70 @@ function home(e) {
 addEventListener('hashchange', route);
 // ---------- Testes
 
+// Lista as perguntas escolhidas, já pela ordem pedida (baralhadas ou pela ordem original).
+// Ordem original = por teste e, dentro do teste, pela posição da pergunta (q.p, em paralelo com q.t).
+// Uma pergunta que está em vários testes marcados conta no primeiro. No Multijogador ficam
+// de fora as perguntas que o anfitrião tirou à mão (EX).
+window.quizPick = () => {
+  const sel = new Set([...document.querySelectorAll('.tc:checked')].map((c) => +c.value)),
+    p = Q.filter((q) => q.t.some((t) => sel.has(t)) && !(MODE === 'multi' && EX.has(q.id)));
+  if (document.querySelector('[name=qo]:checked').value === 'orig') {
+    const k = (q) => Math.min(...q.t.map((t, j) => (sel.has(t) ? t * 1000 + q.p[j] : 1e9)));
+    return p.sort((a, b) => k(a) - k(b));
+  }
+  for (let i = p.length - 1; i > 0; i--) {
+    const j = (Math.random() * (i + 1)) | 0;
+    [p[i], p[j]] = [p[j], p[i]];
+  }
+  return p;
+};
+
+// Multijogador: lista das perguntas de cada teste com uma caixa por pergunta (abre-se por teste).
+// Desmarcar tira a pergunta do teste da sala; a mesma pergunta em vários testes é uma só.
+function pickList(upd) {
+  const box = $('#qpl'),
+    cnt = () => ($('#qpc').textContent = EX.size ? '(' + EX.size + ' tiradas)' : '');
+  box.innerHTML = T.map((t, i) => `<details data-t="${i}"><summary>${esc(t.s)} — ${esc(t.n)} (${Q.filter((q) => q.t.includes(i)).length})</summary><div class="ql"></div></details>`).join('');
+  box.querySelectorAll('details').forEach((d) => {
+    d.ontoggle = () => {
+      const ql = d.querySelector('.ql');
+      if (!d.open || ql.dataset.ok) return;
+      ql.dataset.ok = 1;
+      const i = +d.dataset.t,
+        l = [];
+      Q.forEach((q) => {
+        const j = q.t.indexOf(i);
+        if (j >= 0) l.push([q.p[j], q]);
+      });
+      l.sort((a, b) => a[0] - b[0]);
+      ql.innerHTML =
+        '<p><button type="button" class="btn qa" data-v="1">Marcar todas</button> <button type="button" class="btn qa" data-v="0">Desmarcar todas</button></p>' +
+        l.map(([n, q]) => `<label class="qr"><input type="checkbox" class="qx" value="${q.id}" ${EX.has(q.id) ? '' : 'checked'}> <span>${n}. ${esc(q.q)}</span></label>`).join('');
+    };
+  });
+  box.onchange = (e) => {
+    if (!e.target.classList.contains('qx')) return;
+    const id = +e.target.value;
+    e.target.checked ? EX.delete(id) : EX.add(id);
+    box.querySelectorAll(`.qx[value="${id}"]`).forEach((x) => (x.checked = e.target.checked));
+    cnt();
+    upd();
+  };
+  box.onclick = (e) => {
+    const b = e.target.closest('.qa');
+    if (!b) return;
+    b.closest('details')
+      .querySelectorAll('.qx')
+      .forEach((x) => {
+        x.checked = b.dataset.v === '1';
+        x.checked ? EX.delete(+x.value) : EX.add(+x.value);
+      });
+    cnt();
+    upd();
+  };
+  cnt();
+}
+
 // Ecrã de configuração. Mostra número de perguntas, temas, tempo e (no modo Sozinho)
 // o botão "Começar teste", que baralha as perguntas dos temas escolhidos e inicia S.
 function quizCfg() {
@@ -101,16 +166,19 @@ function quizCfg() {
       .join('') +
     `</div>
 <div class="box"><b>Tempo</b><label><input type="radio" name="tm" value="1" checked> Com limite: <input type="number" id="qm" value="120" min="1"> minutos</label><label><input type="radio" name="tm" value="0"> Sem limite de tempo</label></div>
+<div class="box"><b>Ordem das perguntas</b><label><input type="radio" name="qo" value="sh" checked> Baralhadas</label><label><input type="radio" name="qo" value="orig"> Pela ordem original dos testes</label></div>
+${mp ? '<details class="box" id="qpk"><summary><b>Escolher as perguntas à mão</b> <small id="qpc"></small></summary><p><small>Por defeito entram todas as perguntas dos testes marcados. Abre um teste e tira as que não queres.</small></p><div id="qpl"></div></details>' : ''}
 ${mp ? '' : '<div class="box"><label><input type="checkbox" id="qi"> Mostrar a resposta certa logo depois de responder</label></div>'}
 ${mp ? '' : '<button class="btn p" id="go">Começar teste</button>'} <small id="qerr" style="color:var(--ko)"></small>`;
   const pool = () => {
     const sel = new Set([...document.querySelectorAll('.tc:checked')].map((c) => +c.value));
-    return Q.filter((q) => q.t.some((t) => sel.has(t)));
+    return Q.filter((q) => q.t.some((t) => sel.has(t)) && !(mp && EX.has(q.id)));
   };
   const upd = () => {
     $('#qmax').textContent = '(disponíveis: ' + pool().length + ')';
   };
   upd();
+  if (mp) pickList(upd);
   document.querySelectorAll('.sc').forEach(
     (c) =>
       (c.onchange = () => {
@@ -133,13 +201,9 @@ ${mp ? '' : '<button class="btn p" id="go">Começar teste</button>'} <small id="
   mp && window.mpCfg && window.mpCfg();
   if ($('#go'))
     $('#go').onclick = () => {
-      const p = pool(),
+      const p = window.quizPick(),
         n = Math.min(+$('#qn').value || 100, p.length);
       if (!p.length) return ($('#qerr').textContent = 'Escolhe pelo menos um tema.');
-      for (let i = p.length - 1; i > 0; i--) {
-        const j = (Math.random() * (i + 1)) | 0;
-        [p[i], p[j]] = [p[j], p[i]];
-      }
       const lim =
         document.querySelector('[name=tm]:checked').value === '1'
           ? Math.max(1, +$('#qm').value || 120) * 60000
@@ -217,28 +281,32 @@ function runView() {
 }
 
 // HTML com a resposta certa e a explicação.
+const an = (q) => q.a < 0; // pergunta anulada: sem resposta certa, não conta
 const exHtml = (q) =>
-  `<div class="ex"><b>Resposta certa: ${String.fromCharCode(97 + q.a)})</b>${q.u ? ' <span class="bd">resposta não confirmada</span>' : ''}${q.e}</div>`;
+  an(q)
+    ? `<div class="ex"><b>Pergunta anulada</b> <span class="bd">sem resposta certa</span> Nenhuma das opções corresponde ao Código da Estrada em vigor (art. 163.º), por isso esta pergunta não conta para a pontuação.</div>`
+    : `<div class="ex"><b>Resposta certa: ${String.fromCharCode(97 + q.a)})</b>${q.u ? ' <span class="bd">resposta não confirmada</span>' : ''}${q.e}</div>`;
 
 // Fecha o teste e mostra: pontuação, tempo, lista de erros e botão "Refazer as erradas".
 // auto = true quando o tempo acabou (não pede confirmação).
 function finish(auto) {
-  const un = S.qs.length - S.ans.filter((x) => x != null).length;
+  const un = S.qs.filter((q, i) => !an(q) && S.ans[i] == null).length;
   if (!auto && un && !confirm(`Tens ${un} pergunta(s) por responder. Terminar mesmo assim?`))
     return;
   clearInterval(tm);
   S.live = 0;
-  const wr = S.qs.filter((q, i) => S.ans[i] !== q.a),
+  const wr = S.qs.filter((q, i) => !an(q) && S.ans[i] !== q.a),
     used = Date.now() - S.t0,
     ok = S.qs.filter((q, i) => S.ans[i] === q.a).length,
-    n = S.qs.length;
-  main.innerHTML = `<h1 class="t">Resultado</h1>${auto ? '<p><b>O tempo terminou.</b></p>' : ''}<div class="res">${ok}/${n} <small>(${Math.round((ok / n) * 100)}%)</small></div><p>Certas: ${ok} · Erradas: ${n - ok - un} · Por responder: ${un} · Tempo: ${fmt(Math.min(used, S.lim || used))}</p>
+    nul = S.qs.filter(an).length,
+    n = S.qs.length - nul;
+  main.innerHTML = `<h1 class="t">Resultado</h1>${auto ? '<p><b>O tempo terminou.</b></p>' : ''}<div class="res">${ok}/${n} <small>(${Math.round((ok / Math.max(n, 1)) * 100)}%)</small></div><p>Certas: ${ok} · Erradas: ${n - ok - un} · Por responder: ${un}${nul ? ' · Anuladas: ' + nul : ''} · Tempo: ${fmt(Math.min(used, S.lim || used))}</p>
 <p>${wr.length ? `<button class="btn p" id="rt">🔁 Refazer as erradas (${wr.length})</button>` : '<a class="btn p" href="#/solo">Novo teste</a>'}</p><div id="rv"></div>`;
   const show = (all) =>
     ($('#rv').innerHTML =
       S.qs
         .map((q, i) => ({ q, i, a: S.ans[i] }))
-        .filter((x) => all || x.a !== x.q.a)
+        .filter((x) => all || (!an(x.q) && x.a !== x.q.a))
         .map(
           ({ q, i, a }) =>
             `<div class="ri"><b>${i + 1}.</b> <span class="qt">${esc(q.q)}</span>` +

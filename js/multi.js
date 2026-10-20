@@ -145,16 +145,11 @@ const nm = () => {
   return name;
 };
 
-// Cria a sala: baralha as perguntas dos temas escolhidos, gera um código de 4 letras e grava no Firestore.
+// Cria a sala: usa as perguntas escolhidas (baralhadas ou pela ordem original), gera um código de 4 letras e grava no Firestore.
 async function create() {
   if (!nm()) return err('Escreve o teu nome.');
-  const sel = new Set([...document.querySelectorAll('.tc:checked')].map((c) => +c.value)),
-    p = QS.filter((q) => q.t.some((t) => sel.has(t)));
+  const p = window.quizPick();
   if (!p.length) return err('Escolhe pelo menos um tema.');
-  for (let k = p.length - 1; k > 0; k--) {
-    const j = (Math.random() * (k + 1)) | 0;
-    [p[k], p[j]] = [p[j], p[k]];
-  }
   const n = Math.min(+$('#qn').value || 100, p.length),
     lim =
       document.querySelector('[name=tm]:checked').value === '1'
@@ -344,8 +339,12 @@ function stats(qi) {
 }
 
 // HTML da explicação (ou aviso de resposta não confirmada).
+// Pergunta anulada (q.a < 0): sem resposta certa, não conta.
+const cnt = () => room.qids.filter((id) => QS[id].a >= 0).length;
 const info = (q) =>
-  q.u
+  q.a < 0
+    ? '<div class="ex"><b>Pergunta anulada</b> <span class="bd">sem resposta certa</span> Não conta para a pontuação.</div>'
+    : q.u
     ? '<span class="bd">resposta não confirmada</span>'
     : q.e
       ? `<div class="ex">${q.e}</div>`
@@ -364,7 +363,7 @@ function overview() {
           { c, t } = stats(qi),
           pc = (k) => (t ? Math.round((100 * c[k]) / t) : 0);
         return (
-          `<details class="co" data-i="${qi}"${open.has(String(qi)) ? ' open' : ''}><summary><b>${qi + 1}.</b> ${E(q.q.slice(0, 90))}${q.q.length > 90 ? '…' : ''} — <b>${t ? pc(q.a) + '% acertaram' : 'sem respostas'}</b> (${c[q.a]}/${t})</summary><div class="qt">${E(q.q)}</div>` +
+          `<details class="co" data-i="${qi}"${open.has(String(qi)) ? ' open' : ''}><summary><b>${qi + 1}.</b> ${E(q.q.slice(0, 90))}${q.q.length > 90 ? '…' : ''} — <b>${q.a < 0 ? 'anulada' : t ? pc(q.a) + '% acertaram' : 'sem respostas'}</b> (${q.a < 0 ? t + ' respostas' : c[q.a] + '/' + t})</summary><div class="qt">${E(q.q)}</div>` +
           q.o
             .map(
               (o, k) =>
@@ -387,9 +386,9 @@ function playerView(id) {
   const over = room.state === 'done' || p.done;
   const w = room.qids
     .map((qid, qi) => ({ q: QS[qid], qi, c: p.a && p.a[qi] }))
-    .filter((x) => x.c !== x.q.a && (x.c != null || over));
+    .filter((x) => x.q.a >= 0 && x.c !== x.q.a && (x.c != null || over));
   return (
-    `<h2>${E(p.name)} — ${w.length} erradas de ${room.qids.length}</h2>` +
+    `<h2>${E(p.name)} — ${w.length} erradas de ${cnt()}</h2>` +
     (w.length
       ? w
           .map(
@@ -423,7 +422,7 @@ function results(liveMode) {
     h =
       `<h1 class="t">${sp ? 'A acompanhar a sala' : liveMode ? 'Fim do jogo' : 'Terminaste'}</h1>` +
       (me
-        ? `<p>${liveMode ? 'Pontos: <b>' + me.score + '</b>' : 'Certas: <b>' + me.score + '/' + room.qids.length + '</b> · Tempo: ' + fmt(me.ms)}</p>`
+        ? `<p>${liveMode ? 'Pontos: <b>' + me.score + '</b>' : 'Certas: <b>' + me.score + '/' + cnt() + '</b> · Tempo: ' + fmt(me.ms)}</p>`
         : '') +
       `<h3>Ranking${liveMode ? '' : ' (atualiza em direto)'}</h3>` +
       rank(liveMode, 1) +

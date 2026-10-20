@@ -534,6 +534,14 @@ function confirmA() {
   var k = P.sel;
   P.done = true;
   P.pick = k;
+  if (P.q.a < 0) {
+    // Pergunta anulada: a carta funciona e nada conta (nem certas, nem erradas, nem a série).
+    P.ok = true;
+    P.nul = true;
+    beep(440);
+    render();
+    return;
+  }
   P.ok = P.o[k] == P.q.a;
   if (P.ok) {
     G.ok++;
@@ -551,15 +559,16 @@ function resolve() {
   var i = P.i,
     id = G.hand[i],
     c = CARDS[id],
-    ok = P.ok;
+    ok = P.ok,
+    nul = P.nul;
   P = null;
   G.en -= c.c;
   G.hand.splice(i, 1);
   G.di.push(id);
   if (ok) {
-    msg = 'Resposta certa!';
+    msg = nul ? 'Pergunta anulada: a carta funcionou.' : 'Resposta certa!';
     c.f();
-    if (G.sk % 3 == 0) {
+    if (!nul && G.sk % 3 == 0) {
       G.en++;
       msg += ' 🔥 Sequência! +1 energia';
     }
@@ -869,7 +878,7 @@ function render() {
       if (P.done) {
         h +=
           '<div class="ex"><b>' +
-          (P.ok ? '✅ Certo!' : '❌ Errado.') +
+          (P.nul ? '⚪ Pergunta anulada: sem resposta certa, não conta. A carta funciona.' : P.ok ? '✅ Certo!' : '❌ Errado.') +
           '</b>' +
           P.q.e +
           '</div><div class="row"><button class="btn" onclick="resolve()">Continuar</button></div>';

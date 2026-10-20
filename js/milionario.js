@@ -71,7 +71,7 @@
 
   /* ---------- perguntas ---------- */
   // ELIG = perguntas do jogo. Entram TODAS as de quiz.js (repetidas e de 2 opções incluídas).
-  const ELIG = QS;
+  const ELIG = QS.filter((q) => q.a >= 0); // as anuladas (sem resposta certa) ficam de fora
 
   // Há perguntas cujas opções ou explicação citam outras opções ("todas as anteriores",
   // "alínea b)", "a e c"). Se as opções fossem baralhadas deixavam de fazer sentido,
