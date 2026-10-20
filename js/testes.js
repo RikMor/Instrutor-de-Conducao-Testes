@@ -37,7 +37,7 @@ const esc = (s) =>
 let tm = null,
   S = null,
   MODE = null,
-  EX = new Set(); // ids das perguntas que o anfitrião tirou à mão (só no Multijogador)
+  EX = new Set(); // ids das perguntas tiradas à mão no ecrã de configuração (Sozinho ou Multijogador)
 try {
   localStorage.removeItem('qp');
 } catch (e) {}
@@ -60,7 +60,9 @@ function route() {
   clearInterval(tm);
   if (S && S.live && location.hash === '#/quiz/run') return runView();
   const h = location.hash;
-  MODE = h === '#/solo' ? 'solo' : h === '#/multi' ? 'multi' : null;
+  const novo = h === '#/solo' ? 'solo' : h === '#/multi' ? 'multi' : null;
+  if (novo !== MODE) EX.clear(); // cada modo começa com todas as perguntas
+  MODE = novo;
   if (h && !MODE) history.replaceState(null, '', location.pathname + location.search);
   quizCfg();
   scrollTo(0, 0);
@@ -84,11 +86,11 @@ addEventListener('hashchange', route);
 
 // Lista as perguntas escolhidas, já pela ordem pedida (baralhadas ou pela ordem original).
 // Ordem original = por teste e, dentro do teste, pela posição da pergunta (q.p, em paralelo com q.t).
-// Uma pergunta que está em vários testes marcados conta no primeiro. No Multijogador ficam
-// de fora as perguntas que o anfitrião tirou à mão (EX).
+// Uma pergunta que está em vários testes marcados conta no primeiro. Ficam
+// de fora as perguntas tiradas à mão (EX).
 window.quizPick = () => {
   const sel = new Set([...document.querySelectorAll('.tc:checked')].map((c) => +c.value)),
-    p = Q.filter((q) => q.t.some((t) => sel.has(t)) && !(MODE === 'multi' && EX.has(q.id)));
+    p = Q.filter((q) => q.t.some((t) => sel.has(t)) && !EX.has(q.id));
   if (document.querySelector('[name=qo]:checked').value === 'orig') {
     const k = (q) => Math.min(...q.t.map((t, j) => (sel.has(t) ? t * 1000 + q.p[j] : 1e9)));
     return p.sort((a, b) => k(a) - k(b));
@@ -100,7 +102,7 @@ window.quizPick = () => {
   return p;
 };
 
-// Multijogador: lista das perguntas de cada teste com uma caixa por pergunta (abre-se por teste).
+// Sozinho e Multijogador: lista das perguntas de cada teste com uma caixa por pergunta (abre-se por teste).
 // Desmarcar tira a pergunta do teste da sala; a mesma pergunta em vários testes é uma só.
 function pickList(upd) {
   const box = $('#qpl'),
@@ -176,12 +178,12 @@ function quizCfg() {
     `</div>
 <div class="box"><b>Tempo</b><label><input type="radio" name="tm" value="1" checked> Com limite: <input type="number" id="qm" value="120" min="1"> minutos</label><label><input type="radio" name="tm" value="0"> Sem limite de tempo</label></div>
 <div class="box"><b>Ordem das perguntas</b><label><input type="radio" name="qo" value="sh" checked> Baralhadas</label><label><input type="radio" name="qo" value="orig"> Pela ordem original dos testes</label></div>
-${mp ? '<details class="box" id="qpk"><summary><b>Escolher as perguntas à mão</b> <small id="qpc"></small></summary><p><small>Por defeito entram todas as perguntas dos testes marcados em Temas. Abre um teste e tira as que não queres.</small></p><p id="qpn" hidden><small>Marca primeiro um teste em Temas.</small></p><div id="qpl"></div></details>' : ''}
+${'<details class="box" id="qpk"><summary><b>Escolher as perguntas à mão</b> <small id="qpc"></small></summary><p><small>Por defeito entram todas as perguntas dos testes marcados em Temas. Abre um teste e tira as que não queres.</small></p><p id="qpn" hidden><small>Marca primeiro um teste em Temas.</small></p><div id="qpl"></div></details>'}
 ${mp ? '' : '<div class="box"><label><input type="checkbox" id="qi"> Mostrar a resposta certa logo depois de responder</label></div>'}
 ${mp ? '' : '<button class="btn p" id="go">Começar teste</button>'} <small id="qerr" style="color:var(--ko)"></small>`;
   const pool = () => {
     const sel = new Set([...document.querySelectorAll('.tc:checked')].map((c) => +c.value));
-    return Q.filter((q) => q.t.some((t) => sel.has(t)) && !(mp && EX.has(q.id)));
+    return Q.filter((q) => q.t.some((t) => sel.has(t)) && !EX.has(q.id));
   };
   const upd = () => {
     $('#qmax').textContent = '(disponíveis: ' + pool().length + ')';
@@ -189,7 +191,7 @@ ${mp ? '' : '<button class="btn p" id="go">Começar teste</button>'} <small id="
   };
   window.syncPick = null;
   upd();
-  if (mp) pickList(upd);
+  pickList(upd);
   document.querySelectorAll('.sc').forEach(
     (c) =>
       (c.onchange = () => {
