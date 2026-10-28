@@ -1,104 +1,202 @@
 /* index.css — página inicial (escolha entre Testes, Torre e Milionário)
-   As cores estão em variáveis no :root; o tema escuro troca-as automaticamente. */
+   As cores estão em variáveis no :root; o tema escuro troca-as automaticamente.
+   A paleta vem dos sinais de trânsito: azul (informação), vermelho (perigo), amarelo (obrigação). */
 
 :root {
-  --bg: #fff;
-  --fg: #1c2330;
-  --mu: #5d6778;
-  --bd: #dde2ea;
-  --pa: #f4f6fa;
-  --ac: #1d5fd1;
-  --ac2: #b5532a;
-  --ac3: #b07a00;
+  --bg: #eef1f5;
+  --fg: #1a2029;
+  --mu: #566173;
+  --bd: #d3d9e2;
+  --pa: #fff;
+  --azul: #0b4ea2;
+  --vermelho: #d4202a;
+  --amarelo: #e6a800;
+  --asfalto: #1b2027;
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #10151d;
-    --fg: #e4e8ef;
+    --bg: #11151b;
+    --fg: #e7ebf1;
     --mu: #9aa5b7;
-    --bd: #263040;
-    --pa: #171e29;
-    --ac: #6ea3ff;
-    --ac2: #e0824f;
-    --ac3: #f5b72e;
+    --bd: #2a3342;
+    --pa: #181e27;
+    --azul: #3f86e6;
+    --vermelho: #ef4b53;
+    --amarelo: #f5c400;
+    --asfalto: #0a0d11;
   }
 }
+
+/* ---------- Base ---------- */
 * {
   box-sizing: border-box;
 }
 body {
   margin: 0;
-  min-height: 100vh;
   font:
-    16px/1.6 system-ui,
+    17px/1.6 Barlow,
+    system-ui,
     -apple-system,
     Segoe UI,
     Roboto,
     sans-serif;
   background: var(--bg);
   color: var(--fg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1.2rem;
 }
-main {
+.conteudo {
   width: 100%;
-  max-width: 1020px;
-}
-h1 {
-  font-size: clamp(1.6rem, 5vw, 2.2rem);
-  margin: 0 0 0.3rem;
-  text-align: center;
-}
-.sub {
-  text-align: center;
-  color: var(--mu);
-  margin: 0 0 1.6rem;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0 1.2rem;
 }
 
-/* ---------- Cartões de escolha ---------- */
-.cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1rem;
+/* ---------- Topo: asfalto com a linha da estrada ---------- */
+.topo {
+  background: var(--asfalto);
+  color: #fff;
+  padding-top: max(3.5rem, env(safe-area-inset-top));
 }
-.card {
+.topo h1 {
+  margin: 0;
+  font:
+    700 clamp(2.8rem, 10vw, 5.6rem) / 0.95 'Barlow Condensed',
+    Impact,
+    sans-serif;
+  letter-spacing: 0.01em;
+}
+.lema {
+  max-width: 34rem;
+  margin: 1rem 0 1.6rem;
+  font-size: 1.15rem;
+  color: #c3ccd9;
+}
+.numeros {
   display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  padding: 1.4rem;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 0 0 2.6rem;
+  padding: 0;
+  list-style: none;
+}
+/* cada número parece uma placa azul */
+.numeros li {
+  padding: 0.25rem 0.9rem;
+  border: 2px solid #fff;
+  border-radius: 8px;
+  background: var(--azul);
+  font-weight: 500;
+}
+.numeros b {
+  font: 700 1.4rem 'Barlow Condensed', sans-serif;
+  margin-right: 0.2rem;
+}
+
+/* a linha tracejada do meio da estrada move-se devagar (só se o utilizador permitir animações) */
+.estrada {
+  height: 34px;
+  background-image: repeating-linear-gradient(90deg, #fff 0 46px, transparent 46px 92px);
+  background-size: auto 6px;
+  background-repeat: repeat-x;
+  background-position: 0 50%;
+  border-top: 3px solid var(--amarelo);
+  animation: andar 3s linear infinite;
+}
+@keyframes andar {
+  to {
+    background-position: -92px 50%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .estrada {
+    animation: none;
+  }
+}
+
+/* ---------- Modos de estudo ---------- */
+h2 {
+  margin: 2.4rem 0 1rem;
+  font:
+    600 1.9rem 'Barlow Condensed',
+    sans-serif;
+}
+.modo {
+  display: flex;
+  align-items: center;
+  gap: 1.4rem;
+  margin-bottom: 0.9rem;
+  padding: 1.1rem 1.4rem;
   border: 1px solid var(--bd);
-  border-top: 5px solid var(--c);
-  border-radius: 14px;
+  border-left: 8px solid var(--c);
+  border-radius: 6px 16px 16px 6px;
   background: var(--pa);
   color: inherit;
   text-decoration: none;
-  transition:
-    transform 0.15s,
-    border-color 0.15s;
+  transition: border-color 0.15s, background 0.15s;
 }
-.card:hover,
-.card:focus-visible {
-  transform: translateY(-3px);
+.modo:hover,
+.modo:focus-visible {
   border-color: var(--c);
+  background: color-mix(in srgb, var(--c) 8%, var(--pa));
   outline: none;
 }
-.card .em {
-  font-size: 2.6rem;
-  line-height: 1;
+.modo:focus-visible {
+  outline: 3px solid var(--c);
+  outline-offset: 3px;
 }
-.card b {
-  font-size: 1.2rem;
+.sinal {
+  flex: none;
+  width: 76px;
+  height: 76px;
 }
-.card span {
+.texto {
+  flex: 1;
+}
+.texto h3 {
+  margin: 0;
+  font:
+    700 1.55rem/1.15 'Barlow Condensed',
+    sans-serif;
+}
+.texto p {
+  margin: 0.2rem 0 0;
+  color: var(--mu);
+}
+/* "botão" à direita: preenchido com a cor do sinal */
+.ir {
+  flex: none;
+  padding: 0.5rem 1.1rem;
+  border-radius: 99px;
+  background: var(--c);
+  color: #fff;
+  font-weight: 600;
+}
+/* o amarelo precisa de texto escuro para se ler bem */
+.modo[style*='amarelo'] .ir {
+  color: #1b2027;
+}
+
+/* ---------- Rodapé ---------- */
+.rodape {
+  margin-top: 1.6rem;
+  padding-bottom: max(2.4rem, env(safe-area-inset-bottom));
   color: var(--mu);
   font-size: 0.95rem;
 }
-.card i {
-  margin-top: auto;
-  padding-top: 0.6rem;
-  font-style: normal;
-  font-weight: 700;
-  color: var(--c);
+
+/* ---------- Telemóvel: o botão passa para baixo do texto ---------- */
+@media (max-width: 620px) {
+  .modo {
+    flex-wrap: wrap;
+    gap: 0.8rem 1rem;
+  }
+  .sinal {
+    width: 60px;
+    height: 60px;
+  }
+  .texto {
+    flex-basis: calc(100% - 80px);
+  }
+  .ir {
+    margin-left: 76px;
+  }
 }
