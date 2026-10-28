@@ -52,7 +52,7 @@ const unc = (i) => Q.filter((q) => q.t.includes(i) && q.u).length,
 
 // HTML da caixa de seleção (checkbox) de um teste, com nº de perguntas e etiqueta.
 const tl = (t, i) =>
-  `<label><input type="checkbox" class="tc" data-s="${esc(t.s)}" value="${i}" checked> ${esc(t.n)} (${Q.filter((q) => q.t.includes(i)).length}) ${ofi(i)}</label>`;
+  `<label class="tt"><input type="checkbox" class="tc" data-s="${esc(t.s)}" value="${i}" checked> <span class="tn">${esc(t.n)}</span> <span class="tq">${Q.filter((q) => q.t.includes(i)).length} perguntas</span> ${ofi(i)}</label>`;
 
 // Decide o que mostrar consoante o #hash do endereço. Corre ao abrir a página e quando o hash muda.
 function route() {

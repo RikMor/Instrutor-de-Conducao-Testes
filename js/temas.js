@@ -42,13 +42,13 @@
       if (subs.indexOf(t.s) < 0) subs.push(t.s);
     });
     var h =
-      '<div class="tm"><b class="tm-h">Temas</b> <button class="tm-of" type="button">Selecionar só testes com correção oficial</button>';
+      '<div class="tm"><div class="tm-top"><b class="tm-h">Temas</b> <button class="tm-of" type="button">Selecionar só testes com correção oficial</button></div>';
     subs.forEach(function (s) {
       var all = T.every(function (t, i) {
         return t.s !== s || !sel || sel.has(i);
       });
       h +=
-        '<div class="tm-sub"><label class="tm-l"><input type="checkbox" class="tm-sc" data-s="' +
+        '<div class="tm-sub"><label class="tm-l tm-sh"><input type="checkbox" class="tm-sc" data-s="' +
         esc(s) +
         '"' +
         (all ? ' checked' : '') +
@@ -58,17 +58,18 @@
       T.forEach(function (t, i) {
         if (t.s !== s) return;
         h +=
-          '<label class="tm-l"><input type="checkbox" class="tm-tc" data-s="' +
+          '<label class="tm-l tm-t"><input type="checkbox" class="tm-tc" data-s="' +
           esc(s) +
           '" value="' +
           i +
           '"' +
           (!sel || sel.has(i) ? ' checked' : '') +
-          '> ' +
+          '> <span class="tm-tn">' +
           esc(t.n) +
-          ' (' +
+          '</span> <span class="tm-tq">' +
           n(i) +
-          ') ' +
+          (n(i) === 1 ? ' pergunta' : ' perguntas') +
+          '</span> ' +
           badge(i) +
           '</label>';
       });

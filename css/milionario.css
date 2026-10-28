@@ -898,3 +898,60 @@ details summary {
   --tm-ok: #4cc27a;
   --tm-wa: #e0b252;
 }
+
+/* ================= Tema visual v2 — tipografia da página inicial e brilho dourado ================= */
+body {
+  font-family: Barlow, 'Segoe UI', system-ui, sans-serif;
+  font-size: 17px;
+}
+.start h1,
+.end h1,
+.end .amt,
+.meta b,
+.mp-din,
+.ladder li {
+  font-family: Rajdhani, system-ui, sans-serif;
+}
+.start h1,
+.end h1 {
+  letter-spacing: 0.01em;
+}
+.box,
+.mp-box,
+.info,
+.ladder,
+.mp-placar,
+.reveal {
+  border-radius: 16px;
+  box-shadow: 0 14px 34px -18px rgba(0, 0, 0, 0.9);
+}
+.ladder li {
+  font-size: 1.05rem;
+}
+.ladder li.cur {
+  box-shadow: 0 0 18px rgba(245, 138, 31, 0.55);
+}
+.ladder li.safe {
+  color: var(--gold);
+}
+.bigbtn {
+  letter-spacing: 0.02em;
+  transition: transform 0.12s, background 0.12s;
+}
+.bigbtn:hover:not(:disabled) {
+  transform: scale(1.03);
+}
+.b.go {
+  box-shadow: 0 8px 20px -10px var(--gold);
+}
+.mp-tempo i {
+  box-shadow: 0 0 12px rgba(245, 183, 46, 0.5);
+}
+@media (prefers-reduced-motion: reduce) {
+  .bigbtn {
+    transition: none;
+  }
+  .bigbtn:hover:not(:disabled) {
+    transform: none;
+  }
+}
