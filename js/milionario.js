@@ -1,10 +1,10 @@
 /* ==========================================================================
    milionario.js  —  jogo "Quem quer ser milionário?"
    --------------------------------------------------------------------------
-   Regras: 15 perguntas, dificuldade a subir, patamares seguros na pergunta 5
-   (1.000 €) e 10 (32.000 €), três ajudas (50:50, público, amigo) e possibilidade
-   de desistir. Há também vidas, moedas, relíquias e uma loja (modo rl) que só aparece
-   depois dos boss (perguntas 5 e 10) e antes da última pergunta (depois da 14).
+   Corrida por pontos: cada fase tem um limite de perguntas e uma meta de pontos
+   (pontos base x combo). Depois de cada fase escolhe-se o caminho num mapa (fases,
+   loja, descanso, tesouro, desconhecido). O Manual abre por cima do jogo.
+   As regras (nº de perguntas, metas, pontos) estão juntas em "regras (podes mexer aqui)".
 
    Organização do ficheiro (de cima para baixo):
      1. Funções auxiliares e constantes (prémios, letras)
@@ -99,7 +99,8 @@
   };
 
   // POOL = perguntas deste jogo, da mais fácil para a mais difícil.
-  let POOL = [];
+  let POOL = [],
+    PIDX = new Map();
 
   // Escolhe a próxima pergunta. Quanto mais alto o nível, mais para o fim da lista POOL
   // (mais difícil) é a escolha; as perguntas boss são um pouco mais difíceis.
@@ -113,8 +114,12 @@
       win = () => POOL.slice(Math.max(0, c - w), c + w + 1);
     let cand = win().filter((q) => !g.seen.has(q.id));
     if (!cand.length) {
-      g.seen.clear();
-      cand = win();
+      // zona esgotada: usa as não vistas mais perto da dificuldade pedida (só repete quando já saíram todas)
+      const un = POOL.filter((q) => !g.seen.has(q.id));
+      if (!un.length) {
+        g.seen.clear();
+        cand = win();
+      } else cand = un.sort((a, b) => Math.abs(PIDX.get(a) - c) - Math.abs(PIDX.get(b) - c)).slice(0, 6);
     }
     const q = cand[rnd(0, cand.length - 1)];
     g.seen.add(q.id);
@@ -123,64 +128,50 @@
 
   // RELICS = relíquias: nome interno -> [emoji, nome, o que faz].
   const RELICS = {
-    trevo: ['🍀', 'Trevo', '25% de hipótese de um erro não custar vida.'],
-    escudo: ['🛡️', 'Escudo', 'O primeiro erro de cada andar não custa vida.'],
-    chama: ['🔥', 'Chama', 'A cada 3 certas seguidas, recuperas 1 vida.'],
+    trevo: ['🍀', 'Trevo', '25% de hipótese de um erro não contar (sem perder vida nem pergunta).'],
+    escudo: ['🛡️', 'Escudo', 'O primeiro erro de cada fase não custa vida nem parte o combo.'],
+    chama: ['🔥', 'Chama', 'A cada 3 certas seguidas, ganhas +1 pergunta nesta fase.'],
     mealheiro: ['🐷', 'Mealheiro', 'Ganhas +50% de moedas.'],
-    mochila: ['🎒', 'Mochila', '+1 uso de cada ajuda.'],
-    cofre: ['🏦', 'Cofre', 'Se desistires, ficas com +25% do prémio.'],
+    mochila: ['🎒', 'Mochila', '+1 uso por fase de cada ajuda que tiveres (50:50, Público, Amigo e Troca).'],
+    meio: ['✂️', '50:50', 'Dá-te a ajuda 50:50: uma vez por fase, tira metade das respostas erradas.'],
+    publico: ['👥', 'Público', 'Dá-te a ajuda Público: uma vez por fase, o público vota na resposta.'],
+    amigo: ['📞', 'Amigo', 'Dá-te a ajuda Amigo: uma vez por fase, um amigo dá a sua opinião.'],
+    troca: ['🔄', 'Troca', 'Dá-te a ajuda Troca: uma vez por fase, mudas a pergunta sem gastar uma das da fase.'],
+    lupa: ['🔎', 'Lupa', '+25% de pontos em cada resposta certa.'],
   };
-
-  // O jogador tem a relíquia k?
   const has = (k) => G.relics.includes(k);
-
-  // Prémio ao desistir: o da última pergunta ganha (+25% com a relíquia Cofre).
-  const walkAmt = (g) => {
-    const b = g.lvl ? PRIZE[g.lvl - 1] : 0;
-    return g.relics.includes('cofre') ? Math.min(1e6, Math.round(b * 1.25)) : b;
-  };
-
-  // Dá uma relíquia ao jogador (a Mochila dá logo +1 uso de cada ajuda).
   const giveRelic = (k) => {
     G.relics.push(k);
-    if (k === 'mochila') {
-      G.ch.f++;
-      G.ch.a++;
-      G.ch.t++;
-    }
+    try {
+      const f = new Set((store.get('qqsm_rel') || '').split(',').filter(Boolean));
+      f.add(k);
+      store.set('qqsm_rel', [...f].join(','));
+    } catch (e) {}
   };
-
-  // Sorteia uma relíquia que o jogador ainda não tem (ou null se já tem todas).
   const newRelic = () => {
     const l = Object.keys(RELICS).filter((k) => !G.relics.includes(k));
     return l.length ? l[rnd(0, l.length - 1)] : null;
   };
 
-  // HTML da barra com vidas, moedas e relíquias.
-  const HUD = (g) =>
-    `<div class="hud"><span aria-label="${g.lives} vidas">${'❤️'.repeat(g.lives)}${'🖤'.repeat(Math.max(0, g.max - g.lives))}</span><span>🪙 ${g.coins}</span>${g.relics.map((k) => `<span class="rl" data-tip="${RELICS[k][1]}: ${RELICS[k][2]}" tabindex="0" aria-label="${RELICS[k][1]}: ${RELICS[k][2]}">${RELICS[k][0]}</span>`).join('')}${g.flash ? `<small>${g.flash}</small>` : ''}</div>`;
+  /* ---------- regras (podes mexer aqui) ---------- */
+  const ROWS = 7; // fases por piso (a última leva ao próximo piso; no último piso é o Exame final)
+  const QPISO = 26; // perguntas por piso, mais ou menos (define quantos pisos tem o jogo)
+  const QS_PHASE = 6; // perguntas por fase
+  const SWAPS = 1; // trocas de pergunta por fase
+  const BASE = (t) => 100 + Math.round(t * 100); // pontos base de uma certa (t = 0..1 dificuldade)
+  const MULT = (s) => Math.min(1 + 0.25 * s, 4); // multiplicador do combo (s = certas seguidas)
+  const TARGET = (t, k) => Math.round((450 * (1 + 1.2 * t) * (k === 'E' ? 1.3 : k === 'b' ? 1.5 : 1)) / 50) * 50; // t = 0..1 progresso na corrida
+  const LEFT_BONUS = 50; // pontos por pergunta que sobra ao fechar a fase
+  const COST_RELIC = 45, COST_HELP = 40, COST_HEART = 50;
+  const NAMES = { e: ['A Rotunda', 'O Semáforo', 'A Autoestrada', 'O Cruzamento', 'A Ladeira', 'O Túnel'], E: ['O Radar', 'A Brigada', 'O Nevoeiro'], b: ['O Exame Final'], p: ['O Guardião', 'A Portagem', 'O Posto de Controlo'] };
+  const ICON = { e: '📝', E: '💀', '?': '❓', $: '🛒', r: '🏕️', t: '🧰', b: '🏁' };
+  const LEG = { e: 'Fase', E: 'Fase difícil', '?': 'Desconhecido', $: 'Loja', r: 'Descanso', t: 'Tesouro', b: 'Próximo andar' };
+  const last = () => G.piso === G.pisos - 1;
+  const ico = (k) => (k === 'b' && last() ? '🏁' : k === 'b' ? '🚪' : ICON[k]);
+  const lab = (k) => (k === 'b' && last() ? 'Exame final' : LEG[k]);
+  const fmt = (n) => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 
-  // SHOP_AT = a loja aparece depois de acertar nestas perguntas (os boss 5 e 10, e a 14,
-  // antes da pergunta final). COST = preço na loja.
-  const SHOP_AT = [5, 10, 14];
-  const COST_RELIC = 45,
-    COST_HEART = 50;
-
-  // HTML da loja (relíquias e vida).
-  const SH = () =>
-    `<p style="margin:0 0 .8rem">Loja (depois da pergunta ${G.lvl}). Tens 🪙 ${G.coins}.</p><div class="opts n${G.shop.length}">${G.shop
-      .map((k) => {
-        const h = k === 'heart',
-          c = h ? COST_HEART : COST_RELIC,
-          r = RELICS[k],
-          nb = G.coins < c || (h && G.lives >= G.max);
-        return `<button class="opt${nb ? ' nb' : ''}" data-buy="${k}" ${nb ? 'disabled' : ''}><span class="ltr">${h ? '❤️' : r[0]}</span><span><b>${h ? 'Uma vida' : r[1]}</b> (🪙 ${c})<br><small>${h ? 'Recupera 1 vida.' : r[2]}</small></span></button>`;
-      })
-      .join(
-        '',
-      )}</div><div class="confirm"><button class="b go" data-act="leave">Seguir para a pergunta</button></div>`;
-
-  /* ---------- som (desligado por defeito) ---------- */
+  /* ---------- som ---------- */
 
   // AC = contexto de áudio (só é criado quando o som é usado).
   let AC = null;
@@ -244,531 +235,424 @@
   };
 
   /* ---------- estado ---------- */
-
-  // G   = estado do jogo atual (null quando está no menu):
-  //         lvl       pergunta atual (0 a 14)      lives/max   vidas atuais / máximo
-  //         coins     moedas                       relics      relíquias que tem
-  //         ch        ajudas que restam { f: 50:50, a: público, t: amigo }
-  //         kind      'normal' | 'boss'          phase       fase (ver topo do ficheiro)
-  //         q         pergunta atual               sel         opção marcada
-  //         gone      opções eliminadas pelo 50:50 info        resultado do público/amigo
-  //         hist      perguntas já respondidas     rl          true = modo com vidas e relíquias
-  // CFG = escolhas do ecrã inicial (temas, incluir não confirmadas, modo).
+  // G = jogo atual (null no menu). Fase: f {k,name,target}, round (pontos da fase), left (perguntas),
+  // sw (trocas), streak (combo), base/mult. Mapa: map[andar][faixa] = tipo de nó, row/lane = onde estás.
   let G = null,
-    CFG = { sel: null, withU: false, mode: 'rl' }; // sel = Set dos índices dos testes marcados
+    CFG = { sel: null, withU: false };
+  const best = () => +store.get('qqsm_pts') || 0;
+  const soundBtn = () => `<button class="tb" data-act="sound" aria-pressed="${SOUND}">${SOUND ? 'Som ligado' : 'Som desligado'}</button>`;
 
-    
-  /* ---------- ecrã inicial ---------- */
+  // Manual: janela por cima do jogo (o manual.html dentro de uma moldura; não perde o sítio onde ficaste).
+  const MAN = document.createElement('div');
+  MAN.className = 'man';
+  MAN.hidden = true;
+  MAN.innerHTML = '<div class="mdlg"><div class="mh"><b>📖 Manual</b><button class="b" data-act="mclose">Fechar</button></div><iframe title="Manual" data-src="manual.html?embed=1"></iframe></div>';
+  document.body.appendChild(MAN);
+  const manual = (open) => {
+    const fr = MAN.querySelector('iframe');
+    if (open && !fr.src) fr.src = fr.dataset.src;
+    MAN.hidden = !open;
+  };
 
-  // Ecrã inicial: regras, escolha de temas e botão para começar.
-  function renderStart() {
-    if (!CFG.sel) CFG.sel = new Set(window.TESTS.map((t, i) => i));
-    const best = +store.get('qqsm_best') || 0;
-    app.innerHTML = `<div class="top"><a class="tb" href="index.html">Voltar ao início</a><span class="sp"></span>${soundBtn()}</div>
-<div class="start"><h1>Quem quer ser milionário?</h1>
-<p class="lead">15 perguntas do curso de instrutor de condução. Sobe a escada até ao milhão.</p>
-<ul class="rules"><li>A dificuldade sobe ao longo da escada.</li><li>Os patamares seguros são a pergunta 5 (1.000 €) e a pergunta 10 (32.000 €): se errares depois deles, ficas com esse valor.</li><li>Tens três ajudas, cada uma só uma vez: 50:50, o público e o amigo. O público e o amigo são simulados e também se enganam, sobretudo nas perguntas difíceis.</li><li>Podes desistir a qualquer momento e ficar com o prémio já ganho.</li></ul>
-<div class="box">${Temas.html(CFG.sel)}</div>
-<div class="box"><label><input type="checkbox" id="wu" ${CFG.withU ? 'checked' : ''}> <span>Incluir perguntas com resposta não confirmada <small id="uc"></small></span></label></div>
-<p><button class="bigbtn" id="go" data-act="start">Começar o jogo</button> <small id="avail" style="margin-left:.6rem;color:var(--mu)"></small></p>
-<p><button class="bigbtn alt" id="mpb" data-act="multi">Multijogador (até 4)</button> <small style="margin-left:.6rem;color:var(--mu)">Todos contra todos, com os temas escolhidos acima.</small></p>
-${best ? `<p class="best">O teu melhor prémio neste dispositivo: <b>${money(best)}</b></p>` : ''}</div>`;
+  /* ---------- menu e ecrãs iniciais ---------- */
+  const ensureSel = () => { if (!CFG.sel) CFG.sel = new Set(window.TESTS.map((t, i) => i)); };
+  const topBar = (back) => `<div class="top">${back ? '<button class="tb" data-act="menu0">← Menu</button>' : '<a class="tb" href="index.html">Voltar ao início</a>'}<span class="sp"></span>${soundBtn()}</div>`;
+  const themesBox = () => `<div class="box">${Temas.html(CFG.sel)}</div><div class="box"><label><input type="checkbox" id="wu" ${CFG.withU ? 'checked' : ''}> <span>Incluir perguntas com resposta não confirmada <small id="uc"></small></span></label></div>`;
+
+  // Menu principal: Solo, Multijogador, Coleções.
+  function renderMenu() {
+    G = null;
+    const b = best();
+    app.innerHTML = `${topBar(false)}<div class="start"><h1>Quem quer ser milionário?</h1>
+<p class="lead">Joga pelos pontos, escolhe o caminho no mapa e consulta o manual quando precisares.</p>
+<div class="mnu"><button class="mb blue" data-act="solo">Solo<small>Corrida por pontos</small></button><button class="mb green" data-act="multimenu">Multijogador<small>Até 4 jogadores</small></button><button class="mb orange" data-act="colecoes">Coleções<small>Relíquias, mapa e pontos</small></button><button class="mb purple" data-act="regras">Regras<small>Como o jogo funciona</small></button></div>
+${b ? `<p class="best">O teu melhor resultado neste dispositivo: <b>${fmt(b)} pontos</b></p>` : ''}</div>`;
+  }
+
+  // Solo: regras, temas e começar.
+  function renderSolo() {
+    G = null;
+    ensureSel();
+    app.innerHTML = `${topBar(true)}<div class="start"><h1>Solo</h1>
+<p class="lead">Aqui não se joga pelo dinheiro, joga-se pelos <b>pontos</b>. Cada fase tem um número limite de perguntas e uma meta de pontos.</p>
+<ul class="rules"><li>Cada resposta certa vale <b>pontos base × combo</b>: quantas mais seguidas, maior o multiplicador (até ×4). Errar parte o combo e custa 1 ❤️ (tens 3 vidas).</li><li>Cada fase tem ${QS_PHASE} perguntas e uma meta. Se não chegares à meta, a corrida acaba. Assim que chegares à meta a fase termina logo e ganhas pontos pelas perguntas que sobram.</li><li>Depois de cada fase escolhes o caminho no mapa: fases, fases difíceis, loja, descanso, tesouro ou o desconhecido. O último nó de cada andar leva ao andar seguinte; o número de andares depende das perguntas que escolheres (cerca de ${QPISO} por andar) e só no último aparece o Exame final.</li><li>Podes abrir o <b>Manual</b> a qualquer momento para consultar. As ajudas (50:50, Público, Amigo e Troca de pergunta) não as tens ao início: são relíquias que tens de encontrar no mapa, e cada uma pode ser usada uma vez por fase.</li></ul>
+${themesBox()}
+<p><button class="bigbtn" id="go" data-act="start">Começar a corrida</button> <small id="avail" style="margin-left:.6rem;color:var(--mu)"></small></p></div>`;
     Temas.bind(app.querySelector('.tm'), startInfo);
     startInfo();
   }
 
-  // Atualiza as contagens do ecrã inicial. O jogo precisa de pelo menos 15 perguntas.
+  // Multijogador: escolhe os temas e segue para as opções da sala (js/milionario-multi.js).
+  function renderMulti() {
+    G = null;
+    ensureSel();
+    app.innerHTML = `${topBar(true)}<div class="start"><h1>Multijogador</h1>
+<p class="lead">Escolhe os temas da sala. Depois podes criar uma sala ou entrar com um código.</p>
+${themesBox()}
+<p><button class="bigbtn" id="go" data-act="multigo">Continuar</button> <small id="avail" style="margin-left:.6rem;color:var(--mu)"></small></p></div>`;
+    Temas.bind(app.querySelector('.tm'), startInfo);
+    startInfo();
+  }
+
+  // Coleções: tudo o que existe no jogo (relíquias, nós do mapa, ajudas, pontos).
+  const colHtml = () => {
+    const found = new Set((store.get('qqsm_rel') || '').split(',').filter(Boolean));
+    const NODES = { e: `${QS_PHASE} perguntas e uma meta de pontos. Falhar a meta acaba a corrida.`, E: 'Meta mais alta. Ao vencer ganhas uma relíquia.', '?': 'Pode ser uma fase, uma loja, um descanso ou um tesouro.', $: 'Gasta moedas em relíquias e vidas.', r: 'Recuperas 1 ❤️ e na fase seguinte tens +1 pergunta e +1 troca.', t: 'Ganhas uma relíquia.', b: 'Última fase do andar. Ao vencer subes de andar e ganhas +1 ❤️. No último andar é o Exame final 🏁.' };
+    const card = (e, n, d, x) => `<div class="cd"><span class="e" aria-hidden="true">${e}</span><div><b>${n}</b><small>${d}</small>${x ? `<em>${x}</em>` : ''}</div></div>`;
+    return `<h2>Relíquias</h2><div class="cds">${Object.entries(RELICS).map(([k, r]) => card(r[0], r[1], r[2], G && G.relics.includes(k) ? '✓ Tens nesta corrida' : found.has(k) ? '✓ Já a encontraste' : '')).join('')}</div>
+<h2>Nós do mapa</h2><div class="cds">${Object.keys(NODES).map((k) => card(ICON[k], LEG[k], NODES[k])).join('')}</div>
+<h2>Pontos e vidas</h2><div class="cds">${card('🎯', 'Pontos e combo', 'Cada certa vale o valor base (100 a 200) × combo (×1 a ×4). Errar parte o combo.')}${card('❤️', 'Vidas', 'Começas com 3 (máximo 5). Cada erro custa uma; sem vidas a corrida acaba.')}${card('🪙', 'Moedas', 'Ganhas moedas ao acertar e gastas na loja.')}</div>`;
+  };
+  // Regras: explicação de como o jogo funciona.
+  function renderRegras() {
+    G = null;
+    const sec = (t, ...ps) => `<h2>${t}</h2>${ps.map((x) => `<p>${x}</p>`).join('')}`;
+    app.innerHTML = `${topBar(true)}<div class="start rg"><h1>Regras do jogo</h1>
+<p class="lead">Aqui não se joga pelo dinheiro: o objetivo é fazer o máximo de <b>pontos</b> possível, respondendo a perguntas do curso ao longo de uma corrida.</p>
+${sec('1. Fases e metas', `Uma corrida é feita de <b>fases</b>. Cada fase tem <b>${QS_PHASE} perguntas</b> e uma meta: o "Pontua pelo menos" do painel.`, `Assim que os pontos da fase chegam à meta, a fase termina logo e ganhas <b>+${LEFT_BONUS} pontos</b> por cada pergunta que sobrar. Se as perguntas acabarem sem chegares à meta, a corrida termina.`)}
+${sec('2. Pontos e combo', 'Cada resposta certa vale os <b>pontos base</b> (100 a 200, a subir com a dificuldade) multiplicados pelo <b>combo</b>: começa em ×1 e sobe 0,25 por cada certa seguida, até ×4. Errar parte o combo.', 'As perguntas ficam mais difíceis ao longo da corrida e as metas sobem com elas.')}
+${sec('3. Vidas', 'Tens <b>3 vidas</b> (máximo 5). Cada resposta errada custa uma vida e, sem vidas, a corrida acaba. Podes recuperar vidas nos descansos, ao subir de andar e na loja.')}
+${sec('4. Mapa e andares', 'Depois de cada fase escolhes o caminho no mapa. Só podes ir para o nó à frente ou para o vizinho:', '📝 <b>Fase</b> normal, 💀 <b>fase difícil</b> (meta mais alta, dá uma relíquia), ❓ <b>desconhecido</b> (pode ser qualquer coisa), 🛒 <b>loja</b>, 🏕️ <b>descanso</b> (+1 ❤️, +1 pergunta e +1 troca na fase seguinte) e 🧰 <b>tesouro</b> (uma relíquia).', `O último nó de cada andar (🚪) leva ao andar seguinte. O número de andares depende das perguntas que escolheres (cerca de ${QPISO} por andar) e só no último aparece o 🏁 <b>Exame final</b>. Podes ver o mapa a qualquer momento no "Ver minimapa".`)}
+${sec('5. Relíquias e ajudas', 'As relíquias dão vantagens durante toda a corrida. As ajudas (<b>50:50, Público, Amigo e Troca</b> de pergunta) também são relíquias: não as tens ao início, tens de as encontrar, e cada uma pode ser usada <b>uma vez por fase</b>.', 'Vê todas no botão "Coleções".')}
+${sec('6. Moedas e loja', 'Ganhas moedas ao acertar e ao concluir fases. Na loja gastas moedas em relíquias e vidas.')}
+${sec('7. Manual', 'Podes abrir o <b>Manual</b> a qualquer momento, no topo do ecrã, para consultar a matéria sem sair do jogo.')}
+${sec('8. Fim da corrida', 'A corrida acaba quando passas o Exame final, ficas sem vidas, falhas a meta de uma fase ou desistes. No fim vês os pontos totais, o teu melhor resultado e as perguntas para reveres.')}
+${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a pergunta é a mesma para todos ao mesmo tempo. Joga-se pelo prémio das perguntas, com bónus pela rapidez: ganha quem tiver mais dinheiro no fim.')}
+<p><button class="bigbtn" data-act="solo">Jogar Solo</button></p></div>`;
+  }
+
+  function renderCol() {
+    G = null;
+    app.innerHTML = `${topBar(true)}<div class="start"><h1>Coleções</h1>${colHtml()}</div>`;
+  }
+
   function startInfo() {
-    const sel = Temas.ler(app),
-      wu = $('#wu').checked;
+    const sel = Temas.ler(app), wu = $('#wu').checked;
     CFG.sel = sel;
     CFG.withU = wu;
     $('#uc').textContent = '(' + ELIG.filter((q) => q.u).length + ' no total)';
     const n = ELIG.filter((q) => Temas.tem(sel, q) && (wu || !q.u)).length;
-    $('#avail').textContent =
-      n >= 15
-        ? n + ' perguntas disponíveis'
-        : 'Escolhe mais temas: são precisas pelo menos 15 perguntas.';
-    $('#go').disabled = n < 15;
-    $('#mpb').disabled = n < 15;
+    $('#avail').textContent = n >= 30 ? n + ' perguntas disponíveis' + ($('#go').dataset.act === 'start' ? ' · ' + Math.max(1, Math.round(n / QPISO)) + (Math.round(n / QPISO) <= 1 ? ' andar' : ' andares') : '') : 'Escolhe mais temas: são precisas pelo menos 30 perguntas.';
+    $('#go').disabled = n < 30;
   }
 
-  // HTML do botão Som ligado/desligado.
-  const soundBtn = () =>
-    `<button class="tb" data-act="sound" aria-pressed="${SOUND}">${SOUND ? 'Som ligado' : 'Som desligado'}</button>`;
+  /* ---------- mapa ---------- */
+  // 3 faixas por andar; de cada nó só se vai para a mesma faixa ou a vizinha do andar seguinte.
+  function buildMap() {
+    const W = [['e', 42], ['?', 18], ['$', 12], ['r', 12], ['t', 8], ['E', 8]];
+    const roll = (r) => {
+      const ok = W.filter(([k]) => !(k === 'E' && r < 2) && !(k === 'r' && r < 2) && !(k === '$' && r < 1));
+      let x = rnd(1, ok.reduce((a, [, w]) => a + w, 0));
+      for (const [k, w] of ok) if ((x -= w) <= 0) return k;
+      return 'e';
+    };
+    return Array.from({ length: ROWS }, (_, r) => [0, 1, 2].map(() => (r === ROWS - 1 ? 'b' : r === 0 ? 'e' : r === ROWS - 2 ? (rnd(0, 1) ? 'r' : '$') : roll(r))));
+  }
+  const reach = (g, r, l) => g.phase === 'map' && !g.modal && r === g.row + 1 && (g.row < 0 || Math.abs(l - g.lane) <= 1);
+  function mapHtml(ro) {
+    const g = G, X = (l) => 16 + l * 34, Y = (r) => (ROWS - 1 - r) * 72 + 36;
+    let ln = '', nd = '';
+    for (let r = 0; r < ROWS; r++)
+      for (let l = 0; l < 3; l++) {
+        if (r < ROWS - 1)
+          for (let m = l - 1; m <= l + 1; m++)
+            if (m >= 0 && m < 3) ln += `<line x1="${X(l)}" y1="${Y(r)}" x2="${X(m)}" y2="${Y(r + 1)}" class="${g.path.has(r + ',' + l) && g.path.has(r + 1 + ',' + m) ? 'on' : ''}"/>`;
+        const k = g.map[r][l], can = !ro && reach(g, r, l), cur = g.row === r && g.lane === l, here = g.path.has(r + ',' + l);
+        nd += `<button class="nd${can ? ' can' : ''}${here ? ' vis' : ''}${cur ? ' cur' : ''}${k === 'b' ? ' bs' : ''}" style="left:${X(l)}%;top:${Y(r)}px" ${can ? `data-go="${r},${l}"` : 'disabled'} aria-label="${lab(k)}, fase ${r + 1}">${ico(k)}</button>`;
+      }
+    return `<div class="mapbox"><h2>${ro ? 'Minimapa' : 'Escolhe o caminho'} <small style="color:var(--mu);font-size:.6em">· andar ${g.piso + 1} de ${g.pisos}</small></h2><div class="mapcols"><div class="map" style="height:${ROWS * 72}px"><svg viewBox="0 0 100 ${ROWS * 72}" preserveAspectRatio="none">${ln}</svg>${nd}</div><div class="leg"><b>Legenda</b>${Object.keys(LEG).map((k) => `<span>${ico(k)} ${lab(k)}</span>`).join('')}</div></div></div>`;
+  }
+
+  // Entra num nó do mapa. O ❓ vira uma fase, loja, descanso ou tesouro à sorte.
+  function enter(r, l) {
+    const g = G;
+    g.row = r; g.lane = l; g.path.add(r + ',' + l); g.flash = '';
+    let k = g.map[r][l];
+    if (k === '?') k = ['e', 'e', 'e', 'e', '$', '$', 'r', 'r', 't', 't'][rnd(0, 9)];
+    if (k === 'e' || k === 'E' || k === 'b') return startFase(k);
+    if (k === '$') {
+      g.shop = shuffle(Object.keys(RELICS).filter((x) => !g.relics.includes(x))).slice(0, 3).concat('heart');
+      g.phase = 'shop';
+    } else if (k === 'r') {
+      g.bonusQ++; g.bonusSw++; g.lives = Math.min(g.max, g.lives + 1);
+      g.title = '🏕️ Descanso'; g.msg = 'Recuperas 1 ❤️ e, na próxima fase, tens +1 pergunta e +1 troca.'; g.phase = 'note';
+    } else {
+      const rl = newRelic();
+      if (rl) giveRelic(rl);
+      else g.coins += 60;
+      g.title = '🧰 Tesouro'; g.msg = rl ? `Encontraste a relíquia ${RELICS[rl][0]} <b>${RELICS[rl][1]}</b>: ${RELICS[rl][2]}` : 'Já tens todas as relíquias: ganhas 60 🪙.'; g.phase = 'note';
+    }
+    view();
+  }
 
   /* ---------- jogo ---------- */
-
-  // Começa um jogo: filtra pelos temas, ordena por dificuldade e cria o estado G.
   function startGame() {
     if (G && G.timer) clearTimeout(G.timer);
-    POOL = shuffle(ELIG.filter((q) => Temas.tem(CFG.sel, q) && (CFG.withU || !q.u))).sort(
-      (a, b) => score(a) - score(b),
-    );
-    const rl = CFG.mode !== 'classic';
-    G = {
-      rl,
-      lvl: 0,
-      lives: rl ? 3 : 1,
-      max: 5,
-      coins: 0,
-      relics: [],
-      ch: { f: 1, a: 1, t: 1 },
-      streak: 0,
-      seen: new Set(),
-      kind: 'normal',
-      shield: 0,
-      retry: 0,
-      notes: [],
-      flash: '',
-      shop: null,
-      q: null,
-      phase: 'ask',
-      sel: null,
-      gone: new Set(),
-      info: null,
-      hist: [],
-      modal: null,
-      ladder: false,
-      ok: false,
-      end: null,
-    };
-    enterRung();
+    POOL = shuffle(ELIG.filter((q) => Temas.tem(CFG.sel, q) && (CFG.withU || !q.u))).sort((a, b) => score(a) - score(b));
+    PIDX = new Map(POOL.map((q, i) => [q, i]));
+    G = { piso: 0, pisos: Math.max(1, Math.round(POOL.length / QPISO)), map: buildMap(), path: new Set(), row: -1, lane: 0, lvl: 0, lives: 3, max: 5, coins: 0, total: 0, relics: [], ch: { f: 0, a: 0, t: 0 }, seen: new Set(), streak: 0, shield: 0, bonusQ: 0, bonusSw: 0, f: null, round: 0, left: 0, sw: 0, base: 100, pts: 0, kind: 'normal', q: null, sel: null, gone: new Set(), info: null, hist: [], notes: [], flash: '', phase: 'map', modal: null, end: null };
+    view();
     scrollTo(0, 0);
   }
-
-  // Entra numa pergunta. A cada 5.ª pergunta (5, 10, 15) é boss. Depois das perguntas
-  // 5, 10 e 14 (modo rl) aparece primeiro a loja; nas restantes vai direto para a pergunta.
-  function enterRung() {
-    const g = G;
-    g.info = null;
-    g.retry = 0;
-    if (g.rl && SHOP_AT.includes(g.lvl)) openShop();
-    else startQ(kindOf());
+  function startFase(k) {
+    const g = G, nm = NAMES[k === 'b' && !last() ? 'p' : k], name = nm[rnd(0, nm.length - 1)];
+    g.f = { k, name, target: TARGET(prog(), k) };
+    g.round = 0; g.streak = 0; g.shield = 0;
+    g.left = QS_PHASE + g.bonusQ; const use = (k) => (has(k) ? 1 + (has('mochila') ? 1 : 0) : 0);
+    g.ch = { f: use('meio'), a: use('publico'), t: use('amigo') };
+    g.sw = use('troca') * SWAPS + g.bonusSw; g.bonusQ = g.bonusSw = 0;
+    g.kind = k === 'e' ? 'normal' : 'boss';
+    nextQ();
   }
-
-  // Tipo da pergunta atual: boss em cada 5.ª pergunta, normal nas outras.
-  const kindOf = () => (G.lvl % 5 === 4 ? 'boss' : 'normal');
-
-  // Abre a loja: duas relíquias que o jogador ainda não tem e uma vida.
-  function openShop() {
+  const prog = () => Math.min(1, (G.piso * ROWS + G.row) / Math.max(1, G.pisos * ROWS - 1));
+  const diff = () => Math.max(0, Math.min(1, (G.piso * ROWS + G.row + (QS_PHASE - G.left) / QS_PHASE) / Math.max(1, G.pisos * ROWS - 1)));
+  function nextQ() {
     const g = G;
-    g.shop = shuffle(Object.keys(RELICS).filter((k) => !g.relics.includes(k)))
-      .slice(0, 2)
-      .concat('heart');
-    g.phase = 'shop';
-    renderPlay();
-  }
-
-  // Prepara e mostra uma pergunta do tipo kind (normal ou boss).
-  function startQ(kind) {
-    const g = G;
-    g.kind = kind;
+    g.lvl = Math.round(diff() * 14);
+    g.base = BASE(diff());
     g.q = pickQ();
-    g.sel = null;
-    g.gone = new Set();
-    g.info = null;
-    g.phase = 'ask';
-    renderPlay();
+    g.sel = null; g.gone = new Set(); g.info = null; g.notes = []; g.phase = 'ask';
+    view();
   }
-
-  // Compra na loja: uma vida (COST_HEART moedas) ou uma relíquia (COST_RELIC moedas).
-  function buy(k) {
-    const g = G,
-      c = k === 'heart' ? COST_HEART : COST_RELIC;
-    if (g.phase !== 'shop' || g.coins < c) return;
-    if (k === 'heart') {
-      if (g.lives >= g.max) return;
-      g.lives++;
-    } else {
-      giveRelic(k);
-      g.shop = g.shop.filter((x) => x !== k);
-    }
-    g.coins -= c;
-    SFX.ll();
-    renderPlay();
+  function swap() {
+    const g = G;
+    if (g.phase !== 'ask' || g.sw < 1) return;
+    g.sw--;
+    nextQ(); // a troca não gasta pergunta
   }
-
-  // Desenha o ecrã de jogo conforme a fase: loja ou pergunta (com ajudas, escada de
-  // prémios, confirmação, resposta e explicação).
-  function renderPlay() {
-    const g = G,
-      q = g.q,
-      ph = g.phase,
-      live = ph === 'ask' || ph === 'confirm';
-    const ladder = PRIZE.map(
-      (p, i) =>
-        `<li class="${i === g.lvl ? 'cur' : ''}${i === g.lvl && ph === 'reveal' && g.ok ? ' win' : ''}${i < g.lvl ? ' done' : ''}${SAFE.includes(i) ? ' safe' : ''}"><span class="n">${i + 1}</span><span class="p">${money(p)}</span></li>`,
-    )
-      .reverse()
-      .join('');
-    // O 50:50 só funciona com 3 ou mais opções visíveis (com 2 mostraria logo a certa).
-    const sem5050 = (k) => k === 'f' && q && q.o.length - g.gone.size <= 2;
-    const ll = (k, ic, lb) =>
-      `<button class="ll${!g.ch[k] ? ' used' : ''}" data-ll="${k}" ${!g.ch[k] || !live || sem5050(k) ? 'disabled' : ''}${sem5050(k) && g.ch[k] ? ' title="Só com 3 ou mais opções"' : ''} aria-label="${lb}${!g.ch[k] ? ' (já usada)' : ''}"><span class="ic" aria-hidden="true">${ic}</span><span>${lb}${g.ch[k] > 1 ? ' ×' + g.ch[k] : ''}</span></button>`;
-    const L = g.sel != null ? LT[g.sel] : '';
-    const right = q ? q.o.findIndex((o) => o.ok) : 0;
-    let info = '';
-    if (g.info && g.info.type === 'aud')
-      info = `<div class="info" role="status"><b>O público votou</b>${q.o.map((o, i) => (g.gone.has(i) ? '' : `<div class="bar"><span>${LT[i]}</span><i style="width:${g.info.p[i]}%"></i><span>${g.info.p[i]}%</span></div>`)).join('')}</div>`;
-    if (g.info && g.info.type === 'tel')
-      info = `<div class="info" role="status"><b>O teu amigo diz</b><p>“${esc(g.info.text)}”</p></div>`;
-    let below = '';
-    if (ph === 'confirm')
-      below = `<div class="confirm"><span>Resposta final: <b>${L}</b>?</span><button class="b go" data-act="final" data-focus>Sim, é a final</button><button class="b" data-act="cancel">Não</button></div>`;
-    if (ph === 'reveal') {
-      const last = g.lvl === 14;
-      below =
-        `<div class="reveal ${g.ok ? 'good' : 'bad'}" role="status"><b>${g.ok ? (last ? 'Resposta certa! Ganhaste o prémio máximo.' : 'Resposta certa!') : 'Resposta errada.'}</b>` +
-        `<p>${g.ok ? '' : `A resposta certa era a ${LT[right]}: `}${g.ok ? `${LT[right]}: ` : ''}${esc(cap(q.o[right].t))}</p>${q.e}${g.notes.map((n) => `<small>${n}</small>`).join('')}${q.u ? '<small>Esta resposta não está confirmada oficialmente.</small>' : ''}` +
-        `<button class="b go" data-act="next" data-focus>${g.ok ? (last ? 'Ver o resultado' : `Pergunta seguinte (${money(PRIZE[g.lvl + 1])})`) : g.lives > 0 ? 'Tentar outra pergunta' : 'Ver o resultado'}</button></div>`;
-    }
-    const modal =
-      g.modal === 'walk'
-        ? `<div class="ov"><div class="dlg" role="dialog" aria-modal="true"><p>Se desistires, ficas com <b>${money(walkAmt(g))}</b>. Tens a certeza?</p><div class="row"><button class="b go" data-act="walkyes" data-focus>Sim, desistir</button><button class="b" data-act="walkno">Continuar a jogar</button></div></div></div>`
-        : '';
-    app.innerHTML = `<div class="top"><a class="tb" href="index.html">Início</a><span class="sp"></span>${soundBtn()}<button class="tb lad" data-act="ladder">Escada</button>${live || ph === 'shop' ? '<button class="tb" data-act="walk">Desistir</button>' : ''}</div>
-<div class="game"><section class="stage"><div class="meta"><span>Pergunta ${g.lvl + 1} de 15</span><b>Vale ${money(PRIZE[g.lvl])}</b></div>${g.rl ? HUD(g) : ''}
-<div class="lifes">${ll('f', '50:50', '50:50')}${ll('a', '👥', 'Público')}${ll('t', '📞', 'Amigo')}</div>${info}
-<div class="qarea">${
-      ph === 'shop'
-        ? SH()
-        : `<div class="qbox"><span>${esc(q.q)}</span></div>
-<div class="opts n${q.o.length}${ph === 'lock' ? ' lock' : ''}">${q.o
-              .map((o, i) => {
-                let c = 'opt';
-                if (g.gone.has(i)) c += ' gone';
-                if ((ph === 'confirm' || ph === 'lock') && g.sel === i) c += ' sel';
-                if (ph === 'reveal') {
-                  if (o.ok) c += ' ok';
-                  else if (g.sel === i) c += ' ko';
-                }
-                const dis = !live || g.gone.has(i);
-                return `<button class="${c}" data-i="${i}" ${dis ? 'disabled' : ''} ${g.gone.has(i) ? 'aria-hidden="true" tabindex="-1"' : ''} aria-label="${LT[i]}: ${esc(cap(o.t))}"><span class="ltr" aria-hidden="true">${LT[i]}:</span><span>${esc(cap(o.t))}</span></button>`;
-              })
-              .join('')}</div>${below}`
-    }</div></section>
-<aside class="ladder${g.ladder ? ' open' : ''}" aria-label="Escada de prémios"><ol>${ladder}</ol><button class="b x" data-act="ladder">Fechar</button></aside></div>${modal}`;
-    const f = document.querySelector('[data-focus]');
-    if (f) f.focus({ preventScroll: true });
-    if (ph === 'reveal') {
-      const r = $('.reveal');
-      if (r) r.scrollIntoView({ block: 'nearest', behavior: reduced ? 'auto' : 'smooth' });
-    }
-  }
-
-  // O jogador marcou a opção i; pede confirmação.
   function pick(i) {
     const g = G;
-    if (!g || (g.phase !== 'ask' && g.phase !== 'confirm') || g.gone.has(i) || i >= g.q.o.length)
-      return;
-    g.sel = i;
-    g.phase = 'confirm';
-    SFX.sel();
-    renderPlay();
+    if (!g || (g.phase !== 'ask' && g.phase !== 'confirm') || g.gone.has(i) || i >= g.q.o.length) return;
+    g.sel = i; g.phase = 'confirm'; SFX.sel(); view();
   }
-
-  // Resposta final confirmada: pequena pausa de suspense e depois revela.
   function lockIn() {
     const g = G;
     if (g.phase !== 'confirm' || g.sel == null) return;
-    g.phase = 'lock';
-    SFX.lock();
-    renderPlay();
-    g.timer = setTimeout(reveal, reduced ? 600 : 2200);
+    g.phase = 'lock'; SFX.lock(); view();
+    g.timer = setTimeout(reveal, reduced ? 600 : 1800);
   }
-
-  // Revela se acertou. Se acertou: ganha moedas (e a Chama pode devolver vida).
-  // Se errou: perde uma vida, a não ser que o Escudo ou o Trevo o protejam.
   function reveal() {
-    const g = G,
-      q = g.q;
-    g.ok = q.o[g.sel].ok;
-    g.phase = 'reveal';
-    g.notes = [];
-    g.flash = '';
-    g.hist.push({ q, chosen: g.sel, ok: g.ok });
+    const g = G, q = g.q;
+    g.ok = q.o[g.sel].ok; g.phase = 'reveal'; g.notes = []; g.pts = 0;
+    g.hist.push({ q, chosen: g.sel, ok: g.ok, row: g.row });
+    let free = false;
     if (g.ok) {
-      g.streak++;
-      if (g.rl) {
-        let c = { normal: 15, boss: 50 }[g.kind] + Math.min(g.streak, 5) * 2;
-        if (has('mealheiro')) c = Math.round(c * 1.5);
-        g.coins += c;
-        g.notes.push('+' + c + ' 🪙');
-        if (has('chama') && g.streak % 3 === 0 && g.lives < g.max) {
-          g.lives++;
-          g.notes.push('A Chama devolveu-te 1 ❤️.');
-        }
-      }
+      g.pts = Math.round(g.base * MULT(g.streak) * (has('lupa') ? 1.25 : 1));
+      g.round += g.pts; g.total += g.pts; g.streak++;
+      let c = { e: 12, E: 25, b: 40 }[g.f.k] + Math.min(g.streak, 5);
+      if (has('mealheiro')) c = Math.round(c * 1.5);
+      g.coins += c; g.notes.push('+' + c + ' 🪙');
+      if (has('chama') && g.streak % 3 === 0) { g.left++; g.notes.push('A Chama deu-te +1 pergunta.'); }
+    } else if (has('escudo') && !g.shield) {
+      g.shield = 1; g.notes.push('O Escudo protegeu-te: sem perda de vida nem combo.');
+    } else if (has('trevo') && Math.random() < 0.25) {
+      free = true; g.notes.push('O Trevo protegeu-te: o erro não conta.');
     } else {
-      g.streak = 0;
-      if (has('escudo') && !g.shield) {
-        g.shield = 1;
-        g.notes.push('O Escudo protegeu-te: não perdeste vida.');
-      } else if (has('trevo') && Math.random() < 0.25)
-        g.notes.push('O Trevo protegeu-te: não perdeste vida.');
-      else {
-        g.lives--;
-        g.notes.push(
-          g.lives > 0 ? 'Perdeste 1 ❤️. Vais tentar outra pergunta.' : 'Ficaste sem vidas.',
-        );
-      }
+      g.streak = 0; g.lives--;
+      g.notes.push(g.lives > 0 ? 'Perdeste 1 ❤️.' : 'Ficaste sem vidas.');
     }
+    if (!free) g.left--;
+    if (g.lives > 0 && g.round >= g.f.target) g.notes.push('Meta atingida! A fase fica concluída' + (g.left ? ` e ganhas +${fmt(g.left * LEFT_BONUS)} pontos pelas perguntas que sobram.` : '.'));
     (g.ok ? SFX.ok : SFX.ko)();
-    renderPlay();
+    view();
   }
-
-  // Botão depois da resposta: se errou, tenta outra pergunta (ou termina sem vidas);
-  // se acertou, sobe um nível (com possível relíquia e vida extra no boss) ou ganha o jogo.
   function next() {
-    const g = G;
-    if (!g.ok) {
-      if (g.lives <= 0) return endGame('lose');
-      g.retry = 1;
-      return startQ(g.kind);
-    }
-    if (g.lvl === 14) return endGame('win');
-    let f = '';
-    if (g.rl && g.kind === 'boss') {
-      const k = newRelic();
-      if (k) {
-        giveRelic(k);
-        f = 'Nova relíquia: ' + RELICS[k][0] + ' ' + RELICS[k][1] + '. ';
-      }
-    }
-    if (g.rl && g.kind === 'boss' && g.lives < g.max) {
-      g.lives++;
-      f += 'Fim do andar: +1 ❤️.';
-    }
-    g.flash = f;
-    g.lvl++;
-    if (g.lvl % 5 === 0) g.shield = 0;
-    g.ladder = false;
-    enterRung();
-    scrollTo(0, 0);
+    if (G.lives <= 0) return endGame('dead');
+    if (G.round >= G.f.target) return endFase(true);
+    if (G.left > 0) nextQ();
+    else endFase(false);
   }
+  // Fecha a fase (no fim das perguntas, ou antes se já chegaste à meta). Falhar a meta acaba a corrida.
+  function endFase(early) {
+    const g = G, f = g.f, bonus = early ? g.left * LEFT_BONUS : 0;
+    g.total += bonus;
+    if (g.round < f.target) return endGame('lose');
+    g.coins += 20;
+    let m = `Fase concluída: <b>${fmt(g.round)}</b> de ${fmt(f.target)} pontos.${bonus ? ` Perguntas por usar: +${fmt(bonus)} pontos.` : ''} +20 🪙.`;
+    if (f.k === 'b') {
+      if (last()) { g.total += 500; return endGame('win'); }
+      g.piso++; g.map = buildMap(); g.path = new Set(); g.row = -1; g.lane = 0; g.lives = Math.min(g.max, g.lives + 1);
+      m += ` Subiste para o andar ${g.piso + 1} de ${g.pisos}. +1 ❤️.`;
+      g.title = '🚪 Andar ' + g.piso + ' concluído'; g.msg = m; g.f = null; g.phase = 'note'; g.q = null;
+      view(); scrollTo(0, 0); return;
+    }
+    if (f.k === 'E') {
+      const rl = newRelic();
+      if (rl) { giveRelic(rl); m += ` Relíquia: ${RELICS[rl][0]} <b>${RELICS[rl][1]}</b>.`; }
+    }
+    g.title = '✅ ' + f.name; g.msg = m; g.f = null; g.phase = 'note'; g.q = null;
+    view(); scrollTo(0, 0);
+  }
+  function buy(k) {
+    const g = G, c = k === 'help' ? COST_HELP : k === 'heart' ? COST_HEART : COST_RELIC;
+    if (g.phase !== 'shop' || g.coins < c || (k === 'heart' && g.lives >= g.max)) return;
+    if (k === 'heart') g.lives++;
+    else if (k === 'help') g.ch['fat'[rnd(0, 2)]]++;
+    else { giveRelic(k); g.shop = g.shop.filter((x) => x !== k); }
+    g.coins -= c; SFX.ll(); view();
+  }
+  const SH = () => `<div class="note"><h2>🛒 Loja</h2><p>Tens 🪙 ${G.coins}.</p><div class="opts n4">${G.shop.map((k) => {
+    const h = k === 'help', hr = k === 'heart', c = h ? COST_HELP : hr ? COST_HEART : COST_RELIC, r = RELICS[k] || [], nb = G.coins < c || (hr && G.lives >= G.max);
+    return `<button class="opt${nb ? ' nb' : ''}" data-buy="${k}" ${nb ? 'disabled' : ''}><span class="ltr">${h ? '🎁' : hr ? '❤️' : r[0]}</span><span><b>${h ? 'Uma ajuda extra' : hr ? 'Uma vida' : r[1]}</b> (🪙 ${c})<br><small>${h ? '+1 uso de uma ajuda à sorte (50:50, público ou amigo).' : hr ? 'Recupera 1 vida.' : r[2]}</small></span></button>`;
+  }).join('')}</div><div class="confirm"><button class="b go" data-act="tomap">Escolher caminho</button></div></div>`;
 
-  // Usa uma ajuda: 'f' = 50:50 (tira metade das erradas), 'a' = público (percentagens),
-  // 't' = amigo (palpite). O público e o amigo acertam menos nas perguntas difíceis.
-  // O 50:50 não é usado (nem gasto) quando só restam 2 opções.
   function lifeline(k) {
     const g = G;
     if (!g || !g.ch[k] || (g.phase !== 'ask' && g.phase !== 'confirm')) return;
-    const q = g.q,
-      tier = g.lvl < 5 ? 0 : g.lvl < 10 ? 1 : 2,
-      R = q.o.map((_, i) => i).filter((i) => !g.gone.has(i)),
-      c = R.find((i) => q.o[i].ok);
+    const q = g.q, tier = diff() < 0.34 ? 0 : diff() < 0.67 ? 1 : 2, R = q.o.map((_, i) => i).filter((i) => !g.gone.has(i)), c = R.find((i) => q.o[i].ok);
     if (k === 'f' && R.length <= 2) return;
-    g.ch[k]--;
-    SFX.ll();
+    g.ch[k]--; SFX.ll();
     if (k === 'f') {
-      const wrong = shuffle(R.filter((i) => i !== c));
-      wrong.slice(0, Math.floor(q.o.length / 2)).forEach((i) => g.gone.add(i));
+      shuffle(R.filter((i) => i !== c)).slice(0, Math.floor(q.o.length / 2)).forEach((i) => g.gone.add(i));
       g.info = null;
-      if (g.sel != null && g.gone.has(g.sel)) {
-        g.sel = null;
-        g.phase = 'ask';
-      }
+      if (g.sel != null && g.gone.has(g.sel)) { g.sel = null; g.phase = 'ask'; }
     }
     if (k === 'a') {
-      let pc = [rnd(62, 88), rnd(42, 66), rnd(28, 52)][tier];
-      pc = Math.min(94, pc + (q.o.length - R.length) * 8);
-      let top = c;
-      if (tier === 2 && Math.random() < 0.12) {
-        const w = R.filter((i) => i !== c);
-        top = w[rnd(0, w.length - 1)];
-      }
-      const oth = R.filter((i) => i !== top),
-        w = oth.map(() => Math.random() + 0.2),
-        sw = w.reduce((a, b) => a + b, 0),
-        p = {};
+      let pc = Math.min(94, [rnd(62, 88), rnd(42, 66), rnd(28, 52)][tier] + (q.o.length - R.length) * 8), top = c;
+      if (tier === 2 && Math.random() < 0.12) { const w = R.filter((i) => i !== c); top = w[rnd(0, w.length - 1)]; }
+      const oth = R.filter((i) => i !== top), w = oth.map(() => Math.random() + 0.2), sw = w.reduce((a, b) => a + b, 0), p = {};
       oth.forEach((i, j) => (p[i] = Math.round(((100 - pc) * w[j]) / sw)));
       p[top] = pc;
       p[top] += 100 - R.reduce((a, i) => a + p[i], 0);
       g.info = { type: 'aud', p };
     }
     if (k === 't') {
-      const acc = [0.92, 0.75, 0.55][tier],
-        wr = R.filter((i) => i !== c),
-        guess = Math.random() < acc ? c : wr[rnd(0, wr.length - 1)],
-        r = Math.random(),
-        sure = [0.7, 0.4, 0.2][tier],
-        mid = [0.25, 0.35, 0.35][tier],
-        l = LT[guess];
-      const text =
-        r < sure
-          ? `Tenho a certeza, é a ${l}.`
-          : r < sure + mid
-            ? `Acho que é a ${l}, mas não ponho as mãos no fogo.`
-            : `Hmm, não sei bem. Se tivesse de escolher, ia na ${l}.`;
-      g.info = { type: 'tel', text };
+      const wr = R.filter((i) => i !== c), guess = Math.random() < [0.92, 0.75, 0.55][tier] ? c : wr[rnd(0, wr.length - 1)], r = Math.random(), sure = [0.7, 0.4, 0.2][tier], mid = [0.25, 0.35, 0.35][tier], l = LT[guess];
+      g.info = { type: 'tel', text: r < sure ? `Tenho a certeza, é a ${l}.` : r < sure + mid ? `Acho que é a ${l}, mas não ponho as mãos no fogo.` : `Hmm, não sei bem. Se tivesse de escolher, ia na ${l}.` };
     }
-    renderPlay();
+    view();
+  }
+
+  /* ---------- ecrã de jogo ---------- */
+  // Boneco do meio (instrutor com boné e volante); a cara muda: neutra, feliz (certa) ou triste (errada).
+  const mouth = { n: 'M50 66 h20', h: 'M48 63 q12 14 24 0', s: 'M48 70 q12 -12 24 0' };
+  const MID = (g, ph) => {
+    const m = ph === 'reveal' ? (g.ok ? 'h' : 's') : 'n', pc = Math.min(100, (g.round / g.f.target) * 100);
+    return `<div class="mid ${m}"><svg viewBox="0 0 120 120" role="img" aria-label="Instrutor"><rect x="30" y="80" width="60" height="40" rx="14" fill="#2f6fed"/><path d="M52 80 l8 14 l8 -14z" fill="#fff"/><circle cx="60" cy="50" r="26" fill="#f2c9a0"/><path d="M33 44 q27 -34 54 0 z" fill="#d9531e"/><rect x="30" y="42" width="60" height="6" rx="3" fill="#a83a10"/><circle cx="51" cy="52" r="3" fill="#222"/><circle cx="69" cy="52" r="3" fill="#222"/><path d="${mouth[m]}" fill="none" stroke="#222" stroke-width="3" stroke-linecap="round"/><circle cx="60" cy="108" r="13" fill="none" stroke="#1b1b1b" stroke-width="5"/></svg><div class="pod"><small>Pontos da fase</small><b><i class="chip"></i>${fmt(g.round)}</b><div class="pb"><i style="width:${pc}%"></i></div>${ph === 'reveal' && g.ok ? `<span class="pop">+${fmt(g.pts)}</span>` : ''}</div></div>`;
+  };
+
+  const mx = (n) => String(+n.toFixed(2));
+  function view() {
+    const g = G, ph = g.phase, f = g.f, q = g.q, live = ph === 'ask' || ph === 'confirm', inQ = !!q && ['ask', 'confirm', 'lock', 'reveal'].includes(ph);
+    const hearts = '❤️'.repeat(Math.max(0, g.lives)) + '🖤'.repeat(Math.max(0, g.max - g.lives));
+    const panel = `<aside class="bl"><div class="blh">${f ? esc(f.name) : 'A corrida'}</div>${f ? `<div class="blt">Pontua pelo menos<br><b><i class="chip"></i>${fmt(f.target)}</b></div>` : ''}<div class="blv" aria-label="${g.lives} vidas">${hearts}</div><div class="blm">🪙 ${g.coins}</div><div class="bls"><div><small>Fase</small><b>${Math.max(1, g.row + 1)}/${ROWS}</b></div><div><small>Andar</small><b>${g.piso + 1}/${g.pisos}</b></div></div><div class="rls">${g.relics.map((k) => `<span class="rl" data-tip="${RELICS[k][1]}: ${RELICS[k][2]}" tabindex="0" aria-label="${RELICS[k][1]}: ${RELICS[k][2]}">${RELICS[k][0]}</span>`).join('') || '<small>Sem relíquias</small>'}</div>${ph === 'map' ? '' : '<button class="b go" data-act="minimap">🗺️ Ver minimapa</button>'}<button class="b go" data-act="colmodal">📚 Coleções</button></aside>`;
+    let main = '';
+    if (ph === 'map') main = mapHtml();
+    else if (ph === 'shop') main = SH();
+    else if (ph === 'note') main = `<div class="note"><h2>${g.title}</h2><p>${g.msg}</p><div class="confirm"><button class="b go" data-act="tomap" data-focus>Escolher caminho</button></div></div>`;
+    else if (inQ) {
+      const ll = (k, ic, lb) => `<button class="ll${!g.ch[k] ? ' used' : ''}" data-ll="${k}" ${!g.ch[k] || !live || (k === 'f' && q.o.length - g.gone.size <= 2) ? 'disabled' : ''}><span class="ic" aria-hidden="true">${ic}</span><span>${lb}${g.ch[k] > 1 ? ' ×' + g.ch[k] : ''}</span></button>`;
+      const right = q.o.findIndex((o) => o.ok), L = g.sel != null ? LT[g.sel] : '';
+      let info = '';
+      if (g.info && g.info.type === 'aud') info = `<div class="info" role="status"><b>O público votou</b>${q.o.map((o, i) => (g.gone.has(i) ? '' : `<div class="bar"><span>${LT[i]}</span><i style="width:${g.info.p[i]}%"></i><span>${g.info.p[i]}%</span></div>`)).join('')}</div>`;
+      if (g.info && g.info.type === 'tel') info = `<div class="info" role="status"><b>O teu amigo diz</b><p>“${esc(g.info.text)}”</p></div>`;
+      let below = '';
+      if (ph === 'confirm') below = `<div class="confirm"><span>Resposta final: <b>${L}</b>?</span><button class="b go" data-act="final" data-focus>Sim, é a final</button><button class="b" data-act="cancel">Não</button></div>`;
+      if (ph === 'reveal') {
+        below = `<div class="reveal ${g.ok ? 'good' : 'bad'}" role="status"><b>${g.ok ? `Certa! +${fmt(g.pts)} pontos (${g.base} × ${mx(g.pts / g.base)})` : 'Resposta errada. Sem pontos e o combo volta a ×1.'}</b><p>${g.ok ? '' : `A resposta certa era a ${LT[right]}: `}${g.ok ? `${LT[right]}: ` : ''}${esc(cap(q.o[right].t))}</p>${q.e}${g.notes.map((n) => `<small>${n}</small>`).join('')}${q.u ? '<small>Esta resposta não está confirmada oficialmente.</small>' : ''}<button class="b go" data-act="next" data-focus>${g.lives <= 0 ? 'Ver o resultado' : g.round >= g.f.target ? 'Concluir a fase' : g.left > 0 ? 'Pergunta seguinte' : 'Fechar a fase'}</button></div>`;
+      }
+      const lifeBar = [has('meio') && ll('f', '50:50', '50:50'), has('publico') && ll('a', '👥', 'Público'), has('amigo') && ll('t', '📞', 'Amigo'), (has('troca') || g.sw > 0) && `<button class="ll" data-act="swap" ${ph === 'ask' && g.sw > 0 ? '' : 'disabled'}><span class="ic" aria-hidden="true">🔄</span><span>Trocar${g.sw > 1 ? ' ×' + g.sw : ''}</span></button>`].filter(Boolean);
+      main = `<div class="meta"><span>${f.name}: ${g.left} ${g.left === 1 ? 'pergunta' : 'perguntas'} por responder · Total ${fmt(g.total)} pontos</span><b>Vale ${g.base} × ${mx(MULT(g.streak))}</b></div>
+${lifeBar.length ? `<div class="lifes">${lifeBar.join('')}</div>` : ''}${info}${MID(g, ph)}
+<div class="qarea"><div class="qbox"><span>${esc(q.q)}</span></div><div class="opts n${q.o.length}${ph === 'lock' ? ' lock' : ''}">${q.o.map((o, i) => {
+        let c = 'opt';
+        if (g.gone.has(i)) c += ' gone';
+        if ((ph === 'confirm' || ph === 'lock') && g.sel === i) c += ' sel';
+        if (ph === 'reveal') { if (o.ok) c += ' ok'; else if (g.sel === i) c += ' ko'; }
+        return `<button class="${c}" data-i="${i}" ${!live || g.gone.has(i) ? 'disabled' : ''} ${g.gone.has(i) ? 'aria-hidden="true" tabindex="-1"' : ''} aria-label="${LT[i]}: ${esc(cap(o.t))}"><span class="ltr" aria-hidden="true">${LT[i]}:</span><span>${esc(cap(o.t))}</span></button>`;
+      }).join('')}</div>${below}</div>`;
+    }
+    const modal = g.modal === 'col' ? `<div class="ov"><div class="dlg wide colw" role="dialog" aria-modal="true"><h2>Coleções</h2>${colHtml()}<div class="row"><button class="b go" data-act="mapclose" data-focus>Fechar</button></div></div></div>` : g.modal === 'map' ? `<div class="ov"><div class="dlg wide" role="dialog" aria-modal="true">${mapHtml(true)}<div class="row"><button class="b go" data-act="mapclose" data-focus>Fechar</button></div></div></div>` : g.modal === 'walk' ? `<div class="ov"><div class="dlg" role="dialog" aria-modal="true"><p>Se desistires, ficas com <b>${fmt(g.total)} pontos</b>. Tens a certeza?</p><div class="row"><button class="b go" data-act="walkyes" data-focus>Sim, desistir</button><button class="b" data-act="walkno">Continuar a jogar</button></div></div></div>` : '';
+    app.innerHTML = `<div class="top"><a class="tb" href="index.html">Início</a><span class="sp"></span>${soundBtn()}<button class="tb" data-act="manual">📖 Manual</button><button class="tb" data-act="walk">Desistir</button></div><div class="play">${panel}<section class="stage">${main}</section></div>${modal}`;
+    const fo = document.querySelector('[data-focus]');
+    if (fo) fo.focus({ preventScroll: true });
+    if (ph === 'reveal') { const r = $('.reveal'); if (r) r.scrollIntoView({ block: 'nearest', behavior: reduced ? 'auto' : 'smooth' }); }
   }
 
   /* ---------- fim ---------- */
-
-  // Termina o jogo ('win', 'lose' ou 'walk') e calcula o prémio final; guarda o melhor prémio.
   function endGame(kind) {
     const g = G;
     if (g.timer) clearTimeout(g.timer);
     g.walkQ = g.phase === 'ask' || g.phase === 'confirm' ? g.q : null;
-    const amt = kind === 'win' ? PRIZE[14] : kind === 'walk' ? walkAmt(g) : safeAmt(g.lvl);
-    if (amt > (+store.get('qqsm_best') || 0)) store.set('qqsm_best', String(amt));
-    g.phase = 'end';
-    g.end = { kind, amt };
-    g.modal = null;
-    (kind === 'win' ? SFX.win : kind === 'lose' ? () => {} : SFX.ok)();
-    renderEnd();
-    scrollTo(0, 0);
+    const newBest = g.total > best();
+    if (newBest) store.set('qqsm_pts', String(g.total));
+    g.phase = 'end'; g.end = { kind, newBest }; g.modal = null;
+    (kind === 'win' ? SFX.win : kind === 'lose' || kind === 'dead' ? () => {} : SFX.ok)();
+    renderEnd(); scrollTo(0, 0);
   }
-
-  // Ecrã final: prémio, resumo e revisão de todas as perguntas respondidas.
   function renderEnd() {
-    const g = G,
-      { kind, amt } = g.end,
-      n = g.lvl + 1;
-    const title =
-      kind === 'win'
-        ? 'Milionário!'
-        : kind === 'walk'
-          ? `Desististe na pergunta ${n}`
-          : g.rl
-            ? `Ficaste sem vidas na pergunta ${n}`
-            : `Erraste na pergunta ${n}`;
-    const sub =
-      kind === 'win'
-        ? 'Respondeste certo às 15 perguntas.'
-        : amt
-          ? kind === 'walk'
-            ? 'Ficas com o prémio que já tinhas ganho.'
-            : 'Ficas com o último patamar seguro.'
-          : 'Desta vez sais sem prémio.';
-    const items = g.hist.map((h, i) => ({
-      q: h.q,
-      n: i + 1,
-      st: h.ok ? 'ok' : 'ko',
-      ch: h.chosen,
-    }));
-    if (kind === 'walk' && g.walkQ) items.push({ q: g.walkQ, n, st: 'na', ch: null });
-    const rv = items
-      .map((it) => {
-        const r = it.q.o.find((o) => o.ok);
-        return `<div class="rv"><span class="st ${it.st}">${it.st === 'ok' ? 'Certa' : it.st === 'ko' ? 'Errada' : 'Sem resposta'}</span> <b>${it.n}.</b> <span style="white-space:pre-line">${esc(it.q.q)}</span>
+    const g = G, { kind, newBest } = g.end;
+    const title = kind === 'win' ? 'Exame final superado!' : kind === 'walk' ? 'Desististe' : kind === 'dead' ? `Ficaste sem vidas em ${esc(g.f.name)}` : `Não chegaste à meta em ${esc(g.f.name)}`;
+    const sub = kind === 'win' ? 'Passaste os ' + g.pisos + (g.pisos === 1 ? ' andar.' : ' andares.') : kind === 'walk' ? 'Ficas com os pontos que já tinhas.' : kind === 'dead' ? `Fizeste ${fmt(g.round)} pontos nessa fase.` : `Fizeste ${fmt(g.round)} de ${fmt(g.f.target)} pontos nessa fase.`;
+    const items = g.hist.map((h, i) => ({ q: h.q, n: i + 1, st: h.ok ? 'ok' : 'ko', ch: h.chosen }));
+    if (kind === 'walk' && g.walkQ) items.push({ q: g.walkQ, n: items.length + 1, st: 'na', ch: null });
+    const rv = items.map((it) => {
+      const r = it.q.o.find((o) => o.ok);
+      return `<div class="rv"><span class="st ${it.st}">${it.st === 'ok' ? 'Certa' : it.st === 'ko' ? 'Errada' : 'Sem resposta'}</span> <b>${it.n}.</b> <span style="white-space:pre-line">${esc(it.q.q)}</span>
 <p>Resposta certa: ${esc(cap(r.t))}</p>${it.st === 'ko' ? `<p style="color:var(--mu)">A tua resposta: ${esc(cap(it.q.o[it.ch].t))}</p>` : ''}${it.q.e}${it.q.u ? '<small style="color:var(--mu)">Esta resposta não está confirmada oficialmente.</small>' : ''}</div>`;
-      })
-      .join('');
+    }).join('');
     app.innerHTML = `<div class="top"><a class="tb" href="index.html">Voltar ao início</a><span class="sp"></span>${soundBtn()}</div>
-<div class="end"><h1>${title}</h1><div class="amt">${money(amt)}</div><p>${sub}</p>${g.rl ? `<p>Moedas: 🪙 ${g.coins}. Relíquias: ${g.relics.length ? g.relics.map((k) => RELICS[k][0] + ' ' + RELICS[k][1]).join(', ') : 'nenhuma'}.</p>` : ''}
+<div class="end"><h1>${title}</h1><div class="amt">${fmt(g.total)} pontos</div><p>${sub}${newBest ? ' <b>Novo melhor resultado!</b>' : ''}</p><p>Andar ${g.piso + 1} de ${g.pisos}, fase ${Math.max(1, g.row + 1)} de ${ROWS}. Moedas: 🪙 ${g.coins}. Relíquias: ${g.relics.length ? g.relics.map((k) => RELICS[k][0] + ' ' + RELICS[k][1]).join(', ') : 'nenhuma'}.</p>
 <div class="row"><button class="bigbtn" data-act="again" data-focus>Jogar outra vez</button><button class="bigbtn alt" data-act="menu">Mudar os temas</button></div>
 <details open><summary>Rever as perguntas</summary>${rv}</details></div>`;
-    const f = document.querySelector('[data-focus]');
-    if (f) f.focus({ preventScroll: true });
+    const fo = document.querySelector('[data-focus]');
+    if (fo) fo.focus({ preventScroll: true });
   }
 
   /* ---------- eventos ---------- */
-
-  // Liga/desliga o som e guarda a escolha.
   function toggleSound() {
     SOUND = !SOUND;
     store.set('qqsm_snd', SOUND ? '1' : '0');
     if (SOUND) SFX.sel();
     const b = document.querySelector('[data-act=sound]');
-    if (b) {
-      b.textContent = SOUND ? 'Som ligado' : 'Som desligado';
-      b.setAttribute('aria-pressed', SOUND);
-    }
+    if (b) { b.textContent = SOUND ? 'Som ligado' : 'Som desligado'; b.setAttribute('aria-pressed', SOUND); }
   }
-
-  // ACT = ações dos botões, ligadas pelo atributo data-act do HTML.
-  // Os listeners abaixo tratam os cliques (opções, ajudas, loja) e o teclado (A-D / 1-4, Esc).
   const ACT = {
-    start: () => startGame(),
-    final: lockIn,
-    cancel: () => {
-      G.sel = null;
-      G.phase = 'ask';
-      renderPlay();
-    },
-    next,
-    walk: () => {
-      G.modal = 'walk';
-      renderPlay();
-    },
+    start: startGame, final: lockIn, next, swap, again: startGame, sound: toggleSound,
+    cancel: () => { G.sel = null; G.phase = 'ask'; view(); },
+    close: () => endFase(true),
+    tomap: () => { G.phase = 'map'; view(); scrollTo(0, 0); },
+    walk: () => { if (G && G.phase !== 'end') { G.modal = 'walk'; view(); } },
     walkyes: () => endGame('walk'),
-    walkno: () => {
-      G.modal = null;
-      renderPlay();
-    },
-    sound: toggleSound,
-    // Abre o multijogador (módulo js/milionario-multi.js); não existe se o Firebase não carregou.
-    multi: () =>
-      window.mqOpen
-        ? window.mqOpen()
-        : alert('O multijogador não está disponível (precisa de ligação à internet).'),
-    ladder: () => {
-      G.ladder = !G.ladder;
-      renderPlay();
-    },
-    leave: () => startQ(kindOf()),
-    again: startGame,
-    menu: () => {
-      G = null;
-      renderStart();
-    },
+    walkno: () => { G.modal = null; view(); },
+    minimap: () => { G.modal = 'map'; view(); },
+    colmodal: () => { G.modal = 'col'; view(); },
+    mapclose: () => { G.modal = null; view(); },
+    manual: () => manual(true),
+    mclose: () => manual(false),
+    multigo: () => (window.mqOpen ? window.mqOpen() : alert('O multijogador não está disponível (precisa de ligação à internet).')),
+    menu: renderSolo, menu0: renderMenu, solo: renderSolo, regras: renderRegras, multimenu: renderMulti, colecoes: renderCol,
   };
-  app.addEventListener('click', (e) => {
+  const click = (e) => {
     const b = e.target.closest('button');
     if (!b || b.disabled) return;
     if (b.dataset.i !== undefined) return pick(+b.dataset.i);
     if (b.dataset.ll) return lifeline(b.dataset.ll);
     if (b.dataset.buy) return buy(b.dataset.buy);
+    if (b.dataset.go) return enter(...b.dataset.go.split(',').map(Number));
     const f = ACT[b.dataset.act];
     if (f) f();
-  });
-  app.addEventListener('change', (e) => {
-    if (e.target.matches('#wu')) startInfo();
-  });
+  };
+  app.addEventListener('click', click);
+  MAN.addEventListener('click', click);
+  app.addEventListener('change', (e) => { if (e.target.matches('#wu')) startInfo(); });
   document.addEventListener('keydown', (e) => {
-    if (!G || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
     const k = e.key.toLowerCase();
+    if (!MAN.hidden) { if (k === 'escape') manual(false); return; }
+    if (!G) return;
     if (k === 'escape') {
-      if (G.modal) {
-        G.modal = null;
-        renderPlay();
-      } else if (G.ladder) {
-        G.ladder = false;
-        renderPlay();
-      } else if (G.phase === 'confirm') ACT.cancel();
+      if (G.modal) { G.modal = null; view(); } else if (G.phase === 'confirm') ACT.cancel();
       return;
     }
     if (G.modal || G.phase === 'end' || G.phase === 'lock') return;
-    const i = 'abcd'.indexOf(k),
-      j = ['1', '2', '3', '4'].indexOf(k),
-      x = i >= 0 ? i : j;
+    const i = 'abcd'.indexOf(k), j = ['1', '2', '3', '4'].indexOf(k), x = i >= 0 ? i : j;
     if (x >= 0 && (G.phase === 'ask' || G.phase === 'confirm')) pick(x);
   });
 
-  // Partilha com js/milionario-multi.js o que ele precisa deste ficheiro.
-  window.MILIONARIO = {
-    ELIG,
-    PRIZE,
-    score,
-    keepOrder,
-    shuffle,
-    esc,
-    cap,
-    money,
-    rnd,
-    app,
-    SFX,
-    store,
-    cfg: () => CFG,
-    renderStart,
-  };
+  // Partilha com js/milionario-multi.js (o multijogador continua com prémios em euros).
+  window.MILIONARIO = { ELIG, PRIZE, score, keepOrder, shuffle, esc, cap, money, rnd, app, SFX, store, cfg: () => CFG, renderStart: renderMenu };
 
-  if (!QS.length) {
-    app.innerHTML =
-      '<p style="padding:2rem">Não foi possível carregar as perguntas (js/quiz.js). Confirma que o ficheiro está na pasta js, ao lado dos outros.</p>';
-  } else renderStart();
+  if (!QS.length) app.innerHTML = '<p style="padding:2rem">Não foi possível carregar as perguntas (js/quiz.js). Confirma que o ficheiro está na pasta js, ao lado dos outros.</p>';
+  else renderMenu();
 })();

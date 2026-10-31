@@ -81,7 +81,7 @@ Cada sala e cada jogador gravam um campo `expira` (24 horas depois de criados). 
 
 ## Onde mudar o quê
 
-- **Prémios do milionário** — `PRIZE` e `SAFE` no início de `js/milionario.js`.
+- **Regras do milionário (pontos, metas, perguntas por fase, andares do mapa)** — bloco "regras (podes mexer aqui)" em `js/milionario.js`. O multijogador continua a usar `PRIZE` (euros).
 - **Valor das perguntas e bónus no multijogador** — `valorDaRonda`, `BONUS_MAX`, `MAX_JOGADORES` e `PAUSA_REVELACAO_MS` no início de `js/milionario-multi.js`.
 - **Cartas, inimigos e andares da torre** — `CARDS`, `FOES` e `FL` em `js/torre.js`.
 - **Cores de cada página** — variáveis no `:root` do respetivo ficheiro em `css/`.
