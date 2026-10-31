@@ -31,7 +31,7 @@ Cada ficheiro `.html` só tem a estrutura da página; o CSS e o JavaScript estã
 
 ## Manual (`manual.html`)
 
-O manual tem 5 módulos: Psicologia na Condução, Métodos de Ensino e Pedagogia, Trânsito e Segurança Rodoviária (com as imagens dos sinais), Técnica Automóvel (Mecânica) e Primeiros Socorros.
+O manual tem 12 módulos em 4 grupos: **Manuais** (Psicologia na Condução, Métodos de Ensino e Pedagogia, Trânsito e Segurança Rodoviária com as imagens dos sinais, Técnica Automóvel, Primeiros Socorros), **Resumos das aulas**, **Legislação** (Lei 14/2014, Portaria 185/2015, Código da Estrada/DL 102-B/2020, Portaria 1/2024, RST) e **Relatórios** (ANSR 2025).
 
 - `js/manual/index.js` só tem a estrutura (módulos, secções, títulos). O texto de cada módulo está em `js/manual/<módulo>.js` e só é carregado quando se abre esse módulo.
 - As imagens estão em `img/`. Funciona também a abrir `manual.html` diretamente no browser (sem servidor).

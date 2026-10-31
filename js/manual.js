@@ -27,7 +27,9 @@
   // Índice lateral: um bloco por módulo, com as notas agrupadas por secção.
   function desenharArvore(atual) {
     var h = '';
+    var grp = null;
     IDX.forEach(function (m) {
+      if (m.g !== grp) { grp = m.g; h += '<h3 class="grp">' + esc(grp) + '</h3>'; }
       var aberto = ONDE[atual] ? ONDE[atual].m === m : atual === m.id;
       h += '<details' + (aberto ? ' open' : '') + '><summary>' + esc(m.t) + '</summary>';
       var sec = null;
@@ -44,8 +46,9 @@
 
   function inicio() {
     document.title = 'Manual — Instrutor de Condução';
-    var h = '<h2>Manual de estudo</h2><p>Escolhe um módulo para começar. Para treinar o que leste, usa os <a href="testes.html">testes</a>.</p><div class="cartoes">';
-    IDX.forEach(function (m) { h += '<a class="cartao" href="#/' + m.id + '"><b>' + esc(m.t) + '</b><span>' + esc(m.d) + '</span><small>' + m.n.length + ' capítulos</small></a>'; });
+    var h = '<h2>Manual de estudo</h2><p>Escolhe um módulo para começar: manuais, resumos das aulas, legislação e relatórios. Para treinar o que leste, usa os <a href="testes.html">testes</a>.</p><div class="cartoes">';
+    var g0 = null;
+    IDX.forEach(function (m) { if (m.g !== g0) { g0 = m.g; h += '</div><h3>' + esc(g0) + '</h3><div class="cartoes">'; } h += '<a class="cartao" href="#/' + m.id + '"><b>' + esc(m.t) + '</b><span>' + esc(m.d) + '</span><small>' + m.n.length + ' capítulos</small></a>'; });
     main.innerHTML = h + '</div>';
   }
 
