@@ -137,11 +137,48 @@
     publico: ['👥', 'Público', 'Dá-te a ajuda Público: uma vez por fase, o público vota na resposta.'],
     amigo: ['📞', 'Amigo', 'Dá-te a ajuda Amigo: uma vez por fase, um amigo dá a sua opinião.'],
     troca: ['🔄', 'Troca', 'Dá-te a ajuda Troca: uma vez por fase, mudas a pergunta sem gastar uma das da fase.'],
+    cafe: ['☕', 'Café', '+1 pergunta em cada fase.'],
+    estrela: ['⭐', 'Estrela', 'Cada fase começa com o combo em ×1,5.'],
+    balanca: ['⚖️', 'Balança', 'O combo máximo passa de ×4 para ×5.'],
+    martelo: ['🔨', 'Martelo', '+50 pontos em cada resposta certa.'],
+    cofre: ['💰', 'Cofre', '+30 🪙 sempre que concluis uma fase.'],
+    banco: ['🏦', 'Banco', 'No fim de cada fase ganhas juros: 10% das tuas moedas.'],
+    coracao: ['💖', 'Coração', '+1 vida máxima e +1 vida logo.'],
+    desconto: ['🏷️', 'Cupão', 'Tudo na loja custa 30% menos.'],
+    coroa: ['👑', 'Coroa', 'Fase sem nenhum erro: +200 pontos.'],
+    mira: ['🎯', 'Mira', 'As metas de pontos das fases são 10% mais baixas.'],
+    dado: ['🎲', 'Dado', '10% de hipótese de uma resposta certa valer o dobro.'],
+    cadeado: ['🔒', 'Cadeado', 'Ao errares, o combo só desce para metade em vez de voltar a ×1.'],
+    vela: ['🕯️', 'Vela', 'Os descansos dão o dobro: +2 vidas e +2 perguntas na fase seguinte.'],
+    bussola: ['🧭', 'Bússola', 'Os nós ❓ nunca são fases: só loja, descanso ou tesouro.'],
+    sino: ['🔔', 'Sino', 'A cada 5 certas seguidas ganhas +1 vida.'],
+    raio: ['⚡', 'Raio', 'A primeira resposta certa de cada fase vale o triplo.'],
+    ima: ['🧲', 'Íman', 'Cada resposta certa dá +1 ponto por cada 10 🪙 que tiveres.'],
+    diamante: ['💎', 'Diamante', 'Respostas certas com o combo em ×3 ou mais valem +50%.'],
+    foguete: ['🚀', 'Foguete', 'A partir da 3.ª certa seguida, cada certa dá +75 pontos.'],
+    caneta: ['🖋️', 'Caneta', 'A última pergunta de cada fase vale o dobro.'],
+    pergaminho: ['📜', 'Pergaminho', 'Ao concluir uma fase ganhas +20 pontos por cada resposta certa nela.'],
+    ampulheta: ['⏳', 'Ampulheta', '+1 pergunta nas fases difíceis e no guardião do andar.'],
+    atalho: ['🛤️', 'Atalho', 'As metas das fases difíceis e do guardião são 20% mais baixas.'],
+    balao: ['🎈', 'Balão', 'Começas cada fase com +1 troca de pergunta.'],
+    pocao: ['🧪', 'Poção', 'Ao concluir uma fase com menos de 3 vidas, ganhas +1 vida.'],
+    capacete: ['🪖', 'Capacete', 'O primeiro erro de cada andar não custa vida (o combo parte).'],
+    penso: ['🩹', 'Penso', 'Ao subires de andar ganhas +1 vida extra.'],
+    fenix: ['🪶', 'Fénix', 'Se ficares sem vidas, voltas com 2. A relíquia gasta-se.'],
+    carteira: ['👛', 'Carteira', '+2 🪙 em cada resposta certa.'],
+    ouro: ['🥇', 'Medalha de ouro', 'Fases difíceis e guardiões dão +50 🪙.'],
+    trofeu: ['🏆', 'Troféu', 'Fases difíceis e guardiões dão +300 pontos.'],
+    trombeta: ['🎺', 'Trombeta', 'Ao subires de andar ganhas +500 pontos.'],
+    cartola: ['🎩', 'Cartola', 'Cada nó ❓ que abres dá-te +30 🪙.'],
+    chave: ['🗝️', 'Chave', 'Os tesouros dão duas relíquias em vez de uma.'],
+    megafone: ['📣', 'Megafone', 'O Público vota sempre na resposta certa (com pelo menos 80%).'],
+    caderno: ['📓', 'Caderno', 'O Amigo nunca falha e tem sempre certeza.'],
     lupa: ['🔎', 'Lupa', '+25% de pontos em cada resposta certa.'],
   };
   const has = (k) => G.relics.includes(k);
   const giveRelic = (k) => {
     G.relics.push(k);
+    if (k === 'coracao') { G.max++; G.lives++; }
     try {
       const f = new Set((store.get('qqsm_rel') || '').split(',').filter(Boolean));
       f.add(k);
@@ -159,7 +196,7 @@
   const QS_PHASE = 6; // perguntas por fase
   const SWAPS = 1; // trocas de pergunta por fase
   const BASE = (t) => 100 + Math.round(t * 100); // pontos base de uma certa (t = 0..1 dificuldade)
-  const MULT = (s) => Math.min(1 + 0.25 * s, 4); // multiplicador do combo (s = certas seguidas)
+  const MULT = (s) => Math.min(1 + 0.25 * s, G && has('balanca') ? 5 : 4); // multiplicador do combo (s = certas seguidas)
   const TARGET = (t, k) => Math.round((450 * (1 + 1.2 * t) * (k === 'E' ? 1.3 : k === 'b' ? 1.5 : 1)) / 50) * 50; // t = 0..1 progresso na corrida
   const LEFT_BONUS = 50; // pontos por pergunta que sobra ao fechar a fase
   const COST_RELIC = 45, COST_HELP = 40, COST_HEART = 50;
@@ -368,19 +405,23 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
     const g = G;
     g.row = r; g.lane = l; g.path.add(r + ',' + l); g.flash = '';
     let k = g.map[r][l];
-    if (k === '?') k = ['e', 'e', 'e', 'e', '$', '$', 'r', 'r', 't', 't'][rnd(0, 9)];
+    if (k === '?' && has('cartola')) g.coins += 30;
+    if (k === '?') k = has('bussola') ? ['$', '$', 'r', 'r', 't', 't'][rnd(0, 5)] : ['e', 'e', 'e', 'e', '$', '$', 'r', 'r', 't', 't'][rnd(0, 9)];
     if (k === 'e' || k === 'E' || k === 'b') return startFase(k);
     if (k === '$') {
       g.shop = shuffle(Object.keys(RELICS).filter((x) => !g.relics.includes(x))).slice(0, 3).concat('heart');
       g.phase = 'shop';
     } else if (k === 'r') {
-      g.bonusQ++; g.bonusSw++; g.lives = Math.min(g.max, g.lives + 1);
-      g.title = '🏕️ Descanso'; g.msg = 'Recuperas 1 ❤️ e, na próxima fase, tens +1 pergunta e +1 troca.'; g.phase = 'note';
+      const v = has('vela') ? 2 : 1;
+      g.bonusQ += v; g.bonusSw++; g.lives = Math.min(g.max, g.lives + v);
+      g.title = '🏕️ Descanso'; g.msg = `Recuperas ${v} ❤️ e, na próxima fase, tens +${v} ${v > 1 ? 'perguntas' : 'pergunta'} e +1 troca.`; g.phase = 'note';
     } else {
       const rl = newRelic();
       if (rl) giveRelic(rl);
-      else g.coins += 60;
-      g.title = '🧰 Tesouro'; g.msg = rl ? `Encontraste a relíquia ${RELICS[rl][0]} <b>${RELICS[rl][1]}</b>: ${RELICS[rl][2]}` : 'Já tens todas as relíquias: ganhas 60 🪙.'; g.phase = 'note';
+      else g.coins += 100;
+      const r2 = rl && has('chave') ? newRelic() : null;
+      if (r2) giveRelic(r2);
+      g.title = '🧰 Tesouro'; g.msg = rl ? `Encontraste a relíquia ${RELICS[rl][0]} <b>${RELICS[rl][1]}</b>: ${RELICS[rl][2]}${r2 ? ` 🗝️ A Chave abriu mais uma: ${RELICS[r2][0]} <b>${RELICS[r2][1]}</b>: ${RELICS[r2][2]}` : ''}` : 'Já tens todas as relíquias: ganhas 100 🪙.'; g.phase = 'note';
     }
     view();
   }
@@ -396,11 +437,11 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
   }
   function startFase(k) {
     const g = G, nm = NAMES[k === 'b' && !last() ? 'p' : k], name = nm[rnd(0, nm.length - 1)];
-    g.f = { k, name, target: TARGET(prog(), k) };
-    g.round = 0; g.streak = 0; g.shield = 0;
-    g.left = QS_PHASE + g.bonusQ; const use = (k) => (has(k) ? 1 + (has('mochila') ? 1 : 0) : 0);
+    g.f = { k, name, target: Math.round((TARGET(prog(), k) * (has('mira') ? 0.9 : 1) * (has('atalho') && k !== 'e' ? 0.8 : 1)) / 50) * 50 };
+    g.round = 0; g.streak = has('estrela') ? 2 : 0; g.shield = 0; g.errs = 0; g.first = 0; g.hits = 0;
+    g.left = QS_PHASE + g.bonusQ + (has('cafe') ? 1 : 0) + (has('ampulheta') && k !== 'e' ? 1 : 0); const use = (k) => (has(k) ? 1 + (has('mochila') ? 1 : 0) : 0);
     g.ch = { f: use('meio'), a: use('publico'), t: use('amigo') };
-    g.sw = use('troca') * SWAPS + g.bonusSw; g.bonusQ = g.bonusSw = 0;
+    g.sw = use('troca') * SWAPS + g.bonusSw + (has('balao') ? 1 : 0); g.bonusQ = g.bonusSw = 0;
     g.kind = k === 'e' ? 'normal' : 'boss';
     nextQ();
   }
@@ -436,10 +477,22 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
     g.ok = q.o[g.sel].ok; g.phase = 'reveal'; g.notes = []; g.pts = 0;
     g.hist.push({ q, chosen: g.sel, ok: g.ok, row: g.row });
     let free = false;
+    if (!g.ok) g.errs++;
     if (g.ok) {
-      g.pts = Math.round(g.base * MULT(g.streak) * (has('lupa') ? 1.25 : 1));
+      g.mul = MULT(g.streak);
+      g.pts = Math.round(g.base * g.mul * (has('lupa') ? 1.25 : 1));
+      if (has('raio') && !g.first) { g.pts *= 3; g.notes.push('⚡ Raio: a primeira certa vale o triplo.'); }
+      if (has('dado') && Math.random() < 0.1) { g.pts *= 2; g.notes.push('🎲 Dado: pontos a dobrar!'); }
+      if (has('martelo')) g.pts += 50;
+      if (has('ima')) g.pts += Math.floor(g.coins / 10);
+      if (has('diamante') && g.mul >= 3) g.pts = Math.round(g.pts * 1.5);
+      if (has('foguete') && g.streak >= 2) g.pts += 75;
+      if (has('caneta') && g.left === 1) { g.pts *= 2; g.notes.push('🖋️ Caneta: a última pergunta vale o dobro.'); }
+      g.first = 1; g.hits++;
       g.round += g.pts; g.total += g.pts; g.streak++;
+      if (has('sino') && g.streak % 5 === 0 && g.lives < g.max) { g.lives++; g.notes.push('🔔 Sino: +1 ❤️.'); }
       let c = { e: 12, E: 25, b: 40 }[g.f.k] + Math.min(g.streak, 5);
+      if (has('carteira')) c += 2;
       if (has('mealheiro')) c = Math.round(c * 1.5);
       g.coins += c; g.notes.push('+' + c + ' 🪙');
       if (has('chama') && g.streak % 3 === 0) { g.left++; g.notes.push('A Chama deu-te +1 pergunta.'); }
@@ -447,9 +500,12 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
       g.shield = 1; g.notes.push('O Escudo protegeu-te: sem perda de vida nem combo.');
     } else if (has('trevo') && Math.random() < 0.25) {
       free = true; g.notes.push('O Trevo protegeu-te: o erro não conta.');
+    } else if (has('capacete') && g.helm !== g.piso) {
+      g.helm = g.piso; g.streak = 0; g.notes.push('🪖 Capacete: sem perda de vida neste andar.');
     } else {
-      g.streak = 0; g.lives--;
+      g.streak = has('cadeado') ? Math.floor(g.streak / 2) : 0; g.lives--;
       g.notes.push(g.lives > 0 ? 'Perdeste 1 ❤️.' : 'Ficaste sem vidas.');
+      if (g.lives <= 0 && has('fenix')) { g.lives = 2; g.relics = g.relics.filter((x) => x !== 'fenix'); g.notes.push('🪶 A Fénix renasceu: voltas com 2 ❤️ (a relíquia gastou-se).'); }
     }
     if (!free) g.left--;
     if (g.lives > 0 && g.round >= g.f.target) g.notes.push('Meta atingida! A fase fica concluída' + (g.left ? ` e ganhas +${fmt(g.left * LEFT_BONUS)} pontos pelas perguntas que sobram.` : '.'));
@@ -467,11 +523,20 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
     const g = G, f = g.f, bonus = early ? g.left * LEFT_BONUS : 0;
     g.total += bonus;
     if (g.round < f.target) return endGame('lose');
-    g.coins += 20;
-    let m = `Fase concluída: <b>${fmt(g.round)}</b> de ${fmt(f.target)} pontos.${bonus ? ` Perguntas por usar: +${fmt(bonus)} pontos.` : ''} +20 🪙.`;
+    const gain = 20 + (has('cofre') ? 30 : 0);
+    g.coins += gain;
+    let m = `Fase concluída: <b>${fmt(g.round)}</b> de ${fmt(f.target)} pontos.${bonus ? ` Perguntas por usar: +${fmt(bonus)} pontos.` : ''} +${gain} 🪙.`;
+    if (has('banco')) { const j = Math.floor(g.coins * 0.1); g.coins += j; m += ` Juros: +${j} 🪙.`; }
+    if (has('coroa') && g.errs === 0) { g.total += 200; m += ' 👑 Fase perfeita: +200 pontos.'; }
+    if (has('pergaminho') && g.hits) { const pg = g.hits * 20; g.total += pg; m += ` 📜 Pergaminho: +${pg} pontos.`; }
+    if (has('pocao') && g.lives < 3) { g.lives++; m += ' 🧪 Poção: +1 ❤️.'; }
+    if (f.k !== 'e' && has('ouro')) { g.coins += 50; m += ' 🥇 Medalha de ouro: +50 🪙.'; }
+    if (f.k !== 'e' && has('trofeu')) { g.total += 300; m += ' 🏆 Troféu: +300 pontos.'; }
     if (f.k === 'b') {
       if (last()) { g.total += 500; return endGame('win'); }
       g.piso++; g.map = buildMap(); g.path = new Set(); g.row = -1; g.lane = 0; g.lives = Math.min(g.max, g.lives + 1);
+      if (has('penso')) g.lives = Math.min(g.max, g.lives + 1);
+      if (has('trombeta')) { g.total += 500; m += ' 🎺 Trombeta: +500 pontos.'; }
       m += ` Subiste para o andar ${g.piso + 1} de ${g.pisos}. +1 ❤️.`;
       g.title = '🚪 Andar ' + g.piso + ' concluído'; g.msg = m; g.f = null; g.phase = 'note'; g.q = null;
       view(); scrollTo(0, 0); return;
@@ -483,8 +548,9 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
     g.title = '✅ ' + f.name; g.msg = m; g.f = null; g.phase = 'note'; g.q = null;
     view(); scrollTo(0, 0);
   }
+  const price = (k) => Math.round((k === 'heart' ? COST_HEART : COST_RELIC) * (has('desconto') ? 0.7 : 1));
   function buy(k) {
-    const g = G, c = k === 'help' ? COST_HELP : k === 'heart' ? COST_HEART : COST_RELIC;
+    const g = G, c = price(k);
     if (g.phase !== 'shop' || g.coins < c || (k === 'heart' && g.lives >= g.max)) return;
     if (k === 'heart') g.lives++;
     else if (k === 'help') g.ch['fat'[rnd(0, 2)]]++;
@@ -492,7 +558,7 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
     g.coins -= c; SFX.ll(); view();
   }
   const SH = () => `<div class="note"><h2>🛒 Loja</h2><p>Tens 🪙 ${G.coins}.</p><div class="opts n4">${G.shop.map((k) => {
-    const h = k === 'help', hr = k === 'heart', c = h ? COST_HELP : hr ? COST_HEART : COST_RELIC, r = RELICS[k] || [], nb = G.coins < c || (hr && G.lives >= G.max);
+    const h = k === 'help', hr = k === 'heart', c = price(k), r = RELICS[k] || [], nb = G.coins < c || (hr && G.lives >= G.max);
     return `<button class="opt${nb ? ' nb' : ''}" data-buy="${k}" ${nb ? 'disabled' : ''}><span class="ltr">${h ? '🎁' : hr ? '❤️' : r[0]}</span><span><b>${h ? 'Uma ajuda extra' : hr ? 'Uma vida' : r[1]}</b> (🪙 ${c})<br><small>${h ? '+1 uso de uma ajuda à sorte (50:50, público ou amigo).' : hr ? 'Recupera 1 vida.' : r[2]}</small></span></button>`;
   }).join('')}</div><div class="confirm"><button class="b go" data-act="tomap">Escolher caminho</button></div></div>`;
 
@@ -510,6 +576,7 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
     if (k === 'a') {
       let pc = Math.min(94, [rnd(62, 88), rnd(42, 66), rnd(28, 52)][tier] + (q.o.length - R.length) * 8), top = c;
       if (tier === 2 && Math.random() < 0.12) { const w = R.filter((i) => i !== c); top = w[rnd(0, w.length - 1)]; }
+      if (has('megafone')) { top = c; pc = Math.max(pc, 80); }
       const oth = R.filter((i) => i !== top), w = oth.map(() => Math.random() + 0.2), sw = w.reduce((a, b) => a + b, 0), p = {};
       oth.forEach((i, j) => (p[i] = Math.round(((100 - pc) * w[j]) / sw)));
       p[top] = pc;
@@ -517,7 +584,7 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
       g.info = { type: 'aud', p };
     }
     if (k === 't') {
-      const wr = R.filter((i) => i !== c), guess = Math.random() < [0.92, 0.75, 0.55][tier] ? c : wr[rnd(0, wr.length - 1)], r = Math.random(), sure = [0.7, 0.4, 0.2][tier], mid = [0.25, 0.35, 0.35][tier], l = LT[guess];
+      const wr = R.filter((i) => i !== c), guess = has('caderno') || Math.random() < [0.92, 0.75, 0.55][tier] ? c : wr[rnd(0, wr.length - 1)], r = has('caderno') ? 0 : Math.random(), sure = [0.7, 0.4, 0.2][tier], mid = [0.25, 0.35, 0.35][tier], l = LT[guess];
       g.info = { type: 'tel', text: r < sure ? `Tenho a certeza, é a ${l}.` : r < sure + mid ? `Acho que é a ${l}, mas não ponho as mãos no fogo.` : `Hmm, não sei bem. Se tivesse de escolher, ia na ${l}.` };
     }
     view();
@@ -549,7 +616,7 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
       let below = '';
       if (ph === 'confirm') below = `<div class="confirm"><span>Resposta final: <b>${L}</b>?</span><button class="b go" data-act="final" data-focus>Sim, é a final</button><button class="b" data-act="cancel">Não</button></div>`;
       if (ph === 'reveal') {
-        below = `<div class="reveal ${g.ok ? 'good' : 'bad'}" role="status"><b>${g.ok ? `Certa! +${fmt(g.pts)} pontos (${g.base} × ${mx(g.pts / g.base)})` : 'Resposta errada. Sem pontos e o combo volta a ×1.'}</b><p>${g.ok ? '' : `A resposta certa era a ${LT[right]}: `}${g.ok ? `${LT[right]}: ` : ''}${esc(cap(q.o[right].t))}</p>${q.e}${g.notes.map((n) => `<small>${n}</small>`).join('')}${q.u ? '<small>Esta resposta não está confirmada oficialmente.</small>' : ''}<button class="b go" data-act="next" data-focus>${g.lives <= 0 ? 'Ver o resultado' : g.round >= g.f.target ? 'Concluir a fase' : g.left > 0 ? 'Pergunta seguinte' : 'Fechar a fase'}</button></div>`;
+        below = `<div class="reveal ${g.ok ? 'good' : 'bad'}" role="status"><b>${g.ok ? `Certa! +${fmt(g.pts)} pontos (${g.base} × ${mx(g.mul)})` : 'Resposta errada. Sem pontos.'}</b><p>${g.ok ? '' : `A resposta certa era a ${LT[right]}: `}${g.ok ? `${LT[right]}: ` : ''}${esc(cap(q.o[right].t))}</p>${q.e}${g.notes.map((n) => `<small>${n}</small>`).join('')}${q.u ? '<small>Esta resposta não está confirmada oficialmente.</small>' : ''}<button class="b go" data-act="next" data-focus>${g.lives <= 0 ? 'Ver o resultado' : g.round >= g.f.target ? 'Concluir a fase' : g.left > 0 ? 'Pergunta seguinte' : 'Fechar a fase'}</button></div>`;
       }
       const lifeBar = [has('meio') && ll('f', '50:50', '50:50'), has('publico') && ll('a', '👥', 'Público'), has('amigo') && ll('t', '📞', 'Amigo'), (has('troca') || g.sw > 0) && `<button class="ll" data-act="swap" ${ph === 'ask' && g.sw > 0 ? '' : 'disabled'}><span class="ic" aria-hidden="true">🔄</span><span>Trocar${g.sw > 1 ? ' ×' + g.sw : ''}</span></button>`].filter(Boolean);
       main = `<div class="meta"><span>${f.name}: ${g.left} ${g.left === 1 ? 'pergunta' : 'perguntas'} por responder · Total ${fmt(g.total)} pontos</span><b>Vale ${g.base} × ${mx(MULT(g.streak))}</b></div>
