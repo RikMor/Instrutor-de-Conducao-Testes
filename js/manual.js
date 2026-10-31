@@ -217,6 +217,41 @@
     $('#hl-info').textContent = '«' + HL.q + '» — ocorrência ' + (POS + 1) + ' de ' + MARCAS.length;
   }
 
+  // ---------- Telemóvel: arrastar do canto esquerdo abre o índice (como no Obsidian) ----------
+  // O índice acompanha o dedo; ao largar, abre se passou de metade, senão volta a fechar.
+  // Com o índice aberto, arrastar para a esquerda (ou tocar fora) fecha-o.
+  var fundo = document.createElement('div'); fundo.id = 'fundo'; document.body.appendChild(fundo);
+  var lateral = $('#lateral'), movel = window.matchMedia('(max-width: 820px)'), G = null;
+  var aberto = function () { return document.body.classList.contains('menu-aberto'); };
+  function abrir(sim) { document.body.classList.toggle('menu-aberto', sim); $('#menu').setAttribute('aria-expanded', sim); }
+  fundo.addEventListener('click', function () { abrir(false); });
+  document.addEventListener('touchstart', function (e) {
+    if (!movel.matches || e.touches.length !== 1) { G = null; return; }
+    var t = e.touches[0];
+    if (aberto() || t.clientX <= 48) G = { x: t.clientX, y: t.clientY, ab: aberto(), arrasta: false, pos: 0, W: lateral.offsetWidth };
+    else G = null;
+  }, { passive: true });
+  document.addEventListener('touchmove', function (e) {
+    if (!G) return;
+    var t = e.touches[0], dx = t.clientX - G.x, dy = t.clientY - G.y;
+    if (!G.arrasta) {
+      if (Math.abs(dy) > 12 && Math.abs(dy) > Math.abs(dx)) { G = null; return; }   // é scroll vertical
+      if (Math.abs(dx) < 10 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+      G.arrasta = true; lateral.style.transition = 'none'; fundo.style.transition = 'none';
+    }
+    G.pos = Math.max(-G.W, Math.min(0, (G.ab ? 0 : -G.W) + dx));
+    lateral.style.transform = 'translateX(' + G.pos + 'px)';
+    fundo.style.opacity = 1 + G.pos / G.W; fundo.style.pointerEvents = 'auto';
+    e.preventDefault();
+  }, { passive: false });
+  function largar() {
+    if (!G) return;
+    var g = G; G = null;
+    lateral.style.transition = fundo.style.transition = lateral.style.transform = fundo.style.opacity = fundo.style.pointerEvents = '';
+    if (g.arrasta) abrir(g.pos > -g.W * 0.5);
+  }
+  document.addEventListener('touchend', largar); document.addEventListener('touchcancel', largar);
+
   // ---------- Rotas ----------
   function rota() {
     var id = location.hash.replace(/^#\/?/, '');
@@ -227,7 +262,7 @@
     else { var m = IDX.filter(function (x) { return x.id === id; })[0]; HL = null; if (m) modulo(m); else inicio(); }
     if (!HL) window.scrollTo(0, 0);
   }
-  $('#menu').addEventListener('click', function () { var a = document.body.classList.toggle('menu-aberto'); this.setAttribute('aria-expanded', a); });
+  $('#menu').addEventListener('click', function () { abrir(!aberto()); });
   window.addEventListener('hashchange', function () { TOK++; if (!PEND) busca.value = ''; rota(); });
   rota();
 })();

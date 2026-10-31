@@ -33,10 +33,12 @@ Cada ficheiro `.html` só tem a estrutura da página; o CSS e o JavaScript estã
 
 O manual tem 12 módulos em 4 grupos: **Manuais** (Psicologia na Condução, Métodos de Ensino e Pedagogia, Trânsito e Segurança Rodoviária com as imagens dos sinais, Técnica Automóvel, Primeiros Socorros), **Resumos das aulas**, **Legislação** (Lei 14/2014, Portaria 185/2015, Código da Estrada/DL 102-B/2020, Portaria 1/2024, RST) e **Relatórios** (ANSR 2025).
 
+- Cada ficheiro em `js/manual/` começa com um comentário com a lista das suas notas, e cada nota é um bloco `{ id, h }` com o HTML em várias linhas, separado por comentários `// ===== N. Título =====`. Para encontrar uma nota, abre o ficheiro do módulo e procura o título.
 - `js/manual/index.js` só tem a estrutura (módulos, secções, títulos). O texto de cada módulo está em `js/manual/<módulo>.js` e só é carregado quando se abre esse módulo.
 - As imagens estão em `img/`. Funciona também a abrir `manual.html` diretamente no browser (sem servidor).
+- No telemóvel, o índice abre com os 3 riscos ou a arrastar do canto esquerdo para a direita (como no Obsidian); fecha a arrastar para a esquerda ou a tocar fora.
 - A pesquisa à esquerda funciona como a do Obsidian: escreve uma palavra ou uma frase e procura no texto de todas as notas (sem distinguir maiúsculas nem acentos, mesmo que a frase passe de uma linha para a seguinte). Mostra primeiro as notas com a frase exata e depois as que têm todas as palavras; entre aspas obriga à frase exata. Ao abrir um resultado, o texto fica destacado, com setas para saltar entre ocorrências.
-- O texto é igual ao das notas do vault (inclui índices, introduções e as notas sobre os PDFs; nos Resumos das aulas não há imagens (fotos e desenhos); as ligações para PDFs, testes e canvas não são clicáveis no site). Estes ficheiros são gerados a partir do vault; não se editam à mão.
+- O texto é igual ao das notas do vault (inclui índices e introduções, sem as notas sobre os PDFs nem as referências a páginas; nos Resumos das aulas não há imagens (fotos e desenhos); as ligações para canvas não são clicáveis no site). Estes ficheiros são gerados a partir do vault; não se editam à mão.
 
 ## Formato das perguntas (`js/quiz.js`)
 
