@@ -69,3 +69,12 @@ mark { background:#ffe27a; color:#222; border-radius:3px; }
 .principal .cartoes + h3 { margin-top:1.6rem; }
 /* títulos dentro do texto (o primeiro h2 é o título da página) */
 .principal h2 ~ h2 { color:var(--st); margin:1.8rem 0 .4rem; font:700 1.6rem/1.25 Rajdhani, sans-serif; }
+/* títulos H1 dentro das notas de índice e chamadas (callouts) como no vault */
+.principal h1 { margin:1.4rem 0 .4rem; color:var(--st); font:700 1.7rem/1.25 Rajdhani, sans-serif; }
+.callout { margin:1rem 0; padding:.6rem 1rem; border:1px solid var(--bd); border-left:4px solid var(--ac); border-radius:8px; background:var(--pa); }
+.callout > :last-child { margin-bottom:0; }
+.callout .ct { margin:0 0 .3rem; font-weight:600; }
+.c-warning, .c-danger, .c-failure { border-left-color:#e0a030; }
+.c-success, .c-tip { border-left-color:#2fa866; }
+.c-question { border-left-color:#a070e0; }
+.principal em { font-style:italic; }
