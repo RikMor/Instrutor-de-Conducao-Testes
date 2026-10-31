@@ -623,7 +623,12 @@ ${lifeBar.length ? `<div class="lifes">${lifeBar.join('')}</div>` : ''}${info}${
     multigo: () => (window.mqOpen ? window.mqOpen() : alert('O multijogador não está disponível (precisa de ligação à internet).')),
     menu: renderSolo, menu0: renderMenu, solo: renderSolo, regras: renderRegras, multimenu: renderMulti, colecoes: renderCol,
   };
+  // Clicar fora da janela (no fundo escuro) fecha o minimapa, as coleções e o manual.
+  let downOn = null;
+  document.addEventListener('mousedown', (e) => (downOn = e.target), true);
+  const outside = (e) => downOn === e.target && e.target.classList.contains('ov') && G && (G.modal === 'map' || G.modal === 'col');
   const click = (e) => {
+    if (outside(e)) { G.modal = null; return view(); }
     const b = e.target.closest('button');
     if (!b || b.disabled) return;
     if (b.dataset.i !== undefined) return pick(+b.dataset.i);
@@ -634,7 +639,7 @@ ${lifeBar.length ? `<div class="lifes">${lifeBar.join('')}</div>` : ''}${info}${
     if (f) f();
   };
   app.addEventListener('click', click);
-  MAN.addEventListener('click', click);
+  MAN.addEventListener('click', (e) => { if (downOn === MAN && e.target === MAN) manual(false); else click(e); });
   app.addEventListener('change', (e) => { if (e.target.matches('#wu')) startInfo(); });
   document.addEventListener('keydown', (e) => {
     if (e.ctrlKey || e.metaKey || e.altKey) return;
