@@ -73,8 +73,19 @@ mark { background:#ffe27a; color:#222; border-radius:3px; }
 .principal h1 { margin:1.4rem 0 .4rem; color:var(--st); font:700 1.7rem/1.25 Rajdhani, sans-serif; }
 .callout { margin:1rem 0; padding:.6rem 1rem; border:1px solid var(--bd); border-left:4px solid var(--ac); border-radius:8px; background:var(--pa); }
 .callout > :last-child { margin-bottom:0; }
-.callout .ct { margin:0 0 .3rem; font-weight:600; }
+.callout > p:first-of-type { margin:0 0 .4rem; }
 .c-warning, .c-danger, .c-failure { border-left-color:#e0a030; }
 .c-success, .c-tip { border-left-color:#2fa866; }
 .c-question { border-left-color:#a070e0; }
 .principal em { font-style:italic; }
+
+/* pesquisa: destaque dos resultados dentro da nota */
+.barra-hl { position:sticky; top:3.6rem; z-index:10; display:flex; flex-wrap:wrap; align-items:center; gap:.5rem; margin:0 0 1rem; padding:.5rem .8rem; border:1px solid var(--bd); border-radius:10px; background:var(--pa); font-size:.92rem; }
+.barra-hl span { flex:1; min-width:10rem; }
+.barra-hl button { font:inherit; padding:.25rem .7rem; color:inherit; background:var(--bg); border:1px solid var(--bd); border-radius:8px; cursor:pointer; }
+mark.hl { background:#ffe27a; color:#222; border-radius:3px; padding:0 1px; }
+mark.hl.atual { background:#ff9f43; outline:2px solid #ff9f43; }
+.res .cont { color:var(--mu); font-size:.85rem; }
+.res a { font-weight:600; }
+.res .sn { display:block; margin-top:.25rem; color:var(--fg); font-size:.93rem; line-height:1.45; }
+.sec-res { margin:1.2rem 0 .2rem; color:var(--st); font:700 1.15rem/1.3 Rajdhani, sans-serif; }

@@ -35,8 +35,8 @@ O manual tem 12 módulos em 4 grupos: **Manuais** (Psicologia na Condução, Mé
 
 - `js/manual/index.js` só tem a estrutura (módulos, secções, títulos). O texto de cada módulo está em `js/manual/<módulo>.js` e só é carregado quando se abre esse módulo.
 - As imagens estão em `img/`. Funciona também a abrir `manual.html` diretamente no browser (sem servidor).
-- A pesquisa à esquerda filtra os títulos logo ao escrever; com Enter pesquisa no texto de todo o manual.
-- O texto é igual ao das notas do vault (inclui índices, introduções e as notas sobre os PDFs; as ligações para PDFs, testes e canvas não são clicáveis no site). Estes ficheiros são gerados a partir do vault; não se editam à mão.
+- A pesquisa à esquerda funciona como a do Obsidian: escreve uma palavra ou uma frase e procura no texto de todas as notas (sem distinguir maiúsculas nem acentos, mesmo que a frase passe de uma linha para a seguinte). Mostra primeiro as notas com a frase exata e depois as que têm todas as palavras; entre aspas obriga à frase exata. Ao abrir um resultado, o texto fica destacado, com setas para saltar entre ocorrências.
+- O texto é igual ao das notas do vault (inclui índices, introduções e as notas sobre os PDFs; nos Resumos das aulas não há imagens (fotos e desenhos); as ligações para PDFs, testes e canvas não são clicáveis no site). Estes ficheiros são gerados a partir do vault; não se editam à mão.
 
 ## Formato das perguntas (`js/quiz.js`)
 
