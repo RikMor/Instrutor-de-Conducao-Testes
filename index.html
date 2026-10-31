@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Instrutor de Condução</title>
-    <meta name="description" content="Testes por tema e jogos para estudar para o curso de instrutor de condução." />
+    <meta name="description" content="Manual, testes por tema e jogos para estudar para o curso de instrutor de condução." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -20,14 +20,25 @@
 
       <!-- Números em estilo conta-quilómetros -->
       <div class="odometros">
-        <div class="odo"><span>1</span><span>2</span><span>8</span><span>6</span><small>perguntas</small></div>
-        <div class="odo"><span>1</span><span>6</span><small>testes</small></div>
+        <div class="odo"><span>1</span><span>3</span><span>1</span><span>3</span><small>perguntas</small></div>
+        <div class="odo"><span>1</span><span>7</span><small>testes</small></div>
         <div class="odo"><span>4</span><small>temas</small></div>
+        <div class="odo"><span>5</span><small>manuais</small></div>
       </div>
     </header>
 
     <!-- Painel de instrumentos: cada modo é um mostrador com ponteiro -->
     <main class="painel conteudo">
+      <a class="modo" style="--c: var(--amarelo); --v: 55deg" href="manual.html">
+        <div class="mostrador">
+          <i class="agulha"></i><b class="eixo"></b>
+          <span class="icone">📖</span>
+        </div>
+        <h2>Manual</h2>
+        <p>Estuda a matéria: psicologia, pedagogia, trânsito, mecânica e primeiros socorros.</p>
+        <span class="ir">Ler o manual</span>
+      </a>
+
       <a class="modo" style="--c: var(--azul); --v: 35deg" href="testes.html">
         <div class="mostrador">
           <i class="agulha"></i><b class="eixo"></b>

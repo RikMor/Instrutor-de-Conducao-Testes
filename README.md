@@ -1,19 +1,22 @@
 # Instrutor de Condução — Testes e jogos
 
-Site de estudo para o curso de instrutor de condução. Abre `index.html` num browser (ou publica a pasta toda) e escolhe uma das três opções.
+Site de estudo para o curso de instrutor de condução. Abre `index.html` num browser (ou publica a pasta toda) e escolhe uma das quatro opções.
 
 ## Estrutura
 
 ```
 index.html              página inicial (escolher o que fazer)
+manual.html             manual de estudo (texto da matéria, por módulo)
 testes.html             testes por tema, sozinho ou em multijogador
 milionario.html         jogo "Quem quer ser milionário?"
 Torre_das_Cartas.html   jogo "Torre das Cartas"
 
 css/                    aspeto de cada página (um ficheiro por página)
-  index.css  testes.css  milionario.css  torre.css
+  index.css  manual.css  testes.css  milionario.css  torre.css
 
 js/                     comportamento de cada página
+  manual.js             manual: índice, leitura e pesquisa
+  manual/               TEXTO do manual (um ficheiro por módulo + index.js com a lista de capítulos)
   testes.js             testes: configuração, perguntas, resultado
   quiz.js               DADOS: todas as perguntas e a lista de testes
   multi.js              multijogador dos testes (salas em tempo real, Firebase)
@@ -25,6 +28,15 @@ js/                     comportamento de cada página
 ```
 
 Cada ficheiro `.html` só tem a estrutura da página; o CSS e o JavaScript estão nos ficheiros das pastas `css/` e `js/`. No topo de cada ficheiro JS há um resumo de como funciona e, antes de cada função, um comentário a explicar o que faz.
+
+## Manual (`manual.html`)
+
+O manual tem 5 módulos: Psicologia na Condução, Métodos de Ensino e Pedagogia, Trânsito e Segurança Rodoviária (com as imagens dos sinais), Técnica Automóvel (Mecânica) e Primeiros Socorros.
+
+- `js/manual/index.js` só tem a estrutura (módulos, secções, títulos). O texto de cada módulo está em `js/manual/<módulo>.js` e só é carregado quando se abre esse módulo.
+- As imagens estão em `img/`. Funciona também a abrir `manual.html` diretamente no browser (sem servidor).
+- A pesquisa à esquerda filtra os títulos logo ao escrever; com Enter pesquisa no texto de todo o manual.
+- Estes ficheiros são gerados a partir das notas do vault; para atualizar o texto, edita as notas e volta a gerar (não se edita à mão).
 
 ## Formato das perguntas (`js/quiz.js`)
 
