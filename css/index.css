@@ -11,6 +11,7 @@
   --azul: #4aa3ff;
   --laranja: #ff8a3d;
   --verde: #3ddc84;
+  --amarelo: #f5c542;
 }
 
 /* ---------- Base ---------- */
@@ -34,7 +35,7 @@ body {
 }
 .conteudo {
   width: 100%;
-  max-width: 1040px;
+  max-width: 1160px;
   margin: 0 auto;
   padding: 0 1.2rem;
 }
@@ -87,7 +88,7 @@ body {
 /* ---------- Painel com os três mostradores ---------- */
 .painel {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 1.4rem;
   margin-top: 2.6rem;
 }
