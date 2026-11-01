@@ -347,7 +347,7 @@ const info = (q) =>
     : q.u
     ? '<span class="bd">resposta não confirmada</span>'
     : q.e
-      ? `<div class="ex">${q.e}</div>`
+      ? `<div class="ex">${q.e}${window.ManualPopup ? ManualPopup.btn(q) : ''}</div>`
       : '';
 
 // "Visão geral do teste": percentagem de jogadores que escolheu cada opção, por pergunta.

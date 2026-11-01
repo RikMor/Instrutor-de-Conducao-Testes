@@ -91,7 +91,7 @@
     const opcoes = q.o.map((t, i) => ({ t, ok: i === q.a }));
     return {
       id: q.id,
-      q: q.q.replace(/^Ficha \d+(?: \([^)]*\))? — /, ''),
+      q: q.q.replace(/^Ficha \d+(?: \([^)]*\))? — /, '').replace(/^Verdadeiro ou falso\?\s*«([\s\S]*?)»\.?\s*$/, '$1'),
       e: q.e || '',
       u: q.u,
       s: q.s,
@@ -423,17 +423,40 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
       for (const [k, w] of ok) if ((x -= w) <= 0) return k;
       return 'e';
     };
-    return Array.from({ length: ROWS }, (_, r) => [0, 1, 2].map(() => (r === ROWS - 1 ? 'b' : r === 0 ? 'e' : r === ROWS - 2 ? (rnd(0, 1) ? 'r' : '$') : roll(r))));
+    // Caminhos aleatórios (como no Slay the Spire): 2 ou 3 caminhos a subir, que andam à sorte para a esquerda, em frente
+    // ou para a direita, sem se cruzarem. Só existem os nós por onde passa algum caminho; o último andar é um só nó.
+    let nodes, edges;
+    for (let t = 0; t < 80; t++) {
+      nodes = Array.from({ length: ROWS }, () => [0, 0, 0]);
+      edges = new Set();
+      const E = Array.from({ length: ROWS }, () => []);
+      shuffle([0, 1, 2]).slice(0, rnd(2, 3)).forEach((start) => {
+        let l = start;
+        nodes[0][l] = 1;
+        for (let r = 0; r < ROWS - 2; r++) {
+          const opt = [[l, 3], [l - 1, 2], [l + 1, 2]].filter(([n]) => n >= 0 && n <= 2 && !E[r].some(([a, b]) => (l < a && n > b) || (l > a && n < b)));
+          let x = rnd(1, opt.reduce((a, [, w]) => a + w, 0)), n = l;
+          for (const [m, w] of opt) if ((x -= w) <= 0) { n = m; break; }
+          edges.add(`${r},${l}>${n}`); E[r].push([l, n]); nodes[r + 1][n] = 1; l = n;
+        }
+      });
+      for (let l = 0; l < 3; l++) if (ROWS > 1 && nodes[ROWS - 2][l]) { edges.add(`${ROWS - 2},${l}>1`); nodes[ROWS - 1][1] = 1; }
+      if (nodes.slice(0, ROWS - 1).every((row) => row.reduce((a, b) => a + b, 0) >= 2)) break;
+    }
+    const map = nodes.map((row, r) => row.map((on) => (!on ? null : r === ROWS - 1 ? 'b' : r === 0 ? 'e' : r === ROWS - 2 ? (rnd(0, 1) ? 'r' : '$') : roll(r))));
+    map.edges = edges;
+    return map;
   }
-  const reach = (g, r, l) => g.phase === 'map' && !g.modal && r === g.row + 1 && (g.row < 0 || Math.abs(l - g.lane) <= 1);
+  const reach = (g, r, l) => g.phase === 'map' && !g.modal && r === g.row + 1 && !!g.map[r][l] && (g.row < 0 || g.map.edges.has(`${g.row},${g.lane}>${l}`));
   function mapHtml(ro) {
     const g = G, X = (l) => 16 + l * 34, Y = (r) => (ROWS - 1 - r) * 72 + 36;
     let ln = '', nd = '';
     for (let r = 0; r < ROWS; r++)
       for (let l = 0; l < 3; l++) {
+        if (!g.map[r][l]) continue;
         if (r < ROWS - 1)
-          for (let m = l - 1; m <= l + 1; m++)
-            if (m >= 0 && m < 3) ln += `<line x1="${X(l)}" y1="${Y(r)}" x2="${X(m)}" y2="${Y(r + 1)}" class="${g.path.has(r + ',' + l) && g.path.has(r + 1 + ',' + m) ? 'on' : ''}"/>`;
+          for (let m = 0; m < 3; m++)
+            if (g.map.edges.has(`${r},${l}>${m}`)) ln += `<line x1="${X(l)}" y1="${Y(r)}" x2="${X(m)}" y2="${Y(r + 1)}" class="${g.path.has(r + ',' + l) && g.path.has(r + 1 + ',' + m) ? 'on' : ''}"/>`;
         const k = g.map[r][l], can = !ro && reach(g, r, l), cur = g.row === r && g.lane === l, here = g.path.has(r + ',' + l);
         nd += `<button class="nd${can ? ' can' : ''}${here ? ' vis' : ''}${cur ? ' cur' : ''}${k === 'b' ? ' bs' : ''}" style="left:${X(l)}%;top:${Y(r)}px" ${can ? `data-go="${r},${l}"` : 'disabled'} aria-label="${lab(k)}, fase ${r + 1}">${ico(k)}</button>`;
       }
