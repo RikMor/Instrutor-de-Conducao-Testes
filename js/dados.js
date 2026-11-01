@@ -7,9 +7,10 @@
        conteudo/manual-index   MANUAL_INDEX         módulos, secções e títulos do manual
        conteudo/m-<módulo>     [{ id, h }, ...]     texto das notas de cada módulo
 
-   Quem pode ler: só quem tem um documento em "acessos/<o seu uid>". Esse documento só se
-   cria com o código de acesso certo (guardado em config/convite, que ninguém consegue ler).
-   Quem já entrou uma vez neste browser não precisa de escrever o código outra vez.
+   Quem pode ler: só quem tem um documento em "acessos/<o seu uid>" cujo código ainda existe em
+   "convites/<código>". Cada pessoa tem o seu código (criado à mão no Firestore, com o nome dela),
+   por isso apagar convites/<código> corta o acesso a quem o usou. Ninguém consegue ler a
+   coleção "convites". Quem já entrou neste browser não precisa de escrever o código outra vez.
    As regras estão em SO-NO-TEU-PC/regras-firestore.txt.
 
    Cada página chama iniciar({ quiz, manualIndex, scripts }): pede o acesso, carrega os
@@ -74,7 +75,7 @@ function pedirCodigo(uid, aviso) {
   return new Promise((resolve) => {
     ecra(
       '<h2 style="margin:0 0 .3rem">Instrutor de Condução</h2>' +
-        '<p style="margin:0;opacity:.8">Este site é de acesso reservado. Escreve o código de acesso.</p>' +
+        '<p style="margin:0;opacity:.8">Este site é de acesso reservado. Escreve o teu código de acesso.</p>' +
         '<input id="dd-codigo" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" style="' + ESTILO_INPUT + '" />' +
         '<p id="dd-aviso" style="min-height:1.5em;margin:0 0 .5rem;color:#ff8a80">' + (aviso || '') + '</p>' +
         '<button id="dd-ok" style="' + ESTILO_BOTAO + '">Entrar</button>',
@@ -89,13 +90,13 @@ function pedirCodigo(uid, aviso) {
       botao.disabled = true;
       msg.textContent = '';
       try {
-        // As regras só deixam criar este documento se o código for igual ao de config/convite.
+        // As regras só deixam gravar se existir convites/<código>.
         await setDoc(doc(db, 'acessos', uid), { codigo, criado: serverTimestamp() });
         resolve();
       } catch (e) {
         botao.disabled = false;
         msg.textContent =
-          e && e.code === 'permission-denied' ? 'Código errado.' : 'Não foi possível verificar o código. Verifica a ligação.';
+          e && e.code === 'permission-denied' ? 'Código inválido ou retirado.' : 'Não foi possível verificar o código. Verifica a ligação.';
         campo.select();
       }
     };
@@ -145,36 +146,40 @@ function carregarScript(item) {
 }
 
 // ---------- Ponto de entrada de cada página ----------
+async function carregarDados(opc) {
+  if (opc.quiz) {
+    const d = await lerConteudo('quiz');
+    window.TESTS = d.TESTS;
+    window.QS = d.QS;
+  }
+  if (opc.manualIndex) window.MANUAL_INDEX = await lerConteudo('manual-index');
+  // Usado por manual.js para pedir o texto de cada módulo quando é preciso.
+  window.DADOS = { modulo: (id) => lerConteudo('m-' + id) };
+}
+
 export async function iniciar(opc) {
   ecra('<p>A carregar…</p>');
   try {
-    await garantirAcesso();
+    const uid = await garantirAcesso();
     ecra('<p>A carregar…</p>');
-    if (opc.quiz) {
-      const d = await lerConteudo('quiz');
-      window.TESTS = d.TESTS;
-      window.QS = d.QS;
+    try {
+      await carregarDados(opc);
+    } catch (e) {
+      if (!(e && e.code === 'permission-denied')) throw e;
+      // O convite desta pessoa foi apagado: pede outro código (substitui o acesso antigo).
+      CACHE.clear();
+      await pedirCodigo(uid, 'O teu acesso foi retirado. Escreve um código válido.');
+      ecra('<p>A carregar…</p>');
+      await carregarDados(opc);
     }
-    if (opc.manualIndex) window.MANUAL_INDEX = await lerConteudo('manual-index');
-    // Usado por manual.js para pedir o texto de cada módulo quando é preciso.
-    window.DADOS = { modulo: (id) => lerConteudo('m-' + id) };
-    for (const s of opc.scripts || []) await carregarScript(s);
+    for (const sc of opc.scripts || []) await carregarScript(sc);
     tirarEcra();
   } catch (e) {
     console.error(e);
-    // Se o acesso foi retirado entretanto (documento apagado), volta a pedir o código.
-    if (e && e.code === 'permission-denied') {
-      ecra(
-        '<p>O teu acesso foi retirado ou expirou.</p>' +
-          '<button id="dd-r" style="' + ESTILO_BOTAO + '">Tentar outra vez</button>',
-      );
-      veu.querySelector('#dd-r').onclick = () => location.reload();
-    } else {
-      ecra(
-        '<p>Não foi possível carregar o conteúdo. Verifica a ligação e tenta outra vez.</p>' +
-          '<button id="dd-r" style="' + ESTILO_BOTAO + '">Tentar outra vez</button>',
-      );
-      veu.querySelector('#dd-r').onclick = () => location.reload();
-    }
+    ecra(
+      '<p>Não foi possível carregar o conteúdo. Verifica a ligação e tenta outra vez.</p>' +
+        '<button id="dd-r" style="' + ESTILO_BOTAO + '">Tentar outra vez</button>',
+    );
+    veu.querySelector('#dd-r').onclick = () => location.reload();
   }
 }
