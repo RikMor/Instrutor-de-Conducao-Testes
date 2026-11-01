@@ -14,6 +14,8 @@
   var main = $('#main'), arvore = $('#arvore'), busca = $('#busca');
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
 
+  // Nos resumos das aulas mostra-se só o título (sem "Aula 1 - ").
+  IDX.forEach(function (m) { m.n.forEach(function (n) { n.t = n.t.replace(/^Aula\s*\d+\s*[-–—:]\s*/i, ''); }); });
   IDX.forEach(function (m) { m.n.forEach(function (n, i) { ONDE[n.id] = { m: m, i: i }; }); });
 
   // ---------- Carregar o texto de um módulo (uma só vez) ----------
@@ -74,7 +76,7 @@
     ATUAL = id; document.title = n.t + ' — Manual';
     main.innerHTML = '<p>A carregar…</p>';
     carregar(m.id, function () {
-      if (location.hash.replace('#/', '') !== id) return;
+      if (hashId() !== id) return;
       var ant = m.n[o.i - 1], seg = m.n[o.i + 1];
       main.innerHTML =
         '<p class="crumb"><a href="#/">Manual</a> › <a href="#/' + m.id + '">' + esc(m.t) + '</a>' + (n.s ? ' › ' + esc(n.s) : '') + '</p>' +
@@ -253,10 +255,20 @@
   document.addEventListener('touchend', largar); document.addEventListener('touchcancel', largar);
 
   // ---------- Rotas ----------
+  // O endereço pode levar frases a destacar: #/<nota>?h=<frase>&h=<outra frase> (usado pelo jogo
+  // para abrir o manual no sítio onde está a resposta de uma pergunta).
+  function hashId() { return location.hash.replace(/^#\/?/, '').split('?')[0]; }
+  function hashHL() {
+    var h = location.hash.replace(/^#\/?/, ''), i = h.indexOf('?'), r = [];
+    if (i < 0) return r;
+    h.slice(i + 1).split('&').forEach(function (p) { if (p.indexOf('h=') === 0) { try { r.push(decodeURIComponent(p.slice(2))); } catch (e) {} } });
+    return r;
+  }
   function rota() {
-    var id = location.hash.replace(/^#\/?/, '');
+    var id = hashId(), hl = hashHL();
     document.body.classList.remove('menu-aberto'); $('#menu').setAttribute('aria-expanded', 'false');
     HL = PEND; PEND = null;
+    if (!HL && hl.length) HL = { q: hl[0], termos: hl.map(norm) };
     desenharArvore(id);
     if (ONDE[id]) nota(id);
     else { var m = IDX.filter(function (x) { return x.id === id; })[0]; HL = null; if (m) modulo(m); else inicio(); }

@@ -1060,3 +1060,19 @@ body {
 .mb.purple { background: #7b57c9; }
 @media (max-width: 560px) { .mnu { grid-template-columns: 1fr; } }
 .rg p { line-height: 1.55; margin: .3rem 0; }
+
+.reveal [data-man], .rv [data-man] { margin: .3rem .5rem .3rem 0; }
+
+/* Telemóvel: minimapa e mapa; motivo da derrota; melhorias */
+@media (max-width: 760px) {
+  .mapcols .map { flex: none; width: 100%; max-width: 420px; min-width: 0; }
+  .leg { width: 100%; justify-content: center; }
+  .dlg.wide { max-width: 100%; padding: 1rem .8rem; }
+  .ov { padding: .5rem; }
+}
+.why { margin: .6rem 0; padding: .7rem .9rem; border: 1px solid #e53935; border-radius: 10px; background: rgba(229, 57, 53, .14); text-align: left; line-height: 1.5; }
+.why.win { border-color: var(--ok); background: rgba(46, 204, 113, .14); }
+.why.walk { border-color: var(--mu); background: rgba(255, 255, 255, .06); }
+.why small { color: var(--mu); }
+.rl sup { font-size: .6em; color: var(--gold); font-weight: 700; }
+.opts .opt small { color: var(--mu); }
