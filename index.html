@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-PT">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Instrutor de Condução</title>
+    <meta name="description" content="Manual, testes por tema e jogos para estudar para o curso de instrutor de condução." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500&family=Rajdhani:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/index.css" />
+  </head>
+  <body>
+    <header class="topo conteudo">
+      <h1>Instrutor de Condução</h1>
+      <p class="lema">Liga o motor e escolhe como queres estudar.</p>
+
+      <!-- Números em estilo conta-quilómetros -->
+      <div class="odometros">
+        <div class="odo"><span>1</span><span>3</span><span>1</span><span>3</span><small>perguntas</small></div>
+        <div class="odo"><span>1</span><span>7</span><small>testes</small></div>
+        <div class="odo"><span>4</span><small>temas</small></div>
+        <div class="odo"><span>1</span><span>2</span><small>módulos de manual</small></div>
+      </div>
+    </header>
+
+    <!-- Painel de instrumentos: cada modo é um mostrador com ponteiro -->
+    <main class="painel conteudo">
+      <a class="modo" style="--c: var(--amarelo); --v: 55deg" href="manual.html">
+        <div class="mostrador">
+          <i class="agulha"></i><b class="eixo"></b>
+          <span class="icone">📖</span>
+        </div>
+        <h2>Manual</h2>
+        <p>Estuda a matéria: manuais, resumos das aulas, legislação e relatório de sinistralidade.</p>
+        <span class="ir">Ler o manual</span>
+      </a>
+
+      <a class="modo" style="--c: var(--azul); --v: 35deg" href="testes.html">
+        <div class="mostrador">
+          <i class="agulha"></i><b class="eixo"></b>
+          <span class="icone">📝</span>
+        </div>
+        <h2>Testes</h2>
+        <p>Testes convencionais por tema, com tempo, correção e modo multijogador.</p>
+        <span class="ir">Fazer um teste</span>
+      </a>
+
+      <a class="modo" style="--c: var(--laranja); --v: 80deg" href="Torre_das_Cartas.html">
+        <div class="mostrador">
+          <i class="agulha"></i><b class="eixo"></b>
+          <span class="icone">🏰</span>
+        </div>
+        <h2>Torre do Código de Condução</h2>
+        <p>Sobe a torre derrotando inimigos e vence cada andar respondendo às perguntas.</p>
+        <span class="ir">Subir a torre</span>
+      </a>
+
+      <a class="modo" style="--c: var(--verde); --v: 120deg" href="milionario.html">
+        <div class="mostrador">
+          <i class="agulha"></i><b class="eixo"></b>
+          <span class="icone">💰</span>
+        </div>
+        <h2>Quem quer ser milionário?</h2>
+        <p>15 perguntas do curso, três ajudas e patamares seguros. Chega ao milhão.</p>
+        <span class="ir">Jogar</span>
+      </a>
+    </main>
+
+    <footer class="conteudo rodape">
+      <p>
+        Temas: Psicologia na Condução, Trânsito e Segurança Rodoviária, Código da Estrada e Mecânica, Métodos de
+        Ensino e Pedagogia.
+      </p>
+    </footer>
+  </body>
+</html>
