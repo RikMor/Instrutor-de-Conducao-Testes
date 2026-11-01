@@ -140,7 +140,9 @@ function carregarScript(item) {
     else s.async = false;
     s.src = src;
     s.onload = resolve;
-    s.onerror = () => reject(new Error('Não foi possível carregar ' + src));
+    // { src, opcional: true }: se o ficheiro não existir, a página continua sem ele.
+    s.onerror = () =>
+      typeof item !== 'string' && item.opcional ? resolve() : reject(new Error('Não foi possível carregar ' + src));
     document.body.appendChild(s);
   });
 }
