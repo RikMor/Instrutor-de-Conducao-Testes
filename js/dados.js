@@ -76,7 +76,8 @@ function pedirCodigo(uid, aviso) {
     ecra(
       '<h2 style="margin:0 0 .3rem">Instrutor de Condução</h2>' +
         '<p style="margin:0;opacity:.8">Este site é de acesso reservado. Escreve o teu código de acesso.</p>' +
-        '<input id="dd-codigo" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" style="' + ESTILO_INPUT + '" />' +
+        '<input id="dd-codigo" type="password" autocomplete="new-password" autocapitalize="off" spellcheck="false" style="' + ESTILO_INPUT + '" />' +
+        '<button id="dd-ver" type="button" style="background:none;border:0;color:#9fb0c8;font:inherit;font-size:.9rem;cursor:pointer;text-decoration:underline">Mostrar código</button>' +
         '<p id="dd-aviso" style="min-height:1.5em;margin:0 0 .5rem;color:#ff8a80">' + (aviso || '') + '</p>' +
         '<button id="dd-ok" style="' + ESTILO_BOTAO + '">Entrar</button>',
     );
@@ -84,6 +85,13 @@ function pedirCodigo(uid, aviso) {
       msg = veu.querySelector('#dd-aviso'),
       botao = veu.querySelector('#dd-ok');
     campo.focus();
+    // O código aparece escondido (pontos); o botão mostra-o se precisares de confirmar o que escreveste.
+    const ver = veu.querySelector('#dd-ver');
+    ver.onclick = () => {
+      const esconder = campo.type === 'text';
+      campo.type = esconder ? 'password' : 'text';
+      ver.textContent = esconder ? 'Mostrar código' : 'Esconder código';
+    };
     const enviar = async () => {
       const codigo = campo.value.trim();
       if (!codigo) return;
