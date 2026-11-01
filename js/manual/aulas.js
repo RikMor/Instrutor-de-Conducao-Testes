@@ -9,26 +9,26 @@
    Notas deste módulo (22):
        1. Índice
        2. Psicologia na Condução  ›  Índice
-       3. Psicologia na Condução  ›  Aula 1 - Automatismos, Sensações e Memória
-       4. Psicologia na Condução  ›  Aula 2 - Atividade Exploratória, Índices e Processo Decisional
-       5. Psicologia na Condução  ›  Aula 3 - Treino da E.P.V., Recolha e Tratamento da Informação
-       6. Psicologia na Condução  ›  Aula 4 - Comportamento do Condutor e 3ª Etapa (Agir)
-       7. Psicologia na Condução  ›  Aula 6 - O Condutor e o seu Estado Físico e Psicológico, Substâncias Psicotrópicas
-       8. Psicologia na Condução  ›  Aula 7 - Tipos de Visão e Álcool (TAS)
-       9. Psicologia na Condução  ›  Aula 8 - Efeitos do Álcool segundo a TAS e Fatores da Alcoolemia
-      10. Psicologia na Condução  ›  Aula 9 - Perceção do Risco e Condução Defensiva
+       3. Psicologia na Condução  ›  Automatismos, Sensações e Memória
+       4. Psicologia na Condução  ›  Atividade Exploratória, Índices e Processo Decisional
+       5. Psicologia na Condução  ›  Treino da E.P.V., Recolha e Tratamento da Informação
+       6. Psicologia na Condução  ›  Comportamento do Condutor e 3ª Etapa (Agir)
+       7. Psicologia na Condução  ›  O Condutor e o seu Estado Físico e Psicológico, Substâncias Psicotrópicas
+       8. Psicologia na Condução  ›  Tipos de Visão e Álcool (TAS)
+       9. Psicologia na Condução  ›  Efeitos do Álcool segundo a TAS e Fatores da Alcoolemia
+      10. Psicologia na Condução  ›  Perceção do Risco e Condução Defensiva
       11. Métodos de Ensino e Pedagogia  ›  Índice
-      12. Métodos de Ensino e Pedagogia  ›  Aula 1 - Pedagogia, Binómio Ensino-Aprendizagem e Domínios do Saber
-      13. Métodos de Ensino e Pedagogia  ›  Aula 2 - Aprendizagem, Caraterísticas do Processo e Situações de Aprendizagem
-      14. Métodos de Ensino e Pedagogia  ›  Aula 3 - Princípios Pedagógicos, Planificação e Objetivos
+      12. Métodos de Ensino e Pedagogia  ›  Pedagogia, Binómio Ensino-Aprendizagem e Domínios do Saber
+      13. Métodos de Ensino e Pedagogia  ›  Aprendizagem, Caraterísticas do Processo e Situações de Aprendizagem
+      14. Métodos de Ensino e Pedagogia  ›  Princípios Pedagógicos, Planificação e Objetivos
       15. Trânsito e Segurança Rodoviária  ›  Índice
-      16. Trânsito e Segurança Rodoviária  ›  Aula 1 - Via, Faixa de Rodagem e Autoestradas
-      17. Trânsito e Segurança Rodoviária  ›  Aula 2 - Tempo de Reação, Distâncias de Paragem, Acidente e Visibilidade Reduzida
-      18. Trânsito e Segurança Rodoviária  ›  Aula 3 - Semáforos e Causas de Acidentes
+      16. Trânsito e Segurança Rodoviária  ›  Via, Faixa de Rodagem e Autoestradas
+      17. Trânsito e Segurança Rodoviária  ›  Tempo de Reação, Distâncias de Paragem, Acidente e Visibilidade Reduzida
+      18. Trânsito e Segurança Rodoviária  ›  Semáforos e Causas de Acidentes
       19. Legislação  ›  Índice
-      20. Legislação  ›  Aula 1 - Hierarquia da Legislação, Contraordenações e Marca STOP
-      21. Legislação  ›  Aula 2 - Excesso de Velocidade, Contraordenações e Sanções
-      22. Legislação  ›  Aula 3 - Álcool, Contraordenações e Crime
+      20. Legislação  ›  Hierarquia da Legislação, Contraordenações e Marca STOP
+      21. Legislação  ›  Excesso de Velocidade, Contraordenações e Sanções
+      22. Legislação  ›  Álcool, Contraordenações e Crime
    ============================================================ */
 
 MANUAL_LOAD("aulas", [
@@ -59,50 +59,42 @@ MANUAL_LOAD("aulas", [
 <ul>
 <li><strong>Aula 1 (10/09/2026)</strong> — Automatismos, Sensações e Memória
 <ul>
-<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-1-automatismos-sensacoes-e-memoria">Aula 1 - Automatismos, Sensações e Memória</a></li>
-<li>Vista em Canvas</li>
+<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-1-automatismos-sensacoes-e-memoria">Automatismos, Sensações e Memória</a></li>
 </ul>
 </li>
 <li><strong>Aula 2 (14/09/2026)</strong> — Atividade Exploratória, Índices e Processo Decisional
 <ul>
-<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-2-atividade-exploratoria-indices-e-p">Aula 2 - Atividade Exploratória, Índices e Processo Decisional</a></li>
-<li>Vista em Canvas</li>
+<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-2-atividade-exploratoria-indices-e-p">Atividade Exploratória, Índices e Processo Decisional</a></li>
 </ul>
 </li>
 <li><strong>Aula 3 (17/09/2026)</strong> — Treino da E.P.V., Recolha e Tratamento da Informação
 <ul>
-<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-3-treino-da-e-p-v-recolha-e-tratamen">Aula 3 - Treino da E.P.V., Recolha e Tratamento da Informação</a></li>
-<li>Vista em Canvas</li>
+<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-3-treino-da-e-p-v-recolha-e-tratamen">Treino da E.P.V., Recolha e Tratamento da Informação</a></li>
 </ul>
 </li>
 <li><strong>Aula 4 (21/09/2026)</strong> — Comportamento do Condutor e 3ª Etapa (Agir)
 <ul>
-<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-4-comportamento-do-condutor-e-3a-eta">Aula 4 - Comportamento do Condutor e 3ª Etapa (Agir)</a></li>
-<li>Vista em Canvas</li>
+<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-4-comportamento-do-condutor-e-3a-eta">Comportamento do Condutor e 3ª Etapa (Agir)</a></li>
 </ul>
 </li>
 <li><strong>Aula 6 (30/09/2026)</strong> — O Condutor e o seu Estado Físico e Psicológico, Substâncias Psicotrópicas
 <ul>
-<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-6-o-condutor-e-o-seu-estado-fisico-e">Aula 6 - O Condutor e o seu Estado Físico e Psicológico, Substâncias Psicotrópicas</a></li>
-<li>Vista em Canvas</li>
+<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-6-o-condutor-e-o-seu-estado-fisico-e">O Condutor e o seu Estado Físico e Psicológico, Substâncias Psicotrópicas</a></li>
 </ul>
 </li>
 <li><strong>Aula 7</strong> — Tipos de Visão e Álcool (TAS)
 <ul>
-<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-7-tipos-de-visao-e-alcool-tas">Aula 7 - Tipos de Visão e Álcool (TAS)</a></li>
-<li>Vista em Canvas</li>
+<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-7-tipos-de-visao-e-alcool-tas">Tipos de Visão e Álcool (TAS)</a></li>
 </ul>
 </li>
 <li><strong>Aula 8</strong> — Efeitos do Álcool segundo a TAS e Fatores da Alcoolemia
 <ul>
-<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-8-efeitos-do-alcool-segundo-a-tas-e-">Aula 8 - Efeitos do Álcool segundo a TAS e Fatores da Alcoolemia</a></li>
-<li>Vista em Canvas</li>
+<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-8-efeitos-do-alcool-segundo-a-tas-e-">Efeitos do Álcool segundo a TAS e Fatores da Alcoolemia</a></li>
 </ul>
 </li>
 <li><strong>Aula 9</strong> — Perceção do Risco e Condução Defensiva
 <ul>
-<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-9-percecao-do-risco-e-conducao-defen">Aula 9 - Perceção do Risco e Condução Defensiva</a></li>
-<li>Vista em Canvas</li>
+<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-9-percecao-do-risco-e-conducao-defen">Perceção do Risco e Condução Defensiva</a></li>
 </ul>
 </li>
 </ul>
@@ -113,7 +105,7 @@ MANUAL_LOAD("aulas", [
 `
   },
 
-  // ===== 3. Aula 1 - Automatismos, Sensações e Memória =====
+  // ===== 3. Automatismos, Sensações e Memória =====
   {
     id: "aulas-psicologia-na-conducao-apontamentos-de-aula-1-automatismos-sensacoes-e-memoria",
     h: `<div class="callout c-note">
@@ -199,12 +191,11 @@ c. ...</p>
 <li><a href="#/psicologia-analise-psicologica-da-funcao-conducao">Análise Psicológica da Função Condução</a></li>
 <li><a href="#/psicologia-sensacoes-orgaos-dos-sentidos-percecao-e-memoria">Sensações, Órgãos dos Sentidos, Perceção e Memória</a></li>
 <li><a href="#/psicologia-orgaos-dos-sentidos-visao-audicao-equilibrio">Órgãos dos Sentidos - visão, audição, equilíbrio</a></li>
-<li>Aula 1 - Psicologia na Condução (Canvas)</li>
 </ul>
 `
   },
 
-  // ===== 4. Aula 2 - Atividade Exploratória, Índices e Processo Decisional =====
+  // ===== 4. Atividade Exploratória, Índices e Processo Decisional =====
   {
     id: "aulas-psicologia-na-conducao-apontamentos-de-aula-2-atividade-exploratoria-indices-e-p",
     h: `<div class="callout c-note">
@@ -304,13 +295,12 @@ c. ...</p>
 <li><a href="#/psicologia-processo-decisional-exploracao-identificacao-antecipacao-previsao-e-decisao">Processo Decisional - Exploração, Identificação, Antecipação, Previsão e Decisão</a></li>
 <li><a href="#/psicologia-analise-psicologica-da-funcao-conducao">Análise Psicológica da Função Condução</a></li>
 <li><a href="#/psicologia-orgaos-dos-sentidos-visao-audicao-equilibrio">Órgãos dos Sentidos - visão, audição, equilíbrio</a></li>
-<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-1-automatismos-sensacoes-e-memoria">Aula 1 - Automatismos, Sensações e Memória</a></li>
-<li>Aula 2 - Psicologia na Condução (Canvas)</li>
+<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-1-automatismos-sensacoes-e-memoria">Automatismos, Sensações e Memória</a></li>
 </ul>
 `
   },
 
-  // ===== 5. Aula 3 - Treino da E.P.V., Recolha e Tratamento da Informação =====
+  // ===== 5. Treino da E.P.V., Recolha e Tratamento da Informação =====
   {
     id: "aulas-psicologia-na-conducao-apontamentos-de-aula-3-treino-da-e-p-v-recolha-e-tratamen",
     h: `<div class="callout c-note">
@@ -401,17 +391,16 @@ c. ...</p>
 </ul>
 <h2>Ver também</h2>
 <ul>
-<li>Aula 3 - Psicologia na Condução (Canvas)</li>
 <li><a href="#/psicologia-processo-decisional-exploracao-identificacao-antecipacao-previsao-e-decisao">Processo Decisional - Exploração, Identificação, Antecipação, Previsão e Decisão</a></li>
 <li><a href="#/psicologia-analise-psicologica-da-funcao-conducao">Análise Psicológica da Função Condução</a></li>
-<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-2-atividade-exploratoria-indices-e-p">Aula 2 - Atividade Exploratória, Índices e Processo Decisional</a></li>
-<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-1-automatismos-sensacoes-e-memoria">Aula 1 - Automatismos, Sensações e Memória</a></li>
+<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-2-atividade-exploratoria-indices-e-p">Atividade Exploratória, Índices e Processo Decisional</a></li>
+<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-1-automatismos-sensacoes-e-memoria">Automatismos, Sensações e Memória</a></li>
 <li><a href="testes.html">Testes de Psicologia na Condução</a></li>
 </ul>
 `
   },
 
-  // ===== 6. Aula 4 - Comportamento do Condutor e 3ª Etapa (Agir) =====
+  // ===== 6. Comportamento do Condutor e 3ª Etapa (Agir) =====
   {
     id: "aulas-psicologia-na-conducao-apontamentos-de-aula-4-comportamento-do-condutor-e-3a-eta",
     h: `<div class="callout c-note">
@@ -480,19 +469,18 @@ c. ...</p>
 </ul>
 <h2>Ver também</h2>
 <ul>
-<li>Aula 4 - Psicologia na Condução (Canvas)</li>
 <li><a href="#/psicologia-analise-psicologica-da-funcao-conducao">Análise Psicológica da Função Condução</a></li>
 <li><a href="#/psicologia-processo-decisional-exploracao-identificacao-antecipacao-previsao-e-decisao">Processo Decisional - Exploração, Identificação, Antecipação, Previsão e Decisão</a></li>
 <li><a href="#/psicologia-valores-atitudes-e-personalidade-do-condutor">Valores, atitudes e personalidade do condutor</a></li>
-<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-3-treino-da-e-p-v-recolha-e-tratamen">Aula 3 - Treino da E.P.V., Recolha e Tratamento da Informação</a></li>
-<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-2-atividade-exploratoria-indices-e-p">Aula 2 - Atividade Exploratória, Índices e Processo Decisional</a></li>
-<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-1-automatismos-sensacoes-e-memoria">Aula 1 - Automatismos, Sensações e Memória</a></li>
+<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-3-treino-da-e-p-v-recolha-e-tratamen">Treino da E.P.V., Recolha e Tratamento da Informação</a></li>
+<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-2-atividade-exploratoria-indices-e-p">Atividade Exploratória, Índices e Processo Decisional</a></li>
+<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-1-automatismos-sensacoes-e-memoria">Automatismos, Sensações e Memória</a></li>
 <li><a href="testes.html">Testes de Psicologia na Condução</a></li>
 </ul>
 `
   },
 
-  // ===== 7. Aula 6 - O Condutor e o seu Estado Físico e Psicológico, Substâncias Psicotrópicas =====
+  // ===== 7. O Condutor e o seu Estado Físico e Psicológico, Substâncias Psicotrópicas =====
   {
     id: "aulas-psicologia-na-conducao-apontamentos-de-aula-6-o-condutor-e-o-seu-estado-fisico-e",
     h: `<div class="callout c-note">
@@ -533,7 +521,6 @@ c. ...</p>
 </ul>
 <h2>Ver também</h2>
 <ul>
-<li>Aula 6 - Psicologia na Condução (Canvas)</li>
 <li><a href="#/psicologia-fatores-que-influenciam-a-conducao">Fatores que influenciam a condução</a></li>
 <li><a href="#/psicologia-fatores-internos-idade-genero-e-aspetos-individuais">Fatores internos - idade, género e aspetos individuais</a></li>
 <li><a href="#/psicologia-orgaos-dos-sentidos-visao-audicao-equilibrio">Órgãos dos Sentidos - visão, audição, equilíbrio</a></li>
@@ -541,13 +528,13 @@ c. ...</p>
 <li><a href="#/psicologia-fadiga">Fadiga</a></li>
 <li><a href="#/psicologia-medicamentos-e-alcool">Medicamentos e Álcool</a></li>
 <li><a href="#/psicologia-substancias-psicotropicas">Substâncias Psicotrópicas</a></li>
-<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-4-comportamento-do-condutor-e-3a-eta">Aula 4 - Comportamento do Condutor e 3ª Etapa (Agir)</a></li>
+<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-4-comportamento-do-condutor-e-3a-eta">Comportamento do Condutor e 3ª Etapa (Agir)</a></li>
 <li><a href="testes.html">Testes de Psicologia na Condução</a></li>
 </ul>
 `
   },
 
-  // ===== 8. Aula 7 - Tipos de Visão e Álcool (TAS) =====
+  // ===== 8. Tipos de Visão e Álcool (TAS) =====
   {
     id: "aulas-psicologia-na-conducao-apontamentos-de-aula-7-tipos-de-visao-e-alcool-tas",
     h: `<div class="callout c-note">
@@ -661,15 +648,14 @@ c. ...</p>
 </ul>
 <h2>Ver também</h2>
 <ul>
-<li>Aula 7 - Psicologia na Condução (Canvas)</li>
-<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-8-efeitos-do-alcool-segundo-a-tas-e-">Aula 8 - Efeitos do Álcool segundo a TAS e Fatores da Alcoolemia</a></li>
+<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-8-efeitos-do-alcool-segundo-a-tas-e-">Efeitos do Álcool segundo a TAS e Fatores da Alcoolemia</a></li>
 <li><a href="testes.html">Teste 6, pergunta 10</a> (risco de acidente mortal e TAS)</li>
-<li><a href="#/aulas-legislacao-apontamentos-de-aula-3-alcool-contraordenacoes-e-crime">Aula 3 - Álcool, Contraordenações e Crime</a> (Legislação: taxas de álcool e sanções)</li>
+<li><a href="#/aulas-legislacao-apontamentos-de-aula-3-alcool-contraordenacoes-e-crime">Álcool, Contraordenações e Crime</a> (Legislação: taxas de álcool e sanções)</li>
 </ul>
 `
   },
 
-  // ===== 9. Aula 8 - Efeitos do Álcool segundo a TAS e Fatores da Alcoolemia =====
+  // ===== 9. Efeitos do Álcool segundo a TAS e Fatores da Alcoolemia =====
   {
     id: "aulas-psicologia-na-conducao-apontamentos-de-aula-8-efeitos-do-alcool-segundo-a-tas-e-",
     h: `<div class="callout c-note">
@@ -756,15 +742,14 @@ c. ...</p>
 </ul>
 <h2>Ver também</h2>
 <ul>
-<li>Aula 8 - Psicologia na Condução (Canvas)</li>
-<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-7-tipos-de-visao-e-alcool-tas">Aula 7 - Tipos de Visão e Álcool (TAS)</a></li>
-<li><a href="#/aulas-legislacao-apontamentos-de-aula-3-alcool-contraordenacoes-e-crime">Aula 3 - Álcool, Contraordenações e Crime</a> (Legislação: taxas de álcool e sanções)</li>
+<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-7-tipos-de-visao-e-alcool-tas">Tipos de Visão e Álcool (TAS)</a></li>
+<li><a href="#/aulas-legislacao-apontamentos-de-aula-3-alcool-contraordenacoes-e-crime">Álcool, Contraordenações e Crime</a> (Legislação: taxas de álcool e sanções)</li>
 <li><a href="testes.html">Testes de Psicologia na Condução</a></li>
 </ul>
 `
   },
 
-  // ===== 10. Aula 9 - Perceção do Risco e Condução Defensiva =====
+  // ===== 10. Perceção do Risco e Condução Defensiva =====
   {
     id: "aulas-psicologia-na-conducao-apontamentos-de-aula-9-percecao-do-risco-e-conducao-defen",
     h: `<div class="callout c-note">
@@ -804,9 +789,8 @@ c. ...</p>
 </ul>
 <h2>Ver também</h2>
 <ul>
-<li>Aula 9 - Psicologia na Condução (Canvas)</li>
-<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-8-efeitos-do-alcool-segundo-a-tas-e-">Aula 8 - Efeitos do Álcool segundo a TAS e Fatores da Alcoolemia</a></li>
-<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-2-atividade-exploratoria-indices-e-p">Aula 2 - Atividade Exploratória, Índices e Processo Decisional</a></li>
+<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-8-efeitos-do-alcool-segundo-a-tas-e-">Efeitos do Álcool segundo a TAS e Fatores da Alcoolemia</a></li>
+<li><a href="#/aulas-psicologia-na-conducao-apontamentos-de-aula-2-atividade-exploratoria-indices-e-p">Atividade Exploratória, Índices e Processo Decisional</a></li>
 <li><a href="testes.html">Testes de Psicologia na Condução</a></li>
 </ul>
 `
@@ -823,27 +807,24 @@ c. ...</p>
 <ul>
 <li><strong>Aula 1</strong> — Pedagogia, Binómio Ensino-Aprendizagem e Domínios do Saber
 <ul>
-<li><a href="#/aulas-metodos-de-ensino-e-pedagogia-apontamentos-de-aula-1-pedagogia-binomio-ensino-ap">Aula 1 - Pedagogia, Binómio Ensino-Aprendizagem e Domínios do Saber</a></li>
-<li>Vista em Canvas</li>
+<li><a href="#/aulas-metodos-de-ensino-e-pedagogia-apontamentos-de-aula-1-pedagogia-binomio-ensino-ap">Pedagogia, Binómio Ensino-Aprendizagem e Domínios do Saber</a></li>
 </ul>
 </li>
 <li><strong>Aula 2</strong> — Aprendizagem, Caraterísticas do Processo e Situações de Aprendizagem
 <ul>
-<li><a href="#/aulas-metodos-de-ensino-e-pedagogia-apontamentos-de-aula-2-aprendizagem-carateristicas">Aula 2 - Aprendizagem, Caraterísticas do Processo e Situações de Aprendizagem</a></li>
-<li>Vista em Canvas</li>
+<li><a href="#/aulas-metodos-de-ensino-e-pedagogia-apontamentos-de-aula-2-aprendizagem-carateristicas">Aprendizagem, Caraterísticas do Processo e Situações de Aprendizagem</a></li>
 </ul>
 </li>
 <li><strong>Aula 3</strong> — Princípios Pedagógicos, Planificação e Objetivos
 <ul>
-<li><a href="#/aulas-metodos-de-ensino-e-pedagogia-apontamentos-de-aula-3-principios-pedagogicos-plan">Aula 3 - Princípios Pedagógicos, Planificação e Objetivos</a></li>
-<li>Vista em Canvas</li>
+<li><a href="#/aulas-metodos-de-ensino-e-pedagogia-apontamentos-de-aula-3-principios-pedagogicos-plan">Princípios Pedagógicos, Planificação e Objetivos</a></li>
 </ul>
 </li>
 </ul>
 `
   },
 
-  // ===== 12. Aula 1 - Pedagogia, Binómio Ensino-Aprendizagem e Domínios do Saber =====
+  // ===== 12. Pedagogia, Binómio Ensino-Aprendizagem e Domínios do Saber =====
   {
     id: "aulas-metodos-de-ensino-e-pedagogia-apontamentos-de-aula-1-pedagogia-binomio-ensino-ap",
     h: `<div class="callout c-note">
@@ -914,14 +895,13 @@ c. ...</p>
 </ul>
 <h2>Ver também</h2>
 <ul>
-<li>Aula 1 - Métodos de Ensino e Pedagogia (Canvas)</li>
 <li><a href="#/pedagogia-00-indice">Métodos de Ensino e Pedagogia (25 horas)</a></li>
-<li><a href="#/aulas-metodos-de-ensino-e-pedagogia-apontamentos-de-aula-2-aprendizagem-carateristicas">Aula 2 - Aprendizagem, Caraterísticas do Processo e Situações de Aprendizagem</a></li>
+<li><a href="#/aulas-metodos-de-ensino-e-pedagogia-apontamentos-de-aula-2-aprendizagem-carateristicas">Aprendizagem, Caraterísticas do Processo e Situações de Aprendizagem</a></li>
 </ul>
 `
   },
 
-  // ===== 13. Aula 2 - Aprendizagem, Caraterísticas do Processo e Situações de Aprendizagem =====
+  // ===== 13. Aprendizagem, Caraterísticas do Processo e Situações de Aprendizagem =====
   {
     id: "aulas-metodos-de-ensino-e-pedagogia-apontamentos-de-aula-2-aprendizagem-carateristicas",
     h: `<div class="callout c-note">
@@ -1071,15 +1051,14 @@ c. ...</p>
 </ul>
 <h2>Ver também</h2>
 <ul>
-<li>Aula 2 - Métodos de Ensino e Pedagogia (Canvas)</li>
-<li><a href="#/aulas-metodos-de-ensino-e-pedagogia-apontamentos-de-aula-1-pedagogia-binomio-ensino-ap">Aula 1 - Pedagogia, Binómio Ensino-Aprendizagem e Domínios do Saber</a></li>
-<li><a href="#/aulas-metodos-de-ensino-e-pedagogia-apontamentos-de-aula-3-principios-pedagogicos-plan">Aula 3 - Princípios Pedagógicos, Planificação e Objetivos</a></li>
+<li><a href="#/aulas-metodos-de-ensino-e-pedagogia-apontamentos-de-aula-1-pedagogia-binomio-ensino-ap">Pedagogia, Binómio Ensino-Aprendizagem e Domínios do Saber</a></li>
+<li><a href="#/aulas-metodos-de-ensino-e-pedagogia-apontamentos-de-aula-3-principios-pedagogicos-plan">Princípios Pedagógicos, Planificação e Objetivos</a></li>
 <li><a href="testes.html">Testes de Métodos de Ensino e Pedagogia</a></li>
 </ul>
 `
   },
 
-  // ===== 14. Aula 3 - Princípios Pedagógicos, Planificação e Objetivos =====
+  // ===== 14. Princípios Pedagógicos, Planificação e Objetivos =====
   {
     id: "aulas-metodos-de-ensino-e-pedagogia-apontamentos-de-aula-3-principios-pedagogicos-plan",
     h: `<div class="callout c-note">
@@ -1196,8 +1175,7 @@ c. ...</p>
 </ul>
 <h2>Ver também</h2>
 <ul>
-<li>Aula 3 - Métodos de Ensino e Pedagogia (Canvas)</li>
-<li><a href="#/aulas-metodos-de-ensino-e-pedagogia-apontamentos-de-aula-2-aprendizagem-carateristicas">Aula 2 - Aprendizagem, Caraterísticas do Processo e Situações de Aprendizagem</a></li>
+<li><a href="#/aulas-metodos-de-ensino-e-pedagogia-apontamentos-de-aula-2-aprendizagem-carateristicas">Aprendizagem, Caraterísticas do Processo e Situações de Aprendizagem</a></li>
 <li><a href="testes.html">Testes de Métodos de Ensino e Pedagogia</a></li>
 </ul>
 `
@@ -1214,20 +1192,17 @@ c. ...</p>
 <ul>
 <li><strong>Aula 1 (09/09/2026)</strong> — Via, Faixa de Rodagem e Autoestradas
 <ul>
-<li><a href="#/aulas-transito-e-seguranca-rodoviaria-apontamentos-de-aula-1-via-faixa-de-rodagem-e-au">Aula 1 - Via, Faixa de Rodagem e Autoestradas</a></li>
-<li>Vista em Canvas</li>
+<li><a href="#/aulas-transito-e-seguranca-rodoviaria-apontamentos-de-aula-1-via-faixa-de-rodagem-e-au">Via, Faixa de Rodagem e Autoestradas</a></li>
 </ul>
 </li>
 <li><strong>Aula 2 (16/09/2026)</strong> — Tempo de Reação, Distâncias de Paragem, Acidente e Visibilidade Reduzida
 <ul>
-<li><a href="#/aulas-transito-e-seguranca-rodoviaria-apontamentos-de-aula-2-tempo-de-reacao-distancia">Aula 2 - Tempo de Reação, Distâncias de Paragem, Acidente e Visibilidade Reduzida</a></li>
-<li>Vista em Canvas</li>
+<li><a href="#/aulas-transito-e-seguranca-rodoviaria-apontamentos-de-aula-2-tempo-de-reacao-distancia">Tempo de Reação, Distâncias de Paragem, Acidente e Visibilidade Reduzida</a></li>
 </ul>
 </li>
 <li><strong>Aula 3</strong> — Semáforos e Causas de Acidentes
 <ul>
-<li><a href="#/aulas-transito-e-seguranca-rodoviaria-apontamentos-de-aula-3-semaforos-e-causas-de-aci">Aula 3 - Semáforos e Causas de Acidentes</a></li>
-<li>Vista em Canvas</li>
+<li><a href="#/aulas-transito-e-seguranca-rodoviaria-apontamentos-de-aula-3-semaforos-e-causas-de-aci">Semáforos e Causas de Acidentes</a></li>
 </ul>
 </li>
 </ul>
@@ -1242,7 +1217,7 @@ c. ...</p>
 `
   },
 
-  // ===== 16. Aula 1 - Via, Faixa de Rodagem e Autoestradas =====
+  // ===== 16. Via, Faixa de Rodagem e Autoestradas =====
   {
     id: "aulas-transito-e-seguranca-rodoviaria-apontamentos-de-aula-1-via-faixa-de-rodagem-e-au",
     h: `<div class="callout c-note">
@@ -1276,14 +1251,10 @@ c. ...</p>
 <li>No esquema: duas faixas de rodagem, delimitadas com a berma assinalada.</li>
 </ul>
 <p><strong>Possível método de ensino</strong>: explicar conceitos através de desenhos.</p>
-<h2>Ver também</h2>
-<ul>
-<li>Aula 1 - Trânsito e Segurança Rodoviária (Canvas)</li>
-</ul>
 `
   },
 
-  // ===== 17. Aula 2 - Tempo de Reação, Distâncias de Paragem, Acidente e Visibilidade Reduzida =====
+  // ===== 17. Tempo de Reação, Distâncias de Paragem, Acidente e Visibilidade Reduzida =====
   {
     id: "aulas-transito-e-seguranca-rodoviaria-apontamentos-de-aula-2-tempo-de-reacao-distancia",
     h: `<div class="callout c-note">
@@ -1459,19 +1430,18 @@ c. ...</p>
 </ul>
 <h2>Ver também</h2>
 <ul>
-<li>Aula 2 - Trânsito e Segurança Rodoviária (Canvas)</li>
 <li><a href="#/psicologia-tempo-de-reacao-e-distancias-de-reacao-travagem-e-seguranca">Tempo de reação e distâncias de reação, travagem e segurança</a></li>
 <li><a href="#/psicologia-fadiga">Fadiga</a></li>
 <li><a href="#/psicologia-medicamentos-e-alcool">Medicamentos e Álcool</a></li>
 <li><a href="#/psicologia-orgaos-dos-sentidos-visao-audicao-equilibrio">Órgãos dos Sentidos - visão, audição, equilíbrio</a></li>
 <li><a href="#/dl102-codigo-da-estrada-titulo-i-e-ii-artigos-1-a-58">Código da Estrada - Título I e II (Artigos 1 a 58)</a> (art. 19.º — visibilidade reduzida ou insuficiente)</li>
 <li><a href="#/dl102-codigo-da-estrada-titulo-ii-continuacao-artigos-59-a-98">Código da Estrada - Título II continuação (Artigos 59 a 98)</a> (art. 61.º — utilização das luzes)</li>
-<li><a href="#/aulas-transito-e-seguranca-rodoviaria-apontamentos-de-aula-1-via-faixa-de-rodagem-e-au">Aula 1 - Via, Faixa de Rodagem e Autoestradas</a></li>
+<li><a href="#/aulas-transito-e-seguranca-rodoviaria-apontamentos-de-aula-1-via-faixa-de-rodagem-e-au">Via, Faixa de Rodagem e Autoestradas</a></li>
 </ul>
 `
   },
 
-  // ===== 18. Aula 3 - Semáforos e Causas de Acidentes =====
+  // ===== 18. Semáforos e Causas de Acidentes =====
   {
     id: "aulas-transito-e-seguranca-rodoviaria-apontamentos-de-aula-3-semaforos-e-causas-de-aci",
     h: `<div class="callout c-note">
@@ -1505,8 +1475,7 @@ c. ...</p>
 </ol>
 <h2>Ver também</h2>
 <ul>
-<li>Aula 3 - Trânsito e Segurança Rodoviária (Canvas)</li>
-<li><a href="#/aulas-transito-e-seguranca-rodoviaria-apontamentos-de-aula-2-tempo-de-reacao-distancia">Aula 2 - Tempo de Reação, Distâncias de Paragem, Acidente e Visibilidade Reduzida</a></li>
+<li><a href="#/aulas-transito-e-seguranca-rodoviaria-apontamentos-de-aula-2-tempo-de-reacao-distancia">Tempo de Reação, Distâncias de Paragem, Acidente e Visibilidade Reduzida</a></li>
 </ul>
 `
   },
@@ -1522,27 +1491,24 @@ c. ...</p>
 <ul>
 <li><strong>Aula 1</strong> — Hierarquia da Legislação, Contraordenações e Marca STOP
 <ul>
-<li><a href="#/aulas-legislacao-apontamentos-de-aula-1-hierarquia-da-legislacao-contraordenacoes-e-ma">Aula 1 - Hierarquia da Legislação, Contraordenações e Marca STOP</a></li>
-<li>Vista em Canvas</li>
+<li><a href="#/aulas-legislacao-apontamentos-de-aula-1-hierarquia-da-legislacao-contraordenacoes-e-ma">Hierarquia da Legislação, Contraordenações e Marca STOP</a></li>
 </ul>
 </li>
 <li><strong>Aula 2</strong> — Excesso de Velocidade, Contraordenações e Sanções
 <ul>
-<li><a href="#/aulas-legislacao-apontamentos-de-aula-2-excesso-de-velocidade-contraordenacoes-e-sanco">Aula 2 - Excesso de Velocidade, Contraordenações e Sanções</a></li>
-<li>Vista em Canvas</li>
+<li><a href="#/aulas-legislacao-apontamentos-de-aula-2-excesso-de-velocidade-contraordenacoes-e-sanco">Excesso de Velocidade, Contraordenações e Sanções</a></li>
 </ul>
 </li>
 <li><strong>Aula 3</strong> — Álcool, Contraordenações e Crime
 <ul>
-<li><a href="#/aulas-legislacao-apontamentos-de-aula-3-alcool-contraordenacoes-e-crime">Aula 3 - Álcool, Contraordenações e Crime</a></li>
-<li>Vista em Canvas</li>
+<li><a href="#/aulas-legislacao-apontamentos-de-aula-3-alcool-contraordenacoes-e-crime">Álcool, Contraordenações e Crime</a></li>
 </ul>
 </li>
 </ul>
 `
   },
 
-  // ===== 20. Aula 1 - Hierarquia da Legislação, Contraordenações e Marca STOP =====
+  // ===== 20. Hierarquia da Legislação, Contraordenações e Marca STOP =====
   {
     id: "aulas-legislacao-apontamentos-de-aula-1-hierarquia-da-legislacao-contraordenacoes-e-ma",
     h: `<div class="callout c-note">
@@ -1590,14 +1556,10 @@ c. ...</p>
 <li>Cedência de passagem pela direita (Artigo 30.º): <a href="#/dl102-codigo-da-estrada-titulo-i-e-ii-artigos-1-a-58">Código da Estrada - Título I e II (Artigos 1 a 58)</a></li>
 <li>Marca STOP (M8 e M8a): <a href="#/rst-04-capitulo-iii-marcas-rodoviarias-artigos-58-a-67">04 Capítulo III - Marcas Rodoviárias (Artigos 58 a 67)</a></li>
 </ul>
-<h2>Ver também</h2>
-<ul>
-<li>Aula 1 - Legislação (Canvas)</li>
-</ul>
 `
   },
 
-  // ===== 21. Aula 2 - Excesso de Velocidade, Contraordenações e Sanções =====
+  // ===== 21. Excesso de Velocidade, Contraordenações e Sanções =====
   {
     id: "aulas-legislacao-apontamentos-de-aula-2-excesso-de-velocidade-contraordenacoes-e-sanco",
     h: `<div class="callout c-note">
@@ -1689,13 +1651,12 @@ c. ...</p>
 </ul>
 <h2>Ver também</h2>
 <ul>
-<li>Aula 2 - Legislação (Canvas)</li>
-<li><a href="#/aulas-legislacao-apontamentos-de-aula-1-hierarquia-da-legislacao-contraordenacoes-e-ma">Aula 1 - Hierarquia da Legislação, Contraordenações e Marca STOP</a></li>
+<li><a href="#/aulas-legislacao-apontamentos-de-aula-1-hierarquia-da-legislacao-contraordenacoes-e-ma">Hierarquia da Legislação, Contraordenações e Marca STOP</a></li>
 </ul>
 `
   },
 
-  // ===== 22. Aula 3 - Álcool, Contraordenações e Crime =====
+  // ===== 22. Álcool, Contraordenações e Crime =====
   {
     id: "aulas-legislacao-apontamentos-de-aula-3-alcool-contraordenacoes-e-crime",
     h: `<div class="callout c-note">
@@ -1777,8 +1738,7 @@ c. ...</p>
 </ul>
 <h2>Ver também</h2>
 <ul>
-<li>Aula 3 - Legislação (Canvas)</li>
-<li><a href="#/aulas-legislacao-apontamentos-de-aula-2-excesso-de-velocidade-contraordenacoes-e-sanco">Aula 2 - Excesso de Velocidade, Contraordenações e Sanções</a></li>
+<li><a href="#/aulas-legislacao-apontamentos-de-aula-2-excesso-de-velocidade-contraordenacoes-e-sanco">Excesso de Velocidade, Contraordenações e Sanções</a></li>
 </ul>
 `
   },

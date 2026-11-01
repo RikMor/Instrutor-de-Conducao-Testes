@@ -14,8 +14,6 @@
   var main = $('#main'), arvore = $('#arvore'), busca = $('#busca');
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
 
-  // Nos resumos das aulas mostra-se só o título (sem "Aula 1 - ").
-  IDX.forEach(function (m) { m.n.forEach(function (n) { n.t = n.t.replace(/^Aula\s*\d+\s*[-–—:]\s*/i, ''); }); });
   IDX.forEach(function (m) { m.n.forEach(function (n, i) { ONDE[n.id] = { m: m, i: i }; }); });
 
   // ---------- Carregar o texto de um módulo (uma só vez) ----------
