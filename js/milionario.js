@@ -729,9 +729,11 @@ ${lifeBar.length ? `<div class="lifes">${lifeBar.join('')}</div>` : ''}${info}${
     const sub = kind === 'win' ? 'Passaste os ' + g.pisos + (g.pisos === 1 ? ' andar.' : ' andares.') : kind === 'walk' ? 'Ficas com os pontos que já tinhas.' : kind === 'dead' ? `Fizeste ${fmt(g.round)} pontos nessa fase.` : `Fizeste ${fmt(g.round)} de ${fmt(g.f.target)} pontos nessa fase.`;
     const items = g.hist.map((h, i) => ({ q: h.q, n: i + 1, st: h.ok ? 'ok' : 'ko', ch: h.chosen }));
     if (kind === 'walk' && g.walkQ) items.push({ q: g.walkQ, n: items.length + 1, st: 'na', ch: null });
+    const nOk = items.filter((i) => i.st === 'ok').length, nKo = items.filter((i) => i.st === 'ko').length;
+    const fl = `<div class="flt" role="group" aria-label="Filtrar perguntas"><button class="b" data-flt="all" aria-pressed="true">Todas (${items.length})</button><button class="b" data-flt="ok" aria-pressed="false" ${nOk ? '' : 'disabled'}>Só as certas (${nOk})</button><button class="b" data-flt="ko" aria-pressed="false" ${nKo ? '' : 'disabled'}>Só as erradas (${nKo})</button></div>`;
     const rv = items.map((it) => {
       const r = it.q.o.find((o) => o.ok);
-      return `<div class="rv"><span class="st ${it.st}">${it.st === 'ok' ? 'Certa' : it.st === 'ko' ? 'Errada' : 'Sem resposta'}</span> <b>${it.n}.</b> <span style="white-space:pre-line">${esc(it.q.q)}</span>
+      return `<div class="rv s-${it.st}"><span class="st ${it.st}">${it.st === 'ok' ? 'Certa' : it.st === 'ko' ? 'Errada' : 'Sem resposta'}</span> <b>${it.n}.</b> <span style="white-space:pre-line">${esc(it.q.q)}</span>
 <p>Resposta certa: ${esc(cap(r.t))}</p>${it.st === 'ko' ? `<p style="color:var(--mu)">A tua resposta: ${esc(cap(it.q.o[it.ch].t))}</p>` : ''}${it.q.e}${manBtn(it.q)}${it.q.u ? '<small style="color:var(--mu)">Esta resposta não está confirmada oficialmente.</small>' : ''}</div>`;
     }).join('');
     const lq = g.hist[g.hist.length - 1], where = `andar ${g.piso + 1} de ${g.pisos}, fase ${Math.max(1, g.row + 1)} de ${ROWS}`;
@@ -743,7 +745,7 @@ ${lifeBar.length ? `<div class="lifes">${lifeBar.join('')}</div>` : ''}${info}${
     app.innerHTML = `<div class="top"><a class="tb" href="index.html">Voltar ao início</a><span class="sp"></span>${soundBtn()}</div>
 <div class="end"><h1>${title}</h1><div class="amt">${fmt(g.total)} pontos</div><div class="why ${kind}">${why}</div><p>${sub}${newBest ? ' <b>Novo melhor resultado!</b>' : ''}</p><p>Andar ${g.piso + 1} de ${g.pisos}, fase ${Math.max(1, g.row + 1)} de ${ROWS}. Moedas: 🪙 ${g.coins}. Relíquias: ${g.relics.length ? g.relics.map((k) => RELICS[k][0] + ' ' + RELICS[k][1]).join(', ') : 'nenhuma'}.</p>
 <div class="row"><button class="bigbtn" data-act="again" data-focus>Jogar outra vez</button><button class="bigbtn alt" data-act="menu">Mudar os temas</button></div>
-<details open><summary>Rever as perguntas</summary>${rv}</details></div>`;
+<details open><summary>Rever as perguntas</summary>${fl}<div class="rvs" data-show="all">${rv}</div></details></div>`;
     const fo = document.querySelector('[data-focus]');
     if (fo) fo.focus({ preventScroll: true });
   }
@@ -780,6 +782,12 @@ ${lifeBar.length ? `<div class="lifes">${lifeBar.join('')}</div>` : ''}${info}${
     if (outside(e)) { G.modal = null; return view(); }
     const b = e.target.closest('button');
     if (!b || b.disabled) return;
+    if (b.dataset.flt) {
+      const box = document.querySelector('.rvs');
+      if (box) box.dataset.show = b.dataset.flt;
+      document.querySelectorAll('[data-flt]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      return;
+    }
     if (b.dataset.man) return manual(true, b.dataset.man);
     if (b.dataset.i !== undefined) return pick(+b.dataset.i);
     if (b.dataset.ll) return lifeline(b.dataset.ll);

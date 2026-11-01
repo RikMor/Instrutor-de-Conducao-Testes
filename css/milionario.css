@@ -1076,3 +1076,9 @@ body {
 .why small { color: var(--mu); }
 .rl sup { font-size: .6em; color: var(--gold); font-weight: 700; }
 .opts .opt small { color: var(--mu); }
+
+/* Rever as perguntas: filtro */
+.flt { display: flex; flex-wrap: wrap; gap: .5rem; margin: .7rem 0; }
+.flt .b[aria-pressed='true'] { background: var(--gold); color: #1b1500; }
+.flt .b:disabled { opacity: .4; cursor: not-allowed; }
+.rvs[data-show='ok'] .rv:not(.s-ok), .rvs[data-show='ko'] .rv:not(.s-ko) { display: none; }
