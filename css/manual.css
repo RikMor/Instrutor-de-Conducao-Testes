@@ -93,3 +93,9 @@ mark.hl.atual { background:#ff9f43; outline:2px solid #ff9f43; }
 .res a { font-weight:600; }
 .res .sn { display:block; margin-top:.25rem; color:var(--fg); font-size:.93rem; line-height:1.45; }
 .sec-res { margin:1.2rem 0 .2rem; color:var(--st); font:700 1.15rem/1.3 Rajdhani, sans-serif; }
+
+/* Dentro da janela dos testes (manual.html?embed=1): sem título nem ligações do cabeçalho. */
+.embed .topo h1, .embed .lnk-testes { display: none; }
+.embed .topo { justify-content: flex-start; padding-block: .3rem; }
+.embed .barra-hl, .embed .lateral { top: 2.8rem; }
+@media (min-width: 821px) { .embed .topo { display: none; } .embed .barra-hl, .embed .lateral { top: 0; } .embed .lateral { max-height: 100vh; } }
