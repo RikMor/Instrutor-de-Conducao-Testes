@@ -528,7 +528,7 @@ function ecraJogo() {
     const ultima = r + 1 >= sala.qids.length;
     abaixo = `<div class="reveal ${acertei ? 'good' : 'bad'}" role="status"><b>${titulo}</b>
 <p>Resposta certa: <b>${LETRAS[certa]}: ${esc(cap(q.o[certa].t))}</b></p>
-${q.e ? `<div>${q.e}</div>` : ''}${q.u ? '<small>Esta resposta não está confirmada oficialmente.</small>' : ''}
+${q.e ? `<div>${q.e}</div>` : ''}${window.VerManual ? window.VerManual.btn(q) : ''}${q.u ? '<small>Esta resposta não está confirmada oficialmente.</small>' : ''}
 ${
   souAnfitriao
     ? `<button class="b go" data-mp="seguinte">${ultima ? 'Ver o resultado' : 'Pergunta seguinte'}</button>`

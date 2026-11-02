@@ -295,10 +295,11 @@ function runView() {
 
 // HTML com a resposta certa e a explicação.
 const an = (q) => q.a < 0; // pergunta anulada: sem resposta certa, não conta
+const man = (q) => (window.VerManual ? window.VerManual.btn(q) : ''); // botão "📖 Manual" (js/ver-manual.js)
 const exHtml = (q) =>
   an(q)
     ? `<div class="ex"><b>Pergunta anulada</b> <span class="bd">sem resposta certa</span> Nenhuma das opções corresponde ao Código da Estrada em vigor (art. 163.º), por isso esta pergunta não conta para a pontuação.</div>`
-    : `<div class="ex"><b>Resposta certa: ${String.fromCharCode(97 + q.a)})</b>${q.u ? ' <span class="bd">resposta não confirmada</span>' : ''}${q.e}</div>`;
+    : `<div class="ex"><b>Resposta certa: ${String.fromCharCode(97 + q.a)})</b>${q.u ? ' <span class="bd">resposta não confirmada</span>' : ''}${q.e}${man(q)}</div>`;
 
 // Fecha o teste e mostra: pontuação, tempo, lista de erros e botão "Refazer as erradas".
 // auto = true quando o tempo acabou (não pede confirmação).

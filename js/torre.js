@@ -881,6 +881,7 @@ function render() {
           (P.nul ? '⚪ Pergunta anulada: sem resposta certa, não conta. A carta funciona.' : P.ok ? '✅ Certo!' : '❌ Errado.') +
           '</b>' +
           P.q.e +
+          (window.VerManual ? window.VerManual.btn(P.q) : '') +
           '</div><div class="row"><button class="btn" onclick="resolve()">Continuar</button></div>';
       }
       h += '</div>';

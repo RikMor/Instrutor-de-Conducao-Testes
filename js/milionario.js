@@ -323,12 +323,11 @@
     } else if (open && !fr.getAttribute('src')) fr.src = fr.dataset.src;
     MAN.hidden = !open;
   };
-  // Botão que abre o manual no sítio da resposta (só para perguntas com ligação em js/manual-refs.js).
+  // Botão "📖 Manual": abre o manual na nota da resposta, com a frase destacada.
+  // O endereço vem de js/ver-manual.js (ligação em js/manual-refs.js ou procura automática no manual).
   const manBtn = (q) => {
-    const r = window.QREF && window.QREF[q.id];
-    if (!r) return '';
-    const to = window.QREF_N[r[0]] + '?' + r.slice(1).map((p) => 'h=' + encodeURIComponent(p)).join('&');
-    return `<button class="b" data-man="${esc(to)}">📖 Ver no manual</button>`;
+    if (!window.VerManual || q.a < 0) return '';
+    return `<button class="b" data-man="${esc(window.VerManual.destino(q))}">📖 Manual</button>`;
   };
 
   /* ---------- menu e ecrãs iniciais ---------- */

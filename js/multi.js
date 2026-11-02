@@ -341,14 +341,15 @@ function stats(qi) {
 // HTML da explicação (ou aviso de resposta não confirmada).
 // Pergunta anulada (q.a < 0): sem resposta certa, não conta.
 const cnt = () => room.qids.filter((id) => QS[id].a >= 0).length;
+const man = (q) => (window.VerManual ? window.VerManual.btn(q) : ''); // botão "📖 Manual" (js/ver-manual.js)
 const info = (q) =>
   q.a < 0
     ? '<div class="ex"><b>Pergunta anulada</b> <span class="bd">sem resposta certa</span> Não conta para a pontuação.</div>'
-    : q.u
-    ? '<span class="bd">resposta não confirmada</span>'
-    : q.e
-      ? `<div class="ex">${q.e}</div>`
-      : '';
+    : (q.u
+        ? '<span class="bd">resposta não confirmada</span>'
+        : q.e
+          ? `<div class="ex">${q.e}</div>`
+          : '') + man(q);
 
 // "Visão geral do teste": percentagem de jogadores que escolheu cada opção, por pergunta.
 function overview() {

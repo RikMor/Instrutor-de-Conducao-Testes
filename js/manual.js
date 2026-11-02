@@ -8,13 +8,30 @@
    Aparecem primeiro as notas com a frase exata e depois as que têm todas as palavras.
    "entre aspas" obriga a frase exata. Ao abrir um resultado, o texto procurado fica destacado. */
 (function () {
-  var IDX = window.MANUAL_INDEX, DATA = {}, LOADING = {}, ONDE = {}, TEXTO = null;
+  // Dentro da janela dos testes (manual.html?embed=1) esconde o cabeçalho.
+  if (/[?&]embed=1/.test(location.search)) document.body.classList.add('embed');
+  var IDX = window.MANUAL_INDEX, DATA = {}, LOADING = {}, ONDE = {}, TEXTO = null, SEGS = null;
   var HL = null, PEND = null, ULT = '', TOK = 0, ATUAL = '', MARCAS = [], POS = 0, TIMER = 0;
   var $ = function (s) { return document.querySelector(s); };
   var main = $('#main'), arvore = $('#arvore'), busca = $('#busca');
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
 
   IDX.forEach(function (m) { m.n.forEach(function (n, i) { ONDE[n.id] = { m: m, i: i }; }); });
+
+  // ---------- Endereço: #/<nota>?h=<frase>&h=<frase>  ou  #/achar?p=<pergunta>&r=<resposta>&e=<explicação> ----------
+  // h = frase(s) a destacar na nota. "achar" procura sozinho a nota e a frase que respondem à pergunta.
+  function lerHash() {
+    var raw = location.hash.replace(/^#\/?/, ''), i = raw.indexOf('?'), r = { id: i < 0 ? raw : raw.slice(0, i), h: [], P: {} };
+    if (i >= 0) raw.slice(i + 1).split('&').forEach(function (kv) {
+      var j = kv.indexOf('='); if (j < 0) return;
+      try {
+        var k = decodeURIComponent(kv.slice(0, j)), v = decodeURIComponent(kv.slice(j + 1).replace(/\+/g, ' '));
+        if (k === 'h') r.h.push(v); else r.P[k] = v;
+      } catch (e) { /* parte mal escrita: ignora */ }
+    });
+    return r;
+  }
+
 
   // ---------- Carregar o texto de um módulo (uma só vez) ----------
   window.MANUAL_LOAD = function (id, notas) { DATA[id] = {}; notas.forEach(function (n) { DATA[id][n.id] = n.h; }); };
@@ -74,7 +91,7 @@
     ATUAL = id; document.title = n.t + ' — Manual';
     main.innerHTML = '<p>A carregar…</p>';
     carregar(m.id, function () {
-      if (location.hash.replace('#/', '') !== id) return;
+      if (lerHash().id !== id) return;
       var ant = m.n[o.i - 1], seg = m.n[o.i + 1];
       main.innerHTML =
         '<p class="crumb"><a href="#/">Manual</a> › <a href="#/' + m.id + '">' + esc(m.t) + '</a>' + (n.s ? ' › ' + esc(n.s) : '') + '</p>' +
@@ -200,7 +217,7 @@
     });
     MARCAS.sort(function (a, b) { return a.compareDocumentPosition(b) & 4 ? -1 : 1; });
     var barra = document.createElement('div'); barra.className = 'barra-hl';
-    barra.innerHTML = '<span id="hl-info"></span><button type="button" data-a="ant" aria-label="Ocorrência anterior">▲</button><button type="button" data-a="seg" aria-label="Ocorrência seguinte">▼</button><button type="button" data-a="res">← Resultados</button><button type="button" data-a="lim">Limpar</button>';
+    barra.innerHTML = '<span id="hl-info"></span><button type="button" data-a="ant" aria-label="Ocorrência anterior">▲</button><button type="button" data-a="seg" aria-label="Ocorrência seguinte">▼</button>' + (HL.ext ? '' : '<button type="button" data-a="res">← Resultados</button>') + '<button type="button" data-a="lim">Limpar</button>';
     main.insertBefore(barra, main.firstChild);
     barra.addEventListener('click', function (e) {
       var a = e.target.getAttribute && e.target.getAttribute('data-a'); if (!a) return;
@@ -252,11 +269,120 @@
   }
   document.addEventListener('touchend', largar); document.addEventListener('touchcancel', largar);
 
+  // ---------- Achar a passagem que responde a uma pergunta ----------
+  // Usado pelo botão "Manual" dos testes (#/achar?p=pergunta&r=resposta certa&e=explicação).
+  // Parte o texto de todas as notas em frases, dá pontos às frases que partilham palavras com a
+  // resposta certa (peso 3), com a pergunta (1,5) e com a explicação (1), e abre a nota da melhor
+  // frase com essa frase destacada. As palavras raras valem mais do que as comuns (idf).
+  /* ACHAR-INICIO */
+  var PARAR = ' a o as os um uma uns umas de da do das dos em no na nos nas por para com sem que e ou se ao aos ' +
+    'pelo pela pelos pelas num numa entre sobre como mais menos quando qual quais quem onde quanto quantos ' +
+    'ser sao foi era sera deve devem pode podem tem ter ha nao seu sua seus suas este esta esse essa isto isso ' +
+    'ja so tambem apenas todos todas todo toda outro outra cada ate apos seguinte seguintes afirmacao afirmacoes ' +
+    'opcao resposta correta certa indique assinale verdadeiro falso ';
+  function radical(w) {
+    if (/\d/.test(w)) return w;
+    if (w.length > 3 && w.charAt(w.length - 1) === 's') w = w.slice(0, -1);
+    return w.length > 6 ? w.slice(0, 6) : w;
+  }
+  function radicais(t) {
+    var r = [];
+    norm(t).replace(/[^a-z0-9 ]+/g, ' ').split(' ').forEach(function (w) {
+      if (!w || (w.length < 3 && !/\d/.test(w)) || PARAR.indexOf(' ' + w + ' ') >= 0) return;
+      r.push(radical(w));
+    });
+    return r;
+  }
+  // Frases de um texto simples: [início, fim]. Listas sem pontuação partem-se de ~35 em 35 palavras.
+  function segmentos(p) {
+    var re = /[.!?;]\s+(?=[A-ZÀ-ÝÇ«“"(0-9•–-])/g, cortes = [], ini = 0, m, out = [];
+    while ((m = re.exec(p))) { cortes.push([ini, m.index + 1]); ini = m.index + m[0].length; }
+    cortes.push([ini, p.length]);
+    cortes.forEach(function (c) {
+      var t = p.slice(c[0], c[1]);
+      if (t.trim().length < 8) return;
+      if (t.split(' ').length <= 45) return out.push(c);
+      var a = c[0], n = 0, esp = /\s/g, x;
+      while ((x = esp.exec(t))) { if (++n % 35 === 0) { out.push([a, c[0] + x.index]); a = c[0] + x.index + 1; } }
+      if (c[1] - a > 8) out.push([a, c[1]]);
+    });
+    return out;
+  }
+  function indexar() {
+    var segs = [], df = {};
+    IDX.forEach(function (m) {
+      m.n.forEach(function (n) {
+        var T = TEXTO[n.id]; if (!T) return;
+        segmentos(T.p).forEach(function (c) {
+          var tok = {}, rs = radicais(T.p.slice(c[0], c[1]));
+          rs.forEach(function (r) { if (!tok[r]) { tok[r] = 1; df[r] = (df[r] || 0) + 1; } });
+          segs.push({ n: n.id, a: c[0], b: c[1], tok: tok, len: rs.length });
+        });
+      });
+    });
+    var N = segs.length || 1;
+    return { segs: segs, idf: function (r) { return Math.log(1 + N / (1 + (df[r] || 0))); } };
+  }
+  // Devolve as melhores frases, da melhor para a pior: [{ n: id da nota, a, b, s: pontos 0..1 }].
+  function procurar(P, ix) {
+    var Q = {}, certa = radicais(P.r || '');
+    var juntar = function (rs, w) { rs.forEach(function (r) { if (!(Q[r] >= w)) Q[r] = w; }); };
+    juntar(radicais(P.e || ''), 1); juntar(radicais(P.p || ''), 1.5); juntar(certa, 3);
+    var totQ = 0, totA = 0, A = {};
+    certa.forEach(function (r) { A[r] = 1; });
+    Object.keys(Q).forEach(function (r) { totQ += Q[r] * ix.idf(r); });
+    Object.keys(A).forEach(function (r) { totA += ix.idf(r); });
+    if (!totQ) return [];
+    var frase = norm(P.r || '').replace(/[^a-z0-9 ]+/g, ' ').replace(/ +/g, ' ').trim();
+    var res = ix.segs.map(function (g) {
+      var q = 0, a = 0;
+      Object.keys(g.tok).forEach(function (r) { if (Q[r]) q += Q[r] * ix.idf(r); if (A[r]) a += ix.idf(r); });
+      if (!q) return null;
+      var s = (totA ? 0.55 * (a / totA) + 0.45 * (q / totQ) : q / totQ) / (1 + 0.012 * g.len);
+      if (frase.length >= 4 && TEXTO[g.n].n.slice(g.a, g.b).replace(/[^a-z0-9 ]+/g, ' ').replace(/ +/g, ' ').indexOf(frase) >= 0) s += 0.25;
+      return { n: g.n, a: g.a, b: g.b, s: s };
+    }).filter(Boolean);
+    res.sort(function (x, y) { return y.s - x.s; });
+    return res.slice(0, 40);
+  }
+  /* ACHAR-FIM */
+
+  function achar(P) {
+    var t = ++TOK;
+    ATUAL = ''; document.title = 'A procurar no manual…';
+    main.innerHTML = '<p>A procurar no manual…</p>';
+    prepararTexto(function () {
+      if (t !== TOK) return;
+      if (!SEGS) SEGS = indexar();
+      var res = procurar(P, SEGS), top = res[0];
+      if (top && top.s >= 0.3) {
+        // Abre a nota da melhor frase; junta a 2.ª melhor se for da mesma nota e quase tão boa.
+        var fr = [top];
+        var seg = res.filter(function (r) { return r !== top && r.n === top.n && r.s >= top.s * 0.8 && (r.a >= top.b || r.b <= top.a); })[0];
+        if (seg) fr.push(seg);
+        var h = fr.map(function (r) { return 'h=' + encodeURIComponent(TEXTO[r.n].p.slice(r.a, r.b).trim()); }).join('&');
+        location.replace('#/' + top.n + '?' + h);
+        return;
+      }
+      // Sem frase convincente: mostra as notas mais parecidas.
+      if (!res.length) { main.innerHTML = '<h2>Não encontrei a passagem</h2><p>Nenhuma nota do manual se parece com esta resposta. Usa a pesquisa à esquerda.</p>'; return; }
+      var vistas = {}, h2 = '<h2>Não encontrei a passagem exata</h2><p>Estas são as notas mais parecidas. Também podes usar a pesquisa à esquerda.</p><ul class="res">';
+      res.filter(function (r) { return vistas[r.n] ? false : (vistas[r.n] = 1); }).slice(0, 5).forEach(function (r) {
+        var o = ONDE[r.n], T = TEXTO[r.n];
+        h2 += '<li><a href="#/' + r.n + '">' + esc(o.m.n[o.i].t) + '</a> <span class="cont">· ' + esc(o.m.t) + '</span><span class="sn">' + esc(T.p.slice(r.a, r.b).slice(0, 220)) + '</span></li>';
+      });
+      main.innerHTML = h2 + '</ul>';
+    }, false);
+  }
+
   // ---------- Rotas ----------
   function rota() {
-    var id = location.hash.replace(/^#\/?/, '');
+    var H = lerHash(), id = H.id;
     document.body.classList.remove('menu-aberto'); $('#menu').setAttribute('aria-expanded', 'false');
+    if (id === 'achar') { HL = null; PEND = null; desenharArvore(''); return achar(H.P); }
     HL = PEND; PEND = null;
+    // Ligação com frase (vinda de um botão "Manual"): destaca essa(s) frase(s).
+    if (!HL && H.h.length) HL = { q: H.h[0].length > 70 ? H.h[0].slice(0, 70) + '…' : H.h[0], termos: H.h.map(norm), ext: true };
     desenharArvore(id);
     if (ONDE[id]) nota(id);
     else { var m = IDX.filter(function (x) { return x.id === id; })[0]; HL = null; if (m) modulo(m); else inicio(); }
