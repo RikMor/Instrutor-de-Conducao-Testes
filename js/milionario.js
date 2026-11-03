@@ -152,7 +152,7 @@
     dado: ['🎲', 'Dado', '10% de hipótese de uma resposta certa valer o dobro.'],
     cadeado: ['🔒', 'Cadeado', 'Ao errares, o combo só desce para metade em vez de voltar a ×1.'],
     vela: ['🕯️', 'Vela', 'Os descansos dão o dobro: +2 vidas e +2 perguntas na fase seguinte.'],
-    bussola: ['🧭', 'Bússola', 'Os nós ❓ nunca são fases: só loja, descanso ou tesouro.'],
+    bussola: ['🧭', 'Bússola', 'Os nós ❓ nunca são perguntas: só loja, descanso ou tesouro.'],
     sino: ['🔔', 'Sino', 'A cada 5 certas seguidas ganhas +1 vida.'],
     raio: ['⚡', 'Raio', 'A primeira resposta certa de cada fase vale o triplo.'],
     ima: ['🧲', 'Íman', 'Cada resposta certa dá +1 ponto por cada 10 🪙 que tiveres.'],
@@ -373,7 +373,7 @@ ${themesBox()}
   // Coleções: tudo o que existe no jogo (relíquias, nós do mapa, ajudas, pontos).
   const colHtml = () => {
     const found = new Set((store.get('qqsm_rel') || '').split(',').filter(Boolean));
-    const NODES = { e: `${QS_PHASE} perguntas e uma meta de pontos. Falhar a meta acaba a corrida.`, E: 'Meta mais alta. Ao vencer ganhas uma relíquia.', '?': 'Surpresa: pode ser uma fase, uma relíquia, escolheres o tema da próxima fase (se tiveres mais de um tema), melhorares uma relíquia, curar-te por completo, uma loja ou um descanso.', $: 'Gasta moedas em relíquias e vidas.', r: 'Recuperas 1 ❤️ e na fase seguinte tens +1 pergunta e +1 troca.', t: 'Ganhas uma relíquia.', b: 'Última fase do andar. Ao vencer subes de andar e ganhas +1 ❤️. No último andar é o Exame final 🏁.' };
+    const NODES = { e: `${QS_PHASE} perguntas e uma meta de pontos. Falhar a meta acaba a corrida.`, E: 'Meta mais alta. Ao vencer ganhas uma relíquia.', '?': 'Surpresa: pode ser uma pergunta misteriosa (certa = relíquia), uma relíquia, escolheres o tema da próxima fase (se tiveres mais de um tema), melhorares uma relíquia, curar-te por completo, uma loja ou um descanso.', $: 'Gasta moedas em relíquias e vidas.', r: 'Recuperas 1 ❤️ e na fase seguinte tens +1 pergunta e +1 troca.', t: 'Ganhas uma relíquia.', b: 'Última fase do andar. Ao vencer subes de andar e ganhas +1 ❤️. No último andar é o Exame final 🏁.' };
     const card = (e, n, d, x) => `<div class="cd"><span class="e" aria-hidden="true">${e}</span><div><b>${n}</b><small>${d}</small>${x ? `<em>${x}</em>` : ''}</div></div>`;
     return `<h2>Relíquias</h2><div class="cds">${Object.entries(RELICS).map(([k, r]) => card(r[0], r[1], r[2] + (UP[k] ? `<br><b>Melhorada:</b> ${UP[k]}` : ''), G && G.relics.includes(k) ? '✓ Tens nesta corrida' : found.has(k) ? '✓ Já a encontraste' : '')).join('')}</div>
 <h2>Nós do mapa</h2><div class="cds">${Object.keys(NODES).map((k) => card(ICON[k], LEG[k], NODES[k])).join('')}</div>
@@ -388,7 +388,7 @@ ${themesBox()}
 ${sec('1. Fases e metas', `Uma corrida é feita de <b>fases</b>. Cada fase tem <b>${QS_PHASE} perguntas</b> e uma meta: o "Pontua pelo menos" do painel.`, `Assim que os pontos da fase chegam à meta, a fase termina logo e ganhas <b>+${LEFT_BONUS} pontos</b> por cada pergunta que sobrar. Se as perguntas acabarem sem chegares à meta, a corrida termina.`)}
 ${sec('2. Pontos e combo', 'Cada resposta certa vale os <b>pontos base</b> (100 a 200, a subir com a dificuldade) multiplicados pelo <b>combo</b>: começa em ×1 e sobe 0,25 por cada certa seguida, até ×4. Errar parte o combo.', 'As perguntas ficam mais difíceis ao longo da corrida e as metas sobem com elas.')}
 ${sec('3. Vidas', 'Tens <b>3 vidas</b> ❤️❤️❤️. Cada resposta errada custa uma vida e, sem vidas, a corrida acaba. Podes recuperar vidas nos descansos, ao subir de andar, na loja e em alguns eventos ❓. A relíquia 💖 Coração dá-te uma vida máxima a mais.')}
-${sec('4. Mapa e andares', 'Depois de cada fase escolhes o caminho no mapa. Só podes ir para o nó à frente ou para o vizinho:', '📝 <b>Fase</b> normal, 💀 <b>fase difícil</b> (meta mais alta, dá uma relíquia), ❓ <b>desconhecido</b> (uma fase, uma relíquia, escolher o tema da próxima fase, melhorar uma relíquia, cura total, loja ou descanso), 🛒 <b>loja</b>, 🏕️ <b>descanso</b> (+1 ❤️, +1 pergunta e +1 troca na fase seguinte) e 🧰 <b>tesouro</b> (uma relíquia).', `O último nó de cada andar (🚪) leva ao andar seguinte. O número de andares depende das perguntas que escolheres (cerca de ${QPISO} por andar) e só no último aparece o 🏁 <b>Exame final</b>. Podes ver o mapa a qualquer momento no "Ver minimapa".`)}
+${sec('4. Mapa e andares', 'Depois de cada fase escolhes o caminho no mapa. Só podes ir para o nó à frente ou para o vizinho:', '📝 <b>Fase</b> normal, 💀 <b>fase difícil</b> (meta mais alta, dá uma relíquia), ❓ <b>desconhecido</b> (uma pergunta com relíquia de prémio, uma relíquia, escolher o tema da próxima fase, melhorar uma relíquia, cura total, loja ou descanso), 🛒 <b>loja</b>, 🏕️ <b>descanso</b> (+1 ❤️, +1 pergunta e +1 troca na fase seguinte) e 🧰 <b>tesouro</b> (uma relíquia).', `O último nó de cada andar (🚪) leva ao andar seguinte. O número de andares depende das perguntas que escolheres (cerca de ${QPISO} por andar) e só no último aparece o 🏁 <b>Exame final</b>. Podes ver o mapa a qualquer momento no "Ver minimapa".`)}
 ${sec('5. Relíquias e ajudas', 'As relíquias dão vantagens durante toda a corrida. As ajudas (<b>50:50, Público, Amigo e Troca</b> de pergunta) também são relíquias: não as tens ao início, tens de as encontrar, e cada uma pode ser usada <b>uma vez por fase</b>.', 'Vê todas no botão "Coleções".')}
 ${sec('6. Moedas e loja', 'Ganhas moedas ao acertar e ao concluir fases. Na loja gastas moedas em relíquias e vidas.')}
 ${sec('7. Manual', 'Podes abrir o <b>Manual</b> a qualquer momento, no topo do ecrã, para consultar a matéria sem sair do jogo.')}
@@ -467,7 +467,7 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
     G.shop = shuffle(Object.keys(RELICS).filter((x) => !G.relics.includes(x))).slice(0, 3).concat('heart');
     G.phase = 'shop';
   };
-  // Nó ❓: pode ser uma fase, uma relíquia, escolher o tema da próxima fase, melhorar uma relíquia, curar tudo, loja ou descanso.
+  // Nó ❓: pode ser uma pergunta, uma relíquia, escolher o tema da próxima fase, melhorar uma relíquia, curar tudo, loja ou descanso.
   function unknown() {
     const g = G, themes = [...new Set(POOL.map((q) => q.s))].filter((s) => POOL.filter((q) => q.s === s).length >= 8);
     const W = [['e', has('bussola') ? 0 : 30], ['t', 15], ['tema', themes.length > 1 ? 15 : 0], ['up', upgradable().length ? 15 : 0], ['heal', g.lives < g.max ? 10 : 0], ['$', 8], ['r', 7]];
@@ -495,12 +495,14 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
   function enter(r, l) {
     const g = G;
     g.row = r; g.lane = l; g.path.add(r + ',' + l); g.flash = '';
-    let k = g.map[r][l];
+    let k = g.map[r][l], unk = false;
     if (k === '?') {
+      unk = true;
       if (has('cartola')) g.coins += V('cartola', 30, 60);
       k = unknown();
       if (k === 'tema' || k === 'up') return view();
     }
+    if (k === 'e' && unk) return startQuiz(); // ❓ que sai "fase" passa a ser uma única pergunta
     if (k === 'e' || k === 'E' || k === 'b') return startFase(k);
     if (k === '$') {
       openShop('');
@@ -540,6 +542,27 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
     g.sw = use('troca') * SWAPS + g.bonusSw + (has('balao') ? V('balao', 1, 2) : 0); g.bonusQ = g.bonusSw = 0;
     g.kind = k === 'e' ? 'normal' : 'boss';
     nextQ();
+  }
+  // ❓ Pergunta misteriosa: só 1 pergunta, sem meta. Certa = relíquia (ou 100 🪙); errada = perde 1 ❤️.
+  function startQuiz() {
+    const g = G, use = (k) => (has(k) ? 1 + (has('mochila') ? V('mochila', 1, 2) : 0) + V(k, 0, 1) : 0);
+    g.f = { k: 'q', name: '❓ Pergunta misteriosa', target: 0 };
+    g.round = 0; g.streak = has('estrela') ? V('estrela', 2, 4) : 0; g.fTheme = null; g.shield = 0; g.errs = 0; g.first = 0; g.hits = 0;
+    g.left = 1; g.ch = { f: use('meio'), a: use('publico'), t: use('amigo') };
+    g.sw = use('troca') * SWAPS + (has('balao') ? V('balao', 1, 2) : 0);
+    g.kind = 'normal';
+    nextQ();
+  }
+  function endQuiz() {
+    const g = G;
+    let m;
+    if (g.ok) {
+      const rl = newRelic();
+      if (rl) { giveRelic(rl); m = `Acertaste! Ganhas a relíquia ${RELICS[rl][0]} <b>${RELICS[rl][1]}</b>: ${RELICS[rl][2]}`; }
+      else { g.coins += 100; m = 'Acertaste! Já tens todas as relíquias: ganhas 100 🪙.'; }
+    } else m = 'Desta vez não ganhas nenhum prémio.';
+    g.title = '❓ Desconhecido'; g.msg = m; g.f = null; g.q = null; g.phase = 'note';
+    view(); scrollTo(0, 0);
   }
   const prog = () => Math.min(1, (G.piso * ROWS + G.row) / Math.max(1, G.pisos * ROWS - 1));
   const diff = () => Math.max(0, Math.min(1, (G.piso * ROWS + G.row + (QS_PHASE - G.left) / QS_PHASE) / Math.max(1, G.pisos * ROWS - 1)));
@@ -587,7 +610,7 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
       g.first = 1; g.hits++;
       g.round += g.pts; g.total += g.pts; g.streak++;
       if (has('sino') && g.streak % V('sino', 5, 3) === 0 && g.lives < g.max) { g.lives++; g.notes.push('🔔 Sino: +1 ❤️.'); }
-      let c = { e: 12, E: 25, b: 40 }[g.f.k] + Math.min(g.streak, 5);
+      let c = { e: 12, E: 25, b: 40, q: 12 }[g.f.k] + Math.min(g.streak, 5);
       if (has('carteira')) c += V('carteira', 2, 4);
       if (has('mealheiro')) c = Math.round(c * V('mealheiro', 1.5, 2));
       g.coins += c; g.notes.push('+' + c + ' 🪙');
@@ -604,12 +627,13 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
       if (g.lives <= 0 && has('fenix')) { g.lives = 2; g.relics = g.relics.filter((x) => x !== 'fenix'); g.notes.push('🪶 A Fénix renasceu: voltas com 2 ❤️ (a relíquia gastou-se).'); }
     }
     if (!free) g.left--;
-    if (g.lives > 0 && g.round >= g.f.target) g.notes.push('Meta atingida! A fase fica concluída' + (g.left ? ` e ganhas +${fmt(g.left * LEFT_BONUS)} pontos pelas perguntas que sobram.` : '.'));
+    if (g.f.k !== 'q' && g.lives > 0 && g.round >= g.f.target) g.notes.push('Meta atingida! A fase fica concluída' + (g.left ? ` e ganhas +${fmt(g.left * LEFT_BONUS)} pontos pelas perguntas que sobram.` : '.'));
     (g.ok ? SFX.ok : SFX.ko)();
     view();
   }
   function next() {
     if (G.lives <= 0) return endGame('dead');
+    if (G.f.k === 'q') return endQuiz();
     if (G.round >= G.f.target) return endFase(true);
     if (G.left > 0) nextQ();
     else endFase(false);
@@ -699,7 +723,7 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
   function view() {
     const g = G, ph = g.phase, f = g.f, q = g.q, live = ph === 'ask' || ph === 'confirm', inQ = !!q && ['ask', 'confirm', 'lock', 'reveal'].includes(ph);
     const hearts = '❤️'.repeat(Math.max(0, g.lives)) + '🖤'.repeat(Math.max(0, g.max - g.lives));
-    const panel = `<aside class="bl"><div class="blh">${f ? esc(f.name) : 'A corrida'}</div>${f ? `<div class="blt">Pontua pelo menos<br><b><i class="chip"></i>${fmt(f.target)}</b></div>` : ''}<div class="blv" aria-label="${g.lives} vidas">${hearts}</div><div class="blm">🪙 ${g.coins}</div><div class="bls"><div><small>Fase</small><b>${Math.max(1, g.row + 1)}/${ROWS}</b></div><div><small>Andar</small><b>${g.piso + 1}/${g.pisos}</b></div></div><div class="rls">${g.relics.map((k) => `<span class="rl" data-tip="${RELICS[k][1]}: ${rdesc(k)}" tabindex="0" aria-label="${RELICS[k][1]}: ${rdesc(k)}">${RELICS[k][0]}${g.up.has(k) ? '<sup>+</sup>' : ''}</span>`).join('') || '<small>Sem relíquias</small>'}</div>${ph === 'map' ? '' : '<button class="b go" data-act="minimap">🗺️ Ver minimapa</button>'}<button class="b go" data-act="colmodal">📚 Coleções</button></aside>`;
+    const panel = `<aside class="bl"><div class="blh">${f ? esc(f.name) : 'A corrida'}</div>${f && f.k !== 'q' ? `<div class="blt">Pontua pelo menos<br><b><i class="chip"></i>${fmt(f.target)}</b></div>` : ''}<div class="blv" aria-label="${g.lives} vidas">${hearts}</div><div class="blm">🪙 ${g.coins}</div><div class="bls"><div><small>Fase</small><b>${Math.max(1, g.row + 1)}/${ROWS}</b></div><div><small>Andar</small><b>${g.piso + 1}/${g.pisos}</b></div></div><div class="rls">${g.relics.map((k) => `<span class="rl" data-tip="${RELICS[k][1]}: ${rdesc(k)}" tabindex="0" aria-label="${RELICS[k][1]}: ${rdesc(k)}">${RELICS[k][0]}${g.up.has(k) ? '<sup>+</sup>' : ''}</span>`).join('') || '<small>Sem relíquias</small>'}</div>${ph === 'map' ? '' : '<button class="b go" data-act="minimap">🗺️ Ver minimapa</button>'}<button class="b go" data-act="colmodal">📚 Coleções</button></aside>`;
     let main = '';
     if (ph === 'map') main = mapHtml();
     else if (ph === 'shop') main = SH();
@@ -714,7 +738,7 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
       let below = '';
       if (ph === 'confirm') below = `<div class="confirm"><span>Resposta final: <b>${L}</b>?</span><button class="b go" data-act="final" data-focus>Sim, é a final</button><button class="b" data-act="cancel">Não</button></div>`;
       if (ph === 'reveal') {
-        below = `<div class="reveal ${g.ok ? 'good' : 'bad'}" role="status"><b>${g.ok ? `Certa! +${fmt(g.pts)} pontos (${g.base} × ${mx(g.mul)})` : 'Resposta errada. Sem pontos.'}</b><p>${g.ok ? '' : `A resposta certa era a ${LT[right]}: `}${g.ok ? `${LT[right]}: ` : ''}${esc(cap(q.o[right].t))}</p>${q.e}${manBtn(q)}${g.notes.map((n) => `<small>${n}</small>`).join('')}${q.u ? '<small>Esta resposta não está confirmada oficialmente.</small>' : ''}<button class="b go" data-act="next" data-focus>${g.lives <= 0 ? 'Ver o resultado' : g.round >= g.f.target ? 'Concluir a fase' : g.left > 0 ? 'Pergunta seguinte' : 'Fechar a fase'}</button></div>`;
+        below = `<div class="reveal ${g.ok ? 'good' : 'bad'}" role="status"><b>${g.ok ? `Certa! +${fmt(g.pts)} pontos (${g.base} × ${mx(g.mul)})` : 'Resposta errada. Sem pontos.'}</b><p>${g.ok ? '' : `A resposta certa era a ${LT[right]}: `}${g.ok ? `${LT[right]}: ` : ''}${esc(cap(q.o[right].t))}</p>${q.e}${manBtn(q)}${g.notes.map((n) => `<small>${n}</small>`).join('')}${q.u ? '<small>Esta resposta não está confirmada oficialmente.</small>' : ''}<button class="b go" data-act="next" data-focus>${g.lives <= 0 ? 'Ver o resultado' : g.f.k === 'q' ? 'Continuar' : g.round >= g.f.target ? 'Concluir a fase' : g.left > 0 ? 'Pergunta seguinte' : 'Fechar a fase'}</button></div>`;
       }
       const lifeBar = [has('meio') && ll('f', '50:50', '50:50'), has('publico') && ll('a', '👥', 'Público'), has('amigo') && ll('t', '📞', 'Amigo'), (has('troca') || g.sw > 0) && `<button class="ll" data-act="swap" ${ph === 'ask' && g.sw > 0 ? '' : 'disabled'}><span class="ic" aria-hidden="true">🔄</span><span>Trocar${g.sw > 1 ? ' ×' + g.sw : ''}</span></button>`].filter(Boolean);
       main = `<div class="meta"><span>${f.name}${g.fTheme ? ' (' + esc(g.fTheme) + ')' : ''}: ${g.left} ${g.left === 1 ? 'pergunta' : 'perguntas'} por responder · Total ${fmt(g.total)} pontos</span><b>Vale ${g.base} × ${mx(MULT(g.streak))}</b></div>
