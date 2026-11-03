@@ -424,26 +424,19 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
       for (const [k, w] of ok) if ((x -= w) <= 0) return k;
       return 'e';
     };
-    // Caminhos aleatórios (como no Slay the Spire): 2 ou 3 caminhos a subir, que andam à sorte para a esquerda, em frente
-    // ou para a direita, sem se cruzarem. Só existem os nós por onde passa algum caminho; o último andar é um só nó.
-    let nodes, edges;
-    for (let t = 0; t < 80; t++) {
-      nodes = Array.from({ length: ROWS }, () => [0, 0, 0]);
-      edges = new Set();
-      const E = Array.from({ length: ROWS }, () => []);
-      [0, 1, 2].forEach((start) => { // sempre 3 caminhos
-        let l = start;
-        nodes[0][l] = 1;
-        for (let r = 0; r < ROWS - 2; r++) {
-          const opt = [[l, 3], [l - 1, 2], [l + 1, 2]].filter(([n]) => n >= 0 && n <= 2 && !E[r].some(([a, b]) => (l < a && n > b) || (l > a && n < b)));
-          let x = rnd(1, opt.reduce((a, [, w]) => a + w, 0)), n = l;
-          for (const [m, w] of opt) if ((x -= w) <= 0) { n = m; break; }
-          edges.add(`${r},${l}>${n}`); E[r].push([l, n]); nodes[r + 1][n] = 1; l = n;
-        }
-      });
-      for (let l = 0; l < 3; l++) if (ROWS > 1 && nodes[ROWS - 2][l]) { edges.add(`${ROWS - 2},${l}>1`); nodes[ROWS - 1][1] = 1; }
-      if (nodes.slice(0, ROWS - 1).every((row) => row.reduce((a, b) => a + b, 0) >= 2)) break;
+    // Há sempre 3 caminhos: as 3 faixas existem em todos os andares. De cada nó vai-se sempre em frente e, à sorte, também
+    // para uma faixa vizinha (sem cruzar). O último andar é um só nó, onde as 3 faixas se juntam.
+    const nodes = Array.from({ length: ROWS }, (_, r) => (r === ROWS - 1 ? [0, 1, 0] : [1, 1, 1]));
+    const edges = new Set();
+    for (let r = 0; r < ROWS - 2; r++) {
+      for (let l = 0; l < 3; l++) edges.add(`${r},${l}>${l}`);
+      for (let l = 0; l < 2; l++) {
+        const x = rnd(1, 100);
+        if (x <= 30) edges.add(`${r},${l}>${l + 1}`);
+        else if (x <= 60) edges.add(`${r},${l + 1}>${l}`);
+      }
     }
+    for (let l = 0; l < 3; l++) edges.add(`${ROWS - 2},${l}>1`);
     const map = nodes.map((row) => row.map(() => null));
     for (let r = 0; r < ROWS; r++)
       for (let l = 0; l < 3; l++) {
