@@ -276,7 +276,7 @@ var FL = [
 //   FX    números de dano a mostrar      AC    contexto de áudio
 var G,
   E,
-  scr = 'menu',
+  scr = 'home',
   msg = '',
   opts = [],
   P = null,
@@ -761,6 +761,62 @@ function modal() {
 }
 
 // Volta ao menu inicial.
+// Menu inicial (como no Milionário): Solo, Coleções e Regras.
+function home() {
+  V = null;
+  NG = false;
+  P = null;
+  scr = 'home';
+  render();
+}
+function showCol() {
+  scr = 'col';
+  render();
+}
+function showRules() {
+  scr = 'rules';
+  render();
+}
+
+// Coleções: todas as cartas, inimigos e relíquias do jogo.
+function colHtml() {
+  var h = '<h3>🃏 Cartas</h3><div class="pg">';
+  Object.keys(CARDS).forEach(function (id) {
+    h += cardFace(id, 1);
+  });
+  h += '</div><h3>👾 Inimigos</h3><div class="cl">';
+  var mv = { a: '⚔️', d: '🛡️', b: '💪' };
+  Object.keys(FOES).forEach(function (k) {
+    var f = FOES[k],
+      onde = '';
+    FL.forEach(function (L, i) {
+      if (L.b == k) onde = '👑 Boss do andar ' + (i + 1);
+      else if (L.c.indexOf(k) >= 0) onde += (onde ? ', ' : 'Andar ') + (i + 1);
+    });
+    h +=
+      '<div class="ec"><span class="eem">' +
+      f.e +
+      '</span><b>' +
+      f.n +
+      '</b><small>❤️ ' +
+      f.hp +
+      ' · ' +
+      onde +
+      '</small><small>' +
+      f.p
+        .map(function (m) {
+          return mv[m[0]] + ' ' + m[1];
+        })
+        .join(' · ') +
+      '</small></div>';
+  });
+  h += '</div><h3>🎁 Relíquias</h3><div class="cl">';
+  Object.keys(RL).forEach(function (k) {
+    h += '<div class="ec"><b>' + RL[k].n + '</b><small>' + RL[k].d + '</small></div>';
+  });
+  return h + '</div>';
+}
+
 function menu() {
   V = null;
   NG = false;
@@ -822,15 +878,39 @@ function topbar() {
   return s;
 }
 
-// Redesenha o ecrã conforme scr: menu, battle, blinds, skip, shop, reward, rest, over ou win.
+// Redesenha o ecrã conforme scr: home, col, rules, menu, battle, blinds, skip, shop, reward, rest, over ou win.
 function render() {
   var h = '',
     a = document.getElementById('app');
-  if (scr == 'menu') {
+  if (scr == 'home') {
+    h =
+      '<div class="ctr"><h1>🗼 Torre das Cartas</h1><p>Sobe a torre: cada carta só funciona se acertares na pergunta.</p></div>' +
+      '<div class="mnu"><button class="mb blue" onclick="menu()">Solo<small>Sobe a torre</small></button>' +
+      '<button class="mb purple" onclick="showCol()">Coleções<small>Cartas, inimigos e relíquias</small></button>' +
+      '<button class="mb green" onclick="showRules()">Regras<small>Como se joga</small></button></div>';
+  } else if (scr == 'col') {
+    h =
+      '<div class="ctr"><h2>Coleções</h2></div><div class="colw">' +
+      colHtml() +
+      '</div><div class="row"><button class="btn alt" onclick="home()">Voltar</button></div>';
+  } else if (scr == 'rules') {
+    h =
+      '<div class="ctr"><h2>Regras</h2></div><ul class="rules">' +
+      '<li><b>Objetivo:</b> sobe 3 andares e derrota o Dragão Ancião, o boss do último andar.</li>' +
+      '<li><b>Cada andar</b> tem 3 desafios: 2 combates contra inimigos comuns e 1 boss. Carrega em <b>Selecionar</b> para combater.</li>' +
+      '<li><b>Ignorar:</b> nos 2 combates comuns podes carregar em <b>Ignorar</b>. Não combates nem ganhas moedas, cartas ou loja, mas escolhes 1 de 3 relíquias permanentes. O boss não se pode ignorar.</li>' +
+      '<li><b>Turnos:</b> começas cada turno com a mão cheia e a energia ⚡ cheia. Cada carta custa energia. O inimigo mostra o que vai fazer (por exemplo, "Ataca 6").</li>' +
+      '<li><b>Perguntas:</b> para jogar uma carta tens de acertar numa pergunta. Se acertares, a carta funciona; se errares, falha e gasta a energia na mesma.</li>' +
+      '<li><b>Sequência 🔥:</b> respostas certas seguidas dão mais dano, e a cada 3 certas seguidas ganhas +1 energia.</li>' +
+      '<li><b>Depois do combate:</b> ganhas moedas 🪙, recuperas um pouco de vida e escolhes 1 de 3 cartas novas (ou saltas). Depois podes comprar cartas e uma poção na loja.</li>' +
+      '<li><b>Depois do boss:</b> descansas (recuperas 35% da vida) ou escolhes uma relíquia.</li>' +
+      '<li><b>Perdes</b> quando a tua vida chega a 0.</li></ul>' +
+      '<div class="row"><button class="btn alt" onclick="home()">Voltar</button></div>';
+  } else if (scr == 'menu') {
     h =
       '<div class="ctr"><h1>🗼 Torre das Cartas</h1><p>Sobe 3 andares: em cada um enfrentas 2 inimigos comuns e 1 boss, e depois de cada combate tens uma loja. Derrota o Dragão Ancião no fim. Para jogar uma carta tens de responder a uma pergunta do teste: se acertares, a carta funciona; se errares, falha. Se morreres, recomeças.</p><p><b>Escolhe os temas:</b></p><div class="box">' +
       Temas.html(SEL) +
-      '</div><div class="row" style="flex-direction:column;align-items:center"><button class="btn" id="go" onclick="start()">Começar</button><small id="avail"></small></div></div>';
+      '</div><div class="row" style="flex-direction:column;align-items:center"><button class="btn" id="go" onclick="start()">Começar</button><button class="btn alt" onclick="home()">Voltar</button><small id="avail"></small></div></div>';
   } else if (scr == 'battle') {
     var m = E.p[E.i % E.p.length],
       it =
@@ -927,7 +1007,7 @@ function render() {
       h += '</div>';
     }
     h +=
-      '<div class="tbl"><div class="grp"><div class="orb">⚡ ' +
+      '<div class="tbl"><div class="grp"><div class="orb"><i>⚡</i>' +
       G.en +
       '/' +
       G.me +
