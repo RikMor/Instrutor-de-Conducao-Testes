@@ -416,7 +416,7 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
   /* ---------- mapa ---------- */
   // 3 faixas por andar; de cada nó só se vai para a mesma faixa ou a vizinha do andar seguinte.
   function buildMap() {
-    const W = [['e', 48], ['?', 12], ['$', 12], ['r', 12], ['t', 8], ['E', 8]];
+    const W = [['e', 42], ['?', 18], ['$', 12], ['r', 12], ['t', 8], ['E', 8]];
     // `no` = tipos que não podem sair aqui: os nós especiais (💀 ❓ 🛒 🏕️ 🧰) não se repetem em nós ligados um ao outro.
     const roll = (r, no = []) => {
       const ok = W.filter(([k]) => !(k === 'E' && r < 2) && !(k === 'r' && r < 2) && !(k === '$' && r < 1) && !no.includes(k));
@@ -437,17 +437,22 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
       }
     }
     for (let l = 0; l < 3; l++) edges.add(`${ROWS - 2},${l}>1`);
-    const map = nodes.map((row) => row.map(() => null));
-    for (let r = 0; r < ROWS; r++)
-      for (let l = 0; l < 3; l++) {
-        if (!nodes[r][l]) continue;
-        if (r === ROWS - 1) { map[r][l] = 'b'; continue; }
-        if (r === 0) { map[r][l] = 'e'; continue; }
-        // tipos dos nós do andar anterior que ligam a este (só contam os especiais)
-        const no = [0, 1, 2].filter((p) => edges.has(`${r - 1},${p}>${l}`)).map((p) => map[r - 1][p]).filter((k) => k && k !== 'e');
-        if (r === ROWS - 2) map[r][l] = 'r'; // antes do Próximo andar há sempre um Descanso
-        else map[r][l] = roll(r, r === ROWS - 3 ? no.concat('r') : no); // e o andar antes não pode ser Descanso (não se repetem)
-      }
+    // Todos os tipos de sala têm de existir em cada andar (📝 💀 ❓ 🛒 🏕️ 🧰 🚪): sorteia outra vez até estarem todos.
+    let map;
+    for (let t = 0; t < 500; t++) {
+      map = nodes.map((row) => row.map(() => null));
+      for (let r = 0; r < ROWS; r++)
+        for (let l = 0; l < 3; l++) {
+          if (!nodes[r][l]) continue;
+          if (r === ROWS - 1) { map[r][l] = 'b'; continue; }
+          if (r === 0) { map[r][l] = 'e'; continue; }
+          // tipos dos nós do andar anterior que ligam a este (só contam os especiais)
+          const no = [0, 1, 2].filter((p) => edges.has(`${r - 1},${p}>${l}`)).map((p) => map[r - 1][p]).filter((k) => k && k !== 'e');
+          if (r === ROWS - 2) map[r][l] = 'r'; // antes do Próximo andar há sempre um Descanso
+          else map[r][l] = roll(r, r === ROWS - 3 ? no.concat('r') : no); // e o andar antes não pode ser Descanso (não se repetem)
+        }
+      if (['e', 'E', '?', '$', 'r', 't', 'b'].every((k) => map.some((row) => row.includes(k)))) break;
+    }
     map.edges = edges;
     return map;
   }
