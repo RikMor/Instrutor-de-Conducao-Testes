@@ -417,8 +417,9 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
   // 3 faixas por andar; de cada nó só se vai para a mesma faixa ou a vizinha do andar seguinte.
   function buildMap() {
     const W = [['e', 48], ['?', 12], ['$', 12], ['r', 12], ['t', 8], ['E', 8]];
-    const roll = (r) => {
-      const ok = W.filter(([k]) => !(k === 'E' && r < 2) && !(k === 'r' && r < 2) && !(k === '$' && r < 1));
+    // `no` = tipos que não podem sair aqui: os nós especiais (💀 ❓ 🛒 🏕️ 🧰) não se repetem em nós ligados um ao outro.
+    const roll = (r, no = []) => {
+      const ok = W.filter(([k]) => !(k === 'E' && r < 2) && !(k === 'r' && r < 2) && !(k === '$' && r < 1) && !no.includes(k));
       let x = rnd(1, ok.reduce((a, [, w]) => a + w, 0));
       for (const [k, w] of ok) if ((x -= w) <= 0) return k;
       return 'e';
@@ -443,7 +444,17 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
       for (let l = 0; l < 3; l++) if (ROWS > 1 && nodes[ROWS - 2][l]) { edges.add(`${ROWS - 2},${l}>1`); nodes[ROWS - 1][1] = 1; }
       if (nodes.slice(0, ROWS - 1).every((row) => row.reduce((a, b) => a + b, 0) >= 2)) break;
     }
-    const map = nodes.map((row, r) => row.map((on) => (!on ? null : r === ROWS - 1 ? 'b' : r === 0 ? 'e' : r === ROWS - 2 ? (rnd(0, 1) ? 'r' : '$') : roll(r))));
+    const map = nodes.map((row) => row.map(() => null));
+    for (let r = 0; r < ROWS; r++)
+      for (let l = 0; l < 3; l++) {
+        if (!nodes[r][l]) continue;
+        if (r === ROWS - 1) { map[r][l] = 'b'; continue; }
+        if (r === 0) { map[r][l] = 'e'; continue; }
+        // tipos dos nós do andar anterior que ligam a este (só contam os especiais)
+        const no = [0, 1, 2].filter((p) => edges.has(`${r - 1},${p}>${l}`)).map((p) => map[r - 1][p]).filter((k) => k && k !== 'e');
+        if (r === ROWS - 2) { const o = ['r', '$'].filter((k) => !no.includes(k)); map[r][l] = o.length ? o[rnd(0, o.length - 1)] : 'e'; }
+        else map[r][l] = roll(r, no);
+      }
     map.edges = edges;
     return map;
   }
