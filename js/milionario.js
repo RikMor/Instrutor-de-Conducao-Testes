@@ -431,7 +431,7 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
       nodes = Array.from({ length: ROWS }, () => [0, 0, 0]);
       edges = new Set();
       const E = Array.from({ length: ROWS }, () => []);
-      shuffle([0, 1, 2]).slice(0, rnd(2, 3)).forEach((start) => {
+      [0, 1, 2].forEach((start) => { // sempre 3 caminhos
         let l = start;
         nodes[0][l] = 1;
         for (let r = 0; r < ROWS - 2; r++) {
