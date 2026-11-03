@@ -214,7 +214,7 @@
   };
 
   /* ---------- regras (podes mexer aqui) ---------- */
-  const ROWS = 7; // fases por piso (a última leva ao próximo piso; no último piso é o Exame final)
+  const ROWS = 10; // fases por piso (a última leva ao próximo piso; no último piso é o Exame final)
   const QPISO = 26; // perguntas por piso, mais ou menos (define quantos pisos tem o jogo)
   const QS_PHASE = 6; // perguntas por fase
   const SWAPS = 1; // trocas de pergunta por fase
