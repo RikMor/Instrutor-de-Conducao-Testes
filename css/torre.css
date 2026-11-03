@@ -811,3 +811,141 @@ h1 {
     animation: none;
   }
 }
+
+
+/* ---------- Escolha do combate (estilo Balatro: Selecionar / Ignorar) ---------- */
+.bz {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin: 18px 0;
+}
+.bc {
+  --bk: #2f7fe0;
+  flex: 1 1 170px;
+  max-width: 230px;
+  margin-top: 44px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: center;
+  border: 3px solid color-mix(in srgb, var(--bk) 45%, var(--line));
+  border-radius: 16px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--panel) 92%, #fff), var(--panel));
+  box-shadow: 0 10px 28px -14px rgba(0, 0, 0, 0.8);
+}
+.bc.c0 {
+  --bk: #2f7fe0;
+}
+.bc.c1 {
+  --bk: #e0a020;
+}
+.bc.c2 {
+  --bk: #e5624f;
+}
+.bc.cur {
+  margin-top: 0;
+  border-color: var(--bk);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--bk) 35%, transparent),
+    0 14px 30px -12px rgba(0, 0, 0, 0.8);
+}
+.bc.fut,
+.bc.done {
+  opacity: 0.6;
+}
+.bsel,
+.bskip {
+  font: inherit;
+  font-family: Rajdhani, system-ui, sans-serif;
+  font-weight: 700;
+  padding: 9px 0;
+  border: 0;
+  border-radius: 10px;
+  color: #fff;
+  cursor: pointer;
+}
+.bsel {
+  font-size: 1.2rem;
+  background: #ff9a1f;
+  box-shadow: 0 4px 0 #b86a00;
+}
+.bskip {
+  font-size: 1.1rem;
+  background: #ff4c40;
+  box-shadow: 0 4px 0 #a52a20;
+}
+.bsel:not(:disabled):hover,
+.bskip:not(:disabled):hover {
+  filter: brightness(1.1);
+}
+.bsel:disabled,
+.bskip:disabled {
+  background: color-mix(in srgb, var(--panel) 75%, #fff);
+  color: var(--mut);
+  box-shadow: none;
+  cursor: default;
+}
+.bnm {
+  padding: 6px 8px;
+  border-radius: 10px;
+  border: 2px solid var(--bk);
+  background: color-mix(in srgb, var(--bk) 28%, var(--panel));
+  font-family: Rajdhani, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+.bmed {
+  width: 104px;
+  height: 104px;
+  margin: 2px auto;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 3.2rem;
+  background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--bk) 65%, #fff), var(--bk));
+  box-shadow:
+    inset 0 -6px 0 rgba(0, 0, 0, 0.25),
+    0 8px 14px rgba(0, 0, 0, 0.4);
+}
+.bnn {
+  font-weight: 700;
+}
+.bbox,
+.bskipw {
+  padding: 8px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.28);
+  font-size: 0.9rem;
+  color: var(--mut);
+}
+.bbox b {
+  display: block;
+  font-family: Rajdhani, system-ui, sans-serif;
+  font-size: 1.45rem;
+  color: var(--atk);
+}
+.bbox em {
+  font-style: normal;
+  font-weight: 700;
+  color: #e0a020;
+}
+.bskipw {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.bor {
+  font-family: Rajdhani, system-ui, sans-serif;
+  font-weight: 700;
+  color: var(--mut);
+}
+@media (max-width: 560px) {
+  .bc {
+    margin-top: 0;
+    max-width: none;
+  }
+}
