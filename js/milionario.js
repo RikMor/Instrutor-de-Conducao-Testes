@@ -452,8 +452,8 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
         if (r === 0) { map[r][l] = 'e'; continue; }
         // tipos dos nós do andar anterior que ligam a este (só contam os especiais)
         const no = [0, 1, 2].filter((p) => edges.has(`${r - 1},${p}>${l}`)).map((p) => map[r - 1][p]).filter((k) => k && k !== 'e');
-        if (r === ROWS - 2) { const o = ['r', '$'].filter((k) => !no.includes(k)); map[r][l] = o.length ? o[rnd(0, o.length - 1)] : 'e'; }
-        else map[r][l] = roll(r, no);
+        if (r === ROWS - 2) map[r][l] = 'r'; // antes do Próximo andar há sempre um Descanso
+        else map[r][l] = roll(r, r === ROWS - 3 ? no.concat('r') : no); // e o andar antes não pode ser Descanso (não se repetem)
       }
     map.edges = edges;
     return map;
