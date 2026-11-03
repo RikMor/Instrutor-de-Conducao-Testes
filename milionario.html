@@ -18,7 +18,13 @@
       iniciar({
         quiz: true,
         manualIndex: true,
-        scripts: ['js/temas.js', 'js/manual-refs.js', 'js/milionario.js', { src: 'js/milionario-multi.js', module: true }],
+        scripts: [
+          'js/temas.js',
+          'js/ver-manual.js',
+          { src: 'js/manual-refs.js', opcional: true },
+          'js/milionario.js',
+          { src: 'js/milionario-multi.js', module: true },
+        ],
       });
     </script>
   </body>
