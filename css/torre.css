@@ -949,3 +949,121 @@ h1 {
     max-width: none;
   }
 }
+
+
+/* ---------- Menu inicial (Solo, Coleções, Regras), igual ao do Milionário ---------- */
+.mnu {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.8rem;
+  margin: 1.4rem 0;
+}
+.mb {
+  min-height: 120px;
+  display: grid;
+  place-content: center;
+  gap: 0.2rem;
+  padding: 1rem;
+  border: 4px solid rgba(0, 0, 0, 0.35);
+  border-radius: 14px;
+  color: #fff;
+  font: 700 1.7rem/1 Rajdhani, system-ui, sans-serif;
+  text-transform: uppercase;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.35);
+  box-shadow: inset 0 -8px 0 rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+  transition: transform 0.12s;
+}
+.mb small {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: none;
+  opacity: 0.9;
+  text-shadow: none;
+}
+.mb:hover,
+.mb:focus-visible {
+  transform: translateY(-3px);
+}
+.mb.blue {
+  background: #1e90ff;
+}
+.mb.green {
+  background: #2fb37a;
+}
+.mb.purple {
+  background: #7b57c9;
+}
+@media (max-width: 560px) {
+  .mnu {
+    grid-template-columns: 1fr;
+  }
+}
+.rules {
+  max-width: 640px;
+  margin: 0 auto 16px;
+  padding-left: 20px;
+  text-align: left;
+  line-height: 1.5;
+}
+.rules li {
+  margin: 8px 0;
+}
+.colw h3 {
+  margin: 18px 0 8px;
+}
+.colw .pg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+.cl {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 10px;
+}
+.ec {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+}
+.ec .eem {
+  font-size: 2rem;
+}
+.ec small {
+  color: var(--mut);
+}
+
+/* ---------- Mesa: energia dentro do círculo e mais abaixo das cartas ---------- */
+.tbl {
+  margin-top: 48px;
+}
+.tbl .orb {
+  flex: 0 0 auto;
+  width: 76px;
+  height: 76px;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1;
+  font-size: 1.2rem;
+  white-space: nowrap;
+}
+.tbl .orb i {
+  font-style: normal;
+  font-size: 1.3rem;
+}
+@media (max-width: 560px) {
+  .tbl {
+    margin-top: 36px;
+  }
+  .tbl .orb {
+    width: 64px;
+    height: 64px;
+    font-size: 1rem;
+  }
+}
