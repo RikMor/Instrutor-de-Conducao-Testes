@@ -6,7 +6,7 @@
    se acertar a carta funciona, se errar falha.
 
    Ecrãs (variável scr):
-     menu -> blinds (escolher combate) -> battle -> reward (carta nova)
+     menu -> blinds (escolher combate; ou ignorar um combate -> skip: relíquia) -> battle -> reward (carta nova)
           -> [rest após boss] -> shop -> blinds ... -> win | over
 
    Dados principais:
@@ -373,8 +373,30 @@ function leave() {
   blinds();
 }
 
+// Ignorar um combate (o boss não pode ser ignorado): sem combate nem recompensa, mas escolhes uma relíquia.
+function skip() {
+  if (scr != 'blinds' || G.node % 3 == 2) return;
+  opts = sh(Object.keys(RL)).slice(0, 3);
+  scr = 'skip';
+  render();
+}
+
+// Relíquia escolhida ao ignorar um combate: passa logo para o combate seguinte (sem loja).
+function skipRelic(k) {
+  G.skp[G.node] = true;
+  giveRelic(k);
+  G.node++;
+  blinds();
+}
+
 // Aplica a relíquia escolhida e segue para a loja.
 function relic(k) {
+  giveRelic(k);
+  shop();
+}
+
+// Dá a relíquia ao jogador (efeito permanente).
+function giveRelic(k) {
   G.rels.push(k);
   if (k == 'vida') {
     G.max += 15;
@@ -383,7 +405,13 @@ function relic(k) {
   if (k == 'en') G.me++;
   if (k == 'mao') G.hs++;
   if (k == 'forca') G.bs += 2;
-  shop();
+}
+
+// Só a pergunta em si (como no Milionário): tira o "Ficha 2 (Parte II) — " do início e o embrulho "Verdadeiro ou falso? «…»".
+function qtxt(t) {
+  return String(t)
+    .replace(/^Ficha \d+(?: \([^)]*\))? — /, '')
+    .replace(/^Verdadeiro ou falso\?\s*«([\s\S]*?)»\.?\s*$/, '$1');
 }
 
 // Escapa < > & para o texto das perguntas não ser tratado como HTML.
@@ -435,6 +463,7 @@ function start() {
   P = null;
   G = {
     rels: [],
+    skp: {},
     gold: 0,
     ok: 0,
     ko: 0,
@@ -793,7 +822,7 @@ function topbar() {
   return s;
 }
 
-// Redesenha o ecrã conforme scr: menu, battle, blinds, shop, reward, rest, over ou win.
+// Redesenha o ecrã conforme scr: menu, battle, blinds, skip, shop, reward, rest, over ou win.
 function render() {
   var h = '',
     a = document.getElementById('app');
@@ -846,12 +875,8 @@ function render() {
     if (P) {
       var cd = CARDS[G.hand[P.i]];
       h +=
-        '<div class="qbox"><div class="t" style="color:var(--mut);font-size:.85rem">Carta: ' +
-        cd.n +
-        ' · ' +
-        esc(P.q.s) +
-        '</div><div class="qt">' +
-        esc(P.q.q) +
+        '<div class="qbox"><div class="qt">' +
+        esc(qtxt(P.q.q)) +
         '</div>';
       P.o.forEach(function (oi, k) {
         var cl = '';
@@ -920,7 +945,7 @@ function render() {
       topbar() +
       '<div class="ctr"><h2>Andar ' +
       (F + 1) +
-      '/3</h2><p>Escolhe o teu próximo desafio</p></div><div class="blinds">';
+      '/3</h2><p>Escolhe o teu próximo desafio</p></div><div class="bz">';
     G.pl3.forEach(function (k, i) {
       var f = FOES[k],
         b = i == 2,
@@ -928,29 +953,34 @@ function render() {
         hp = Math.round(f.hp * (k == 'boss' ? 1 : 1 + 0.3 * F)),
         st = i < sl ? 'done' : i == sl ? 'cur' : 'fut';
       h +=
-        '<div class="poster ' +
+        '<div class="bc c' +
+        i +
+        ' ' +
         st +
-        (b ? ' bossp' : '') +
-        '"><div class="pt">' +
-        (b ? '👑 BOSS' : 'Combate ' + (i + 1)) +
-        '</div><div class="em">' +
+        '"><button class="bsel" ' +
+        (st == 'cur' ? 'onclick="enter()"' : 'disabled') +
+        '>' +
+        (st == 'cur' ? 'Selecionar' : st == 'fut' ? 'Próximo' : G.skp[nn] ? 'Ignorado' : 'Derrotado') +
+        '</button><div class="bnm">' +
+        (b ? '👑 Boss' : 'Combate ' + (i + 1)) +
+        '</div><div class="bmed">' +
         f.e +
-        '</div><b>' +
+        '</div><div class="bnn">' +
         f.n +
-        '</b><div class="pd">❤️ ' +
+        '</div><div class="bbox">Vida · Força<b>❤️ ' +
         hp +
         ' · 💪 +' +
         F +
-        '</div><div class="pd">Recompensa: 🪙 ' +
+        '</b>Recompensa: <em>🪙 ' +
         (10 + nn) +
         '–' +
         (20 + nn) +
-        '</div>' +
-        (i == sl
-          ? '<div class="row"><button class="btn" onclick="enter()">Enfrentar</button></div>'
-          : i < sl
-            ? '<div class="pd">✔ Derrotado</div>'
-            : '<div class="pd">🔒 Bloqueado</div>') +
+        '</em></div>' +
+        (b
+          ? '<div class="bskipw"><small>O boss não pode ser ignorado</small></div>'
+          : '<div class="bor">OU</div><div class="bskipw"><button class="bskip" ' +
+            (st == 'cur' ? 'onclick="skip()"' : 'disabled') +
+            '>Ignorar</button><small>🎁 Ganhas uma relíquia, sem combate nem recompensa</small></div>') +
         '</div>';
     });
     h += '</div>';
@@ -1002,6 +1032,21 @@ function render() {
         '</span></button>';
     });
     h += '</div></div>';
+  } else if (scr == 'skip') {
+    h =
+      topbar() +
+      '<div class="ctr"><h2>🎁 Combate ignorado</h2><p>Escolhe uma relíquia permanente. Não ganhas moedas nem cartas deste combate.</p></div><div class="hand">';
+    opts.forEach(function (k) {
+      h +=
+        '<button class="card s" onclick="skipRelic(\'' +
+        k +
+        '\')"><span class="n">' +
+        RL[k].n +
+        '</span><span>' +
+        RL[k].d +
+        '</span></button>';
+    });
+    h += '</div><div class="row"><button class="btn alt" onclick="blinds()">Voltar</button></div>';
   } else if (scr == 'over') {
     h =
       '<div class="ctr"><h1>💀 Caíste no andar ' +
