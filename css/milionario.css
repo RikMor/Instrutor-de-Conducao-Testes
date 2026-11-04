@@ -1082,3 +1082,10 @@ body {
 .flt .b[aria-pressed='true'] { background: var(--gold); color: #1b1500; }
 .flt .b:disabled { opacity: .4; cursor: not-allowed; }
 .rvs[data-show='ok'] .rv:not(.s-ok), .rvs[data-show='ko'] .rv:not(.s-ko) { display: none; }
+
+/* Raridade das relíquias (loja) */
+.rar { display: inline-block; margin-left: .3rem; padding: 1px 7px; border-radius: 9px; font-size: .72rem; font-weight: 700; vertical-align: middle; color: #fff; }
+.rar.r0 { background: #6b7785; }
+.rar.r1 { background: #2fb37a; }
+.rar.r2 { background: #7b57c9; }
+.rar.r3 { background: #ff9f0a; color: #1b1200; }
