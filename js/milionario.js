@@ -205,11 +205,6 @@
   const giveRelic = (k) => {
     G.relics.push(k);
     if (k === 'coracao') { G.max++; G.lives++; }
-    try {
-      const f = new Set((store.get('qqsm_rel') || '').split(',').filter(Boolean));
-      f.add(k);
-      store.set('qqsm_rel', [...f].join(','));
-    } catch (e) {}
   };
   // Raridade das relíquias: 0 comum, 1 incomum, 2 rara, 3 lendária. Quanto mais rara, menos sai e mais cara é na loja.
   const RAR_OF = [
@@ -403,10 +398,9 @@ ${themesBox()}
 
   // Coleções: tudo o que existe no jogo (relíquias, nós do mapa, ajudas, pontos).
   const colHtml = () => {
-    const found = new Set((store.get('qqsm_rel') || '').split(',').filter(Boolean));
     const NODES = { e: `${QS_PHASE} perguntas e uma meta de pontos. Falhar a meta acaba a corrida.`, E: 'Meta mais alta. Ao vencer ganhas uma relíquia.', '?': 'Surpresa: pode ser uma pergunta misteriosa, escolheres o tema da próxima fase (se tiveres mais de um tema), curar-te por completo, uma loja ou um descanso.', $: 'Gasta moedas em 2 relíquias (quanto mais raras, mais caras) e em vidas.', r: 'Recuperas 1 ❤️.', t: 'Escolhes entre receber uma relíquia ou melhorar uma das tuas.', b: 'Última fase do andar. Ao vencer subes de andar e ganhas +1 ❤️ e uma relíquia à sorte. No último andar é o Exame final 🏁.' };
     const card = (e, n, d, x) => `<div class="cd"><span class="e" aria-hidden="true">${e}</span><div><b>${n}</b><small>${d}</small>${x ? `<em>${x}</em>` : ''}</div></div>`;
-    return `<h2>Relíquias</h2><div class="cds">${Object.entries(RELICS).map(([k, r]) => card(r[0], r[1], r[2] + (UP[k] ? `<br><b>Melhorada:</b> ${UP[k]}` : ''), G && G.relics.includes(k) ? '✓ Tens nesta corrida' : found.has(k) ? '✓ Já a encontraste' : '')).join('')}</div>
+    return `<h2>Relíquias</h2><div class="cds">${Object.entries(RELICS).map(([k, r]) => card(r[0], r[1], r[2] + (UP[k] ? `<br><b>Melhorada:</b> ${UP[k]}` : '') + `<br><b>${RAR_NAME[tier(k)]}</b> · loja: ${RAR_COST[tier(k)]} 💰`, G && G.relics.includes(k) ? '✓ Tens nesta corrida' : '')).join('')}</div>
 <h2>Nós do mapa</h2><div class="cds">${Object.keys(NODES).map((k) => card(ICON[k], LEG[k], NODES[k])).join('')}</div>
 <h2>Pontos e vidas</h2><div class="cds">${card('🎯', 'Pontos e combo', 'Cada certa vale o valor base (100 a 200) × combo (×1 a ×4). Errar parte o combo.')}${card('❤️', 'Vidas', 'Começas com 3 e é esse o máximo (a relíquia Coração aumenta-o). Cada erro custa uma; sem vidas a corrida acaba.')}${card('💰', 'Moedas', 'Ganhas moedas ao acertar e gastas na loja.')}</div>`;
   };
