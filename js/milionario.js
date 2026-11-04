@@ -99,6 +99,12 @@
     };
   };
 
+  // Chave de uma pergunta: enunciado (sem "Ficha n —") + resposta certa. Perguntas com a mesma chave são a mesma pergunta.
+  const qkey = (q) => {
+    const n = (t) => String(t).toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+    return n(q.q.replace(/^Ficha \d+(?: \([^)]*\))? — /, '').replace(/^Verdadeiro ou falso\?\s*«([\s\S]*?)»\.?\s*$/, '$1')) + '#' + n(q.o[q.a]);
+  };
+
   // POOL = perguntas deste jogo, da mais fácil para a mais difícil.
   let POOL = [],
     PIDX = new Map();
@@ -140,10 +146,11 @@
     amigo: ['📞', 'Amigo', 'Dá-te a ajuda Amigo: uma vez por fase, um amigo dá a sua opinião.'],
     troca: ['🔄', 'Troca', 'Dá-te a ajuda Troca: uma vez por fase, mudas a pergunta sem gastar uma das da fase.'],
     cafe: ['☕', 'Café', '+1 pergunta em cada fase.'],
+    livro: ['📚', 'Biblioteca', '+2 perguntas em cada fase.'],
     estrela: ['⭐', 'Estrela', 'Cada fase começa com o combo em ×1,5.'],
     balanca: ['⚖️', 'Balança', 'O combo máximo passa de ×4 para ×5.'],
     martelo: ['🔨', 'Martelo', '+50 pontos em cada resposta certa.'],
-    cofre: ['💰', 'Cofre', '+30 🪙 sempre que concluis uma fase.'],
+    cofre: ['📦', 'Cofre', '+30 💰 sempre que concluis uma fase.'],
     banco: ['🏦', 'Banco', 'No fim de cada fase ganhas juros: 10% das tuas moedas.'],
     coracao: ['💖', 'Coração', '+1 vida máxima e +1 vida logo.'],
     desconto: ['🏷️', 'Cupão', 'Tudo na loja custa 30% menos.'],
@@ -151,11 +158,11 @@
     mira: ['🎯', 'Mira', 'As metas de pontos das fases são 10% mais baixas.'],
     dado: ['🎲', 'Dado', '10% de hipótese de uma resposta certa valer o dobro.'],
     cadeado: ['🔒', 'Cadeado', 'Ao errares, o combo só desce para metade em vez de voltar a ×1.'],
-    vela: ['🕯️', 'Vela', 'Os descansos dão o dobro: +2 vidas e +2 perguntas na fase seguinte.'],
+    vela: ['🕯️', 'Vela', 'Os descansos recuperam o dobro: +2 vidas.'],
     bussola: ['🧭', 'Bússola', 'Os nós ❓ nunca são perguntas: só loja, descanso ou tesouro.'],
     sino: ['🔔', 'Sino', 'A cada 5 certas seguidas ganhas +1 vida.'],
     raio: ['⚡', 'Raio', 'A primeira resposta certa de cada fase vale o triplo.'],
-    ima: ['🧲', 'Íman', 'Cada resposta certa dá +1 ponto por cada 10 🪙 que tiveres.'],
+    ima: ['🧲', 'Íman', 'Cada resposta certa dá +1 ponto por cada 10 💰 que tiveres.'],
     diamante: ['💎', 'Diamante', 'Respostas certas com o combo em ×3 ou mais valem +50%.'],
     foguete: ['🚀', 'Foguete', 'A partir da 3.ª certa seguida, cada certa dá +75 pontos.'],
     caneta: ['🖋️', 'Caneta', 'A última pergunta de cada fase vale o dobro.'],
@@ -164,14 +171,14 @@
     atalho: ['🛤️', 'Atalho', 'As metas das fases difíceis e do guardião são 20% mais baixas.'],
     balao: ['🎈', 'Balão', 'Começas cada fase com +1 troca de pergunta.'],
     pocao: ['🧪', 'Poção', 'Ao concluir uma fase sem a vida cheia, ganhas +1 vida.'],
-    capacete: ['🪖', 'Capacete', 'O primeiro erro de cada andar não custa vida (o combo parte).'],
-    penso: ['🩹', 'Penso', 'Ao subires de andar ganhas +1 vida extra.'],
-    fenix: ['🪶', 'Fénix', 'Se ficares sem vidas, voltas com 2. A relíquia gasta-se.'],
-    carteira: ['👛', 'Carteira', '+2 🪙 em cada resposta certa.'],
-    ouro: ['🥇', 'Medalha de ouro', 'Fases difíceis e guardiões dão +50 🪙.'],
+    capacete: ['⛑️', 'Capacete', 'O primeiro erro de cada andar não custa vida (o combo parte).'],
+    penso: ['🏥', 'Penso', 'Ao subires de andar ganhas +1 vida extra.'],
+    fenix: ['🦅', 'Fénix', 'Se ficares sem vidas, voltas com 2. A relíquia gasta-se.'],
+    carteira: ['👛', 'Carteira', '+2 💰 em cada resposta certa.'],
+    ouro: ['🥇', 'Medalha de ouro', 'Fases difíceis e guardiões dão +50 💰.'],
     trofeu: ['🏆', 'Troféu', 'Fases difíceis e guardiões dão +300 pontos.'],
     trombeta: ['🎺', 'Trombeta', 'Ao subires de andar ganhas +500 pontos.'],
-    cartola: ['🎩', 'Cartola', 'Cada nó ❓ que abres dá-te +30 🪙.'],
+    cartola: ['🎩', 'Cartola', 'Cada nó ❓ que abres dá-te +30 💰.'],
     chave: ['🗝️', 'Chave', 'Os tesouros dão duas relíquias em vez de uma.'],
     megafone: ['📣', 'Megafone', 'O Público vota sempre na resposta certa (com pelo menos 80%).'],
     caderno: ['📓', 'Caderno', 'O Amigo nunca falha e tem sempre certeza.'],
@@ -180,14 +187,14 @@
   // Melhorias: o que a relíquia passa a fazer depois de melhorada (nó ❓). V(k, normal, melhorada) escolhe o valor.
   const UP = {
     trevo: '40% de hipótese de um erro não contar.', escudo: 'Protege os dois primeiros erros de cada fase.', chama: 'A cada 2 certas seguidas ganhas +1 pergunta.',
-    mealheiro: '+100% de moedas.', mochila: '+2 usos por fase de cada ajuda.', lupa: '+50% de pontos em cada certa.', cafe: '+2 perguntas em cada fase.',
-    estrela: 'Cada fase começa com o combo em ×2.', balanca: 'O combo máximo passa a ×6.', martelo: '+100 pontos por certa.', cofre: '+60 🪙 por fase concluída.',
+    mealheiro: '+100% de moedas.', mochila: '+2 usos por fase de cada ajuda.', lupa: '+50% de pontos em cada certa.', cafe: '+2 perguntas em cada fase.', livro: '+3 perguntas em cada fase.',
+    estrela: 'Cada fase começa com o combo em ×2.', balanca: 'O combo máximo passa a ×6.', martelo: '+100 pontos por certa.', cofre: '+60 💰 por fase concluída.',
     banco: 'Juros de 20%.', desconto: 'Tudo na loja custa 50% menos.', coroa: 'Fase sem erros: +400 pontos.', mira: 'Metas 20% mais baixas.',
-    dado: '20% de hipótese de valer o dobro.', cadeado: 'Ao errares o combo só desce 25%.', vela: 'Os descansos dão o triplo.', foguete: '+150 pontos por certa a partir da 3.ª seguida.',
-    diamante: 'Certas com combo ×3 ou mais valem o dobro.', ima: '+1 ponto por cada 5 🪙.', caneta: 'A última pergunta de cada fase vale o triplo.', raio: 'A primeira certa de cada fase vale ×5.',
-    carteira: '+4 🪙 por certa.', sino: 'A cada 3 certas seguidas ganhas +1 vida.', ampulheta: '+2 perguntas nas fases difíceis e guardiões.', atalho: 'Metas 35% mais baixas nessas fases.',
+    dado: '20% de hipótese de valer o dobro.', cadeado: 'Ao errares o combo só desce 25%.', vela: 'Os descansos recuperam o triplo: +3 vidas.', foguete: '+150 pontos por certa a partir da 3.ª seguida.',
+    diamante: 'Certas com combo ×3 ou mais valem o dobro.', ima: '+1 ponto por cada 5 💰.', caneta: 'A última pergunta de cada fase vale o triplo.', raio: 'A primeira certa de cada fase vale ×5.',
+    carteira: '+4 💰 por certa.', sino: 'A cada 3 certas seguidas ganhas +1 vida.', ampulheta: '+2 perguntas nas fases difíceis e guardiões.', atalho: 'Metas 35% mais baixas nessas fases.',
     balao: '+2 trocas no início de cada fase.', penso: '+2 vidas ao subir de andar.', trombeta: '+1000 pontos ao subir de andar.', trofeu: '+600 pontos nessas fases.',
-    ouro: '+100 🪙 nessas fases.', cartola: '+60 🪙 por cada nó ❓.', pergaminho: '+40 pontos por certa ao concluir a fase.', meio: '+1 uso por fase do 50:50.',
+    ouro: '+100 💰 nessas fases.', cartola: '+60 💰 por cada nó ❓.', pergaminho: '+40 pontos por certa ao concluir a fase.', meio: '+1 uso por fase do 50:50.',
     publico: '+1 uso por fase do Público.', amigo: '+1 uso por fase do Amigo.', troca: '+1 troca por fase.', coracao: '+1 vida máxima extra.',
   };
   const V = (k, a, b) => (G && G.up.has(k) ? b : a);
@@ -208,10 +215,33 @@
       store.set('qqsm_rel', [...f].join(','));
     } catch (e) {}
   };
-  const newRelic = () => {
-    const l = Object.keys(RELICS).filter((k) => !G.relics.includes(k));
-    return l.length ? l[rnd(0, l.length - 1)] : null;
+  // Raridade das relíquias: 0 comum, 1 incomum, 2 rara, 3 lendária. Quanto mais rara, menos sai e mais cara é na loja.
+  const RAR_OF = [
+    'meio publico amigo troca balao carteira cartola mira atalho ampulheta penso pocao megafone caderno',
+    'escudo capacete mochila desconto vela bussola sino cofre mealheiro trombeta trofeu ouro pergaminho ima estrela cafe',
+    'trevo chama cadeado coroa dado caneta raio martelo diamante balanca livro foguete',
+    'lupa fenix coracao chave banco',
+  ];
+  const RAR = {};
+  RAR_OF.forEach((l, t) => l.split(' ').forEach((k) => (RAR[k] = t)));
+  const RAR_NAME = ['Comum', 'Incomum', 'Rara', 'Lendária'], RAR_W = [55, 28, 13, 4], RAR_COST = [40, 65, 100, 160];
+  const tier = (k) => (RAR[k] === undefined ? 1 : RAR[k]);
+  // Sorteia n relíquias diferentes que ainda não tens (as mais raras saem menos), sem as de `excl`.
+  const pickRelics = (n, excl = []) => {
+    const out = [];
+    while (out.length < n) {
+      const l = Object.keys(RELICS).filter((k) => !G.relics.includes(k) && !excl.includes(k) && !out.includes(k));
+      if (!l.length) break;
+      // o peso de cada raridade reparte-se pelas relíquias dela que ainda não tens, por isso as lendárias saem mesmo pouco
+      const nt = [0, 0, 0, 0];
+      l.forEach((k) => nt[tier(k)]++);
+      const w = (k) => RAR_W[tier(k)] / nt[tier(k)];
+      let x = Math.random() * l.reduce((a, k) => a + w(k), 0);
+      out.push(l.find((k) => (x -= w(k)) <= 0) || l[l.length - 1]);
+    }
+    return out;
   };
+  const newRelic = () => pickRelics(1)[0] || null;
 
   /* ---------- regras (podes mexer aqui) ---------- */
   const ROWS = 10; // fases por piso (a última leva ao próximo piso; no último piso é o Exame final)
@@ -220,10 +250,14 @@
   const SWAPS = 1; // trocas de pergunta por fase
   const BASE = (t) => 100 + Math.round(t * 100); // pontos base de uma certa (t = 0..1 dificuldade)
   const MULT = (s) => Math.min(1 + 0.25 * s, G && has('balanca') ? V('balanca', 5, 6) : 4); // multiplicador do combo (s = certas seguidas)
-  const TARGET = (t, k) => Math.round((450 * (1 + 1.2 * t) * (k === 'E' ? 1.3 : k === 'b' ? 1.5 : 1)) / 50) * 50; // t = 0..1 progresso na corrida
+  // Meta de pontos: sobe com o progresso na corrida (t = 0..1) e +10% do valor base por cada andar subido (e um bocadinho a cada fase).
+  const TARGET = (t, k) => {
+    const fl = G ? G.piso + Math.max(0, G.row) / ROWS : 0;
+    return Math.round((450 * (1 + 1.2 * t + 0.1 * fl) * (k === 'E' ? 1.3 : k === 'b' ? 1.5 : 1)) / 50) * 50;
+  };
   const LEFT_BONUS = 50; // pontos por pergunta que sobra ao fechar a fase
   const REROLL_BASE = 10, REROLL_STEP = 5; // reroll da loja
-  const COST_RELIC = 45, COST_HELP = 40, COST_HEART = 50;
+  const COST_HELP = 40, COST_HEART = 50; // o preço das relíquias depende da raridade (RAR_COST)
   const NAMES = { e: ['A Rotunda', 'O Semáforo', 'A Autoestrada', 'O Cruzamento', 'A Ladeira', 'O Túnel'], E: ['O Radar', 'A Brigada', 'O Nevoeiro'], b: ['O Exame Final'], p: ['O Guardião', 'A Portagem', 'O Posto de Controlo'] };
   const ICON = { e: '📝', E: '💀', '?': '❓', $: '🛒', r: '🏕️', t: '🧰', b: '🏁' };
   const LEG = { e: 'Fase', E: 'Fase difícil', '?': 'Desconhecido', $: 'Loja', r: 'Descanso', t: 'Tesouro', b: 'Próximo andar' };
@@ -374,11 +408,11 @@ ${themesBox()}
   // Coleções: tudo o que existe no jogo (relíquias, nós do mapa, ajudas, pontos).
   const colHtml = () => {
     const found = new Set((store.get('qqsm_rel') || '').split(',').filter(Boolean));
-    const NODES = { e: `${QS_PHASE} perguntas e uma meta de pontos. Falhar a meta acaba a corrida.`, E: 'Meta mais alta. Ao vencer ganhas uma relíquia.', '?': 'Surpresa: pode ser uma pergunta misteriosa, uma relíquia, escolheres o tema da próxima fase (se tiveres mais de um tema), melhorares uma relíquia, curar-te por completo, uma loja ou um descanso.', $: 'Gasta moedas em relíquias e vidas.', r: 'Recuperas 1 ❤️ e na fase seguinte tens +1 pergunta e +1 troca.', t: 'Ganhas uma relíquia.', b: 'Última fase do andar. Ao vencer subes de andar e ganhas +1 ❤️. No último andar é o Exame final 🏁.' };
+    const NODES = { e: `${QS_PHASE} perguntas e uma meta de pontos. Falhar a meta acaba a corrida.`, E: 'Meta mais alta. Ao vencer ganhas uma relíquia.', '?': 'Surpresa: pode ser uma pergunta misteriosa, uma relíquia, escolheres o tema da próxima fase (se tiveres mais de um tema), melhorares uma relíquia, curar-te por completo, +1 pergunta e +1 troca na fase seguinte, uma loja ou um descanso.', $: 'Gasta moedas em 2 relíquias (quanto mais raras, mais caras) e em vidas.', r: 'Recuperas 1 ❤️.', t: 'Ganhas uma relíquia.', b: 'Última fase do andar. Ao vencer subes de andar e ganhas +1 ❤️ e uma relíquia à sorte. No último andar é o Exame final 🏁.' };
     const card = (e, n, d, x) => `<div class="cd"><span class="e" aria-hidden="true">${e}</span><div><b>${n}</b><small>${d}</small>${x ? `<em>${x}</em>` : ''}</div></div>`;
     return `<h2>Relíquias</h2><div class="cds">${Object.entries(RELICS).map(([k, r]) => card(r[0], r[1], r[2] + (UP[k] ? `<br><b>Melhorada:</b> ${UP[k]}` : ''), G && G.relics.includes(k) ? '✓ Tens nesta corrida' : found.has(k) ? '✓ Já a encontraste' : '')).join('')}</div>
 <h2>Nós do mapa</h2><div class="cds">${Object.keys(NODES).map((k) => card(ICON[k], LEG[k], NODES[k])).join('')}</div>
-<h2>Pontos e vidas</h2><div class="cds">${card('🎯', 'Pontos e combo', 'Cada certa vale o valor base (100 a 200) × combo (×1 a ×4). Errar parte o combo.')}${card('❤️', 'Vidas', 'Começas com 3 e é esse o máximo (a relíquia Coração aumenta-o). Cada erro custa uma; sem vidas a corrida acaba.')}${card('🪙', 'Moedas', 'Ganhas moedas ao acertar e gastas na loja.')}</div>`;
+<h2>Pontos e vidas</h2><div class="cds">${card('🎯', 'Pontos e combo', 'Cada certa vale o valor base (100 a 200) × combo (×1 a ×4). Errar parte o combo.')}${card('❤️', 'Vidas', 'Começas com 3 e é esse o máximo (a relíquia Coração aumenta-o). Cada erro custa uma; sem vidas a corrida acaba.')}${card('💰', 'Moedas', 'Ganhas moedas ao acertar e gastas na loja.')}</div>`;
   };
   // Regras: explicação de como o jogo funciona.
   function renderRegras() {
@@ -389,7 +423,7 @@ ${themesBox()}
 ${sec('1. Fases e metas', `Uma corrida é feita de <b>fases</b>. Cada fase tem <b>${QS_PHASE} perguntas</b> e uma meta: o "Pontua pelo menos" do painel.`, `Assim que os pontos da fase chegam à meta, a fase termina logo e ganhas <b>+${LEFT_BONUS} pontos</b> por cada pergunta que sobrar. Se as perguntas acabarem sem chegares à meta, a corrida termina.`)}
 ${sec('2. Pontos e combo', 'Cada resposta certa vale os <b>pontos base</b> (100 a 200, a subir com a dificuldade) multiplicados pelo <b>combo</b>: começa em ×1 e sobe 0,25 por cada certa seguida, até ×4. Errar parte o combo.', 'As perguntas ficam mais difíceis ao longo da corrida e as metas sobem com elas.')}
 ${sec('3. Vidas', 'Tens <b>3 vidas</b> ❤️❤️❤️. Cada resposta errada custa uma vida e, sem vidas, a corrida acaba. Podes recuperar vidas nos descansos, ao subir de andar, na loja e em alguns eventos ❓. A relíquia 💖 Coração dá-te uma vida máxima a mais.')}
-${sec('4. Mapa e andares', 'Depois de cada fase escolhes o caminho no mapa. Só podes ir para o nó à frente ou para o vizinho:', '📝 <b>Fase</b> normal, 💀 <b>fase difícil</b> (meta mais alta, dá uma relíquia), ❓ <b>desconhecido</b> (uma pergunta, uma relíquia, escolher o tema da próxima fase, melhorar uma relíquia, cura total, loja ou descanso), 🛒 <b>loja</b>, 🏕️ <b>descanso</b> (+1 ❤️, +1 pergunta e +1 troca na fase seguinte) e 🧰 <b>tesouro</b> (uma relíquia).', `O último nó de cada andar (🚪) leva ao andar seguinte. O número de andares depende das perguntas que escolheres (cerca de ${QPISO} por andar) e só no último aparece o 🏁 <b>Exame final</b>. Podes ver o mapa a qualquer momento no "Ver minimapa".`)}
+${sec('4. Mapa e andares', 'Depois de cada fase escolhes o caminho no mapa. Só podes ir para o nó à frente ou para o vizinho:', '📝 <b>Fase</b> normal, 💀 <b>fase difícil</b> (meta mais alta, dá uma relíquia), ❓ <b>desconhecido</b> (uma pergunta, uma relíquia, escolher o tema da próxima fase, melhorar uma relíquia, cura total, +1 pergunta e +1 troca na fase seguinte, loja ou descanso), 🛒 <b>loja</b> (2 relíquias à venda: as raras saem menos e custam mais), 🏕️ <b>descanso</b> (+1 ❤️) e 🧰 <b>tesouro</b> (uma relíquia).', `O último nó de cada andar (🚪) leva ao andar seguinte. O número de andares depende das perguntas que escolheres (cerca de ${QPISO} por andar) e só no último aparece o 🏁 <b>Exame final</b>. Podes ver o mapa a qualquer momento no "Ver minimapa".`)}
 ${sec('5. Relíquias e ajudas', 'As relíquias dão vantagens durante toda a corrida. As ajudas (<b>50:50, Público, Amigo e Troca</b> de pergunta) também são relíquias: não as tens ao início, tens de as encontrar, e cada uma pode ser usada <b>uma vez por fase</b>.', 'Vê todas no botão "Coleções".')}
 ${sec('6. Moedas e loja', 'Ganhas moedas ao acertar e ao concluir fases. Na loja gastas moedas em relíquias e vidas.')}
 ${sec('7. Manual', 'Podes abrir o <b>Manual</b> a qualquer momento, no topo do ecrã, para consultar a matéria sem sair do jogo.')}
@@ -474,14 +508,14 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
 
   const openShop = (msg) => {
     G.shopMsg = msg || '';
-    G.shop = shuffle(Object.keys(RELICS).filter((x) => !G.relics.includes(x))).slice(0, 3).concat('heart');
+    G.shop = pickRelics(2).concat('heart'); // só 2 relíquias à venda (+ uma vida)
     G.rr = 0; // rerolls já feitos nesta loja
     G.phase = 'shop';
   };
-  // Nó ❓: pode ser uma pergunta, uma relíquia, escolher o tema da próxima fase, melhorar uma relíquia, curar tudo, loja ou descanso.
+  // Nó ❓: pode ser uma pergunta, uma relíquia, escolher o tema da próxima fase, melhorar uma relíquia, curar tudo, +1 pergunta e +1 troca na próxima fase, loja ou descanso.
   function unknown() {
     const g = G, themes = [...new Set(POOL.map((q) => q.s))].filter((s) => POOL.filter((q) => q.s === s).length >= 8);
-    const W = [['e', has('bussola') ? 0 : 30], ['t', 15], ['tema', themes.length > 1 ? 15 : 0], ['up', upgradable().length ? 15 : 0], ['heal', g.lives < g.max ? 10 : 0], ['$', 8], ['r', 7]];
+    const W = [['e', has('bussola') ? 0 : 30], ['t', 10], ['tema', themes.length > 1 ? 15 : 0], ['up', upgradable().length ? 15 : 0], ['heal', g.lives < g.max ? 10 : 0], ['ins', 10], ['$', 5], ['r', 5]];
     let x = rnd(1, W.reduce((a, [, w]) => a + w, 0)), k = 't';
     for (const [kk, w] of W) if (w && (x -= w) <= 0) { k = kk; break; }
     if (k === 'tema') {
@@ -520,8 +554,11 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
       openShop('');
     } else if (k === 'r') {
       const v = has('vela') ? V('vela', 2, 3) : 1;
-      g.bonusQ += v; g.bonusSw++; g.lives = Math.min(g.max, g.lives + v);
-      g.title = '🏕️ Descanso'; g.msg = `Recuperas ${v} ❤️ e, na próxima fase, tens +${v} ${v > 1 ? 'perguntas' : 'pergunta'} e +1 troca.`; g.phase = 'note';
+      g.lives = Math.min(g.max, g.lives + v);
+      g.title = '🏕️ Descanso'; g.msg = `Recuperas ${v} ❤️.`; g.phase = 'note';
+    } else if (k === 'ins') {
+      g.bonusQ += 1; g.bonusSw++;
+      g.title = '❓ Desconhecido'; g.msg = 'Um momento de inspiração: na próxima fase tens +1 pergunta e +1 troca.'; g.phase = 'note';
     } else if (k === 'heal') {
       g.lives = g.max;
       g.title = '❓ Desconhecido'; g.msg = `Uma fonte milagrosa curou-te por completo: ${'❤️'.repeat(g.max)}.`; g.phase = 'note';
@@ -531,7 +568,7 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
       else g.coins += 100;
       const r2 = rl && has('chave') ? newRelic() : null;
       if (r2) giveRelic(r2);
-      g.title = '🧰 Tesouro'; g.msg = rl ? `Encontraste a relíquia ${RELICS[rl][0]} <b>${RELICS[rl][1]}</b>: ${RELICS[rl][2]}${r2 ? ` 🗝️ A Chave abriu mais uma: ${RELICS[r2][0]} <b>${RELICS[r2][1]}</b>: ${RELICS[r2][2]}` : ''}` : 'Já tens todas as relíquias: ganhas 100 🪙.'; g.phase = 'note';
+      g.title = '🧰 Tesouro'; g.msg = rl ? `Encontraste a relíquia ${RELICS[rl][0]} <b>${RELICS[rl][1]}</b>: ${RELICS[rl][2]}${r2 ? ` 🗝️ A Chave abriu mais uma: ${RELICS[r2][0]} <b>${RELICS[r2][1]}</b>: ${RELICS[r2][2]}` : ''}` : 'Já tens todas as relíquias: ganhas 100 💰.'; g.phase = 'note';
     }
     view();
   }
@@ -539,7 +576,10 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
   /* ---------- jogo ---------- */
   function startGame() {
     if (G && G.timer) clearTimeout(G.timer);
-    POOL = shuffle(ELIG.filter((q) => Temas.tem(CFG.sel, q) && (CFG.withU || !q.u))).sort((a, b) => score(a) - score(b));
+    const vistas = new Set();
+    POOL = shuffle(ELIG.filter((q) => Temas.tem(CFG.sel, q) && (CFG.withU || !q.u)))
+      .filter((q) => { const k = qkey(q); if (vistas.has(k)) return false; vistas.add(k); return true; }) // sem perguntas repetidas
+      .sort((a, b) => score(a) - score(b));
     PIDX = new Map(POOL.map((q, i) => [q, i]));
     G = { piso: 0, pisos: Math.max(1, Math.round(POOL.length / QPISO)), map: buildMap(), path: new Set(), row: -1, lane: 0, lvl: 0, lives: 3, max: 3, up: new Set(), themeNext: null, fTheme: null, ev: null, shopMsg: '', coins: 0, total: 0, relics: [], ch: { f: 0, a: 0, t: 0 }, seen: new Set(), streak: 0, shield: 0, bonusQ: 0, bonusSw: 0, f: null, round: 0, left: 0, sw: 0, base: 100, pts: 0, kind: 'normal', q: null, sel: null, gone: new Set(), info: null, hist: [], notes: [], flash: '', phase: 'map', modal: null, end: null };
     view();
@@ -549,7 +589,7 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
     const g = G, nm = NAMES[k === 'b' && !last() ? 'p' : k], name = nm[rnd(0, nm.length - 1)];
     g.f = { k, name, target: Math.round((TARGET(prog(), k) * (has('mira') ? V('mira', 0.9, 0.8) : 1) * (has('atalho') && k !== 'e' ? V('atalho', 0.8, 0.65) : 1)) / 50) * 50 };
     g.round = 0; g.streak = has('estrela') ? V('estrela', 2, 4) : 0; g.fTheme = g.themeNext; g.themeNext = null; g.shield = 0; g.errs = 0; g.fc = 0; g.first = 0; g.hits = 0;
-    g.left = QS_PHASE + g.bonusQ + (has('cafe') ? V('cafe', 1, 2) : 0) + (has('ampulheta') && k !== 'e' ? V('ampulheta', 1, 2) : 0); const use = (k) => (has(k) ? 1 + (has('mochila') ? V('mochila', 1, 2) : 0) + V(k, 0, 1) : 0);
+    g.left = QS_PHASE + g.bonusQ + (has('cafe') ? V('cafe', 1, 2) : 0) + (has('livro') ? V('livro', 2, 3) : 0) + (has('ampulheta') && k !== 'e' ? V('ampulheta', 1, 2) : 0); const use = (k) => (has(k) ? 1 + (has('mochila') ? V('mochila', 1, 2) : 0) + V(k, 0, 1) : 0);
     g.ch = { f: use('meio'), a: use('publico'), t: use('amigo') };
     g.sw = use('troca') * SWAPS + g.bonusSw + (has('balao') ? V('balao', 1, 2) : 0); g.bonusQ = g.bonusSw = 0;
     g.kind = k === 'e' ? 'normal' : 'boss';
@@ -630,11 +670,11 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
     } else if (has('trevo') && Math.random() < V('trevo', 0.25, 0.4)) {
       free = true; g.notes.push('O Trevo protegeu-te: o erro não conta.');
     } else if (has('capacete') && g.helm !== g.piso) {
-      g.helm = g.piso; g.streak = 0; g.notes.push('🪖 Capacete: sem perda de vida neste andar.');
+      g.helm = g.piso; g.streak = 0; g.notes.push('⛑️ Capacete: sem perda de vida neste andar.');
     } else {
       g.streak = has('cadeado') ? Math.floor(g.streak * V('cadeado', 0.5, 0.75)) : 0; g.lives--;
       g.notes.push(g.lives > 0 ? 'Perdeste 1 ❤️.' : 'Ficaste sem vidas.');
-      if (g.lives <= 0 && has('fenix')) { g.lives = 2; g.relics = g.relics.filter((x) => x !== 'fenix'); g.notes.push('🪶 A Fénix renasceu: voltas com 2 ❤️ (a relíquia gastou-se).'); }
+      if (g.lives <= 0 && has('fenix')) { g.lives = 2; g.relics = g.relics.filter((x) => x !== 'fenix'); g.notes.push('🦅 A Fénix renasceu: voltas com 2 ❤️ (a relíquia gastou-se).'); }
     }
     if (!free) g.left--;
     if (g.f.k !== 'q' && g.lives > 0 && g.round >= g.f.target) g.notes.push('Meta atingida! A fase fica concluída' + (g.left ? ` e ganhas +${fmt(g.left * LEFT_BONUS)} pontos pelas perguntas que sobram.` : '.'));
@@ -656,12 +696,12 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
     const gain = 20 + (g.fc || 0) + (has('cofre') ? V('cofre', 30, 60) : 0);
     g.fc = 0;
     g.coins += gain;
-    let m = `Fase concluída: <b>${fmt(g.round)}</b> de ${fmt(f.target)} pontos.${bonus ? ` Perguntas por usar: +${fmt(bonus)} pontos.` : ''} +${gain} 🪙.`;
-    if (has('banco')) { const j = Math.floor(g.coins * V('banco', 0.1, 0.2)); g.coins += j; m += ` Juros: +${j} 🪙.`; }
+    let m = `Fase concluída: <b>${fmt(g.round)}</b> de ${fmt(f.target)} pontos.${bonus ? ` Perguntas por usar: +${fmt(bonus)} pontos.` : ''} +${gain} 💰.`;
+    if (has('banco')) { const j = Math.floor(g.coins * V('banco', 0.1, 0.2)); g.coins += j; m += ` Juros: +${j} 💰.`; }
     if (has('coroa') && g.errs === 0) { g.total += V('coroa', 200, 400); m += ` 👑 Fase perfeita: +${V('coroa', 200, 400)} pontos.`; }
     if (has('pergaminho') && g.hits) { const pg = g.hits * V('pergaminho', 20, 40); g.total += pg; m += ` 📜 Pergaminho: +${pg} pontos.`; }
     if (has('pocao') && g.lives < g.max) { g.lives++; m += ' 🧪 Poção: +1 ❤️.'; }
-    if (f.k !== 'e' && has('ouro')) { g.coins += V('ouro', 50, 100); m += ` 🥇 Medalha de ouro: +${V('ouro', 50, 100)} 🪙.`; }
+    if (f.k !== 'e' && has('ouro')) { g.coins += V('ouro', 50, 100); m += ` 🥇 Medalha de ouro: +${V('ouro', 50, 100)} 💰.`; }
     if (f.k !== 'e' && has('trofeu')) { g.total += V('trofeu', 300, 600); m += ` 🏆 Troféu: +${V('trofeu', 300, 600)} pontos.`; }
     if (f.k === 'b') {
       if (last()) { g.total += 500; return endGame('win'); }
@@ -669,6 +709,9 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
       if (has('penso')) g.lives = Math.min(g.max, g.lives + V('penso', 1, 2));
       if (has('trombeta')) { g.total += V('trombeta', 500, 1000); m += ` 🎺 Trombeta: +${V('trombeta', 500, 1000)} pontos.`; }
       m += ` Subiste para o andar ${g.piso + 1} de ${g.pisos}. +1 ❤️.`;
+      const rb = newRelic();
+      if (rb) { giveRelic(rb); m += ` 🎁 Relíquia do andar: ${RELICS[rb][0]} <b>${RELICS[rb][1]}</b> (${RAR_NAME[tier(rb)]}).`; }
+      else { g.coins += 100; m += ' Já tens todas as relíquias: +100 💰.'; }
       g.f = null; g.q = null;
       openShop(`🚪 <b>Andar ${g.piso} concluído!</b> ${m}`);
       view(); scrollTo(0, 0); return;
@@ -680,7 +723,7 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
     g.title = '✅ ' + f.name; g.msg = m; g.f = null; g.phase = 'note'; g.q = null;
     view(); scrollTo(0, 0);
   }
-  const price = (k) => Math.round((k === 'heart' ? COST_HEART : COST_RELIC) * (has('desconto') ? V('desconto', 0.7, 0.5) : 1));
+  const price = (k) => Math.round((k === 'heart' ? COST_HEART : RAR_COST[tier(k)]) * (has('desconto') ? V('desconto', 0.7, 0.5) : 1));
   function buy(k) {
     const g = G, c = price(k);
     if (g.phase !== 'shop' || g.coins < c || (k === 'heart' && g.lives >= g.max)) return;
@@ -689,23 +732,22 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
     else { giveRelic(k); g.shop = g.shop.filter((x) => x !== k); }
     g.coins -= c; SFX.ll(); view();
   }
-  // Reroll: volta a sortear as relíquias à venda (a vida fica). Custa 10 🪙 e sobe 5 🪙 a cada reroll na mesma loja.
+  // Reroll: volta a sortear as relíquias à venda (a vida fica). Custa 10 💰 e sobe 5 💰 a cada reroll na mesma loja.
   const rerollCost = () => Math.max(1, Math.round((REROLL_BASE + REROLL_STEP * (G.rr || 0)) * (has('desconto') ? V('desconto', 0.7, 0.5) : 1)));
   function reroll() {
     const g = G, c = rerollCost();
     if (g.phase !== 'shop' || g.coins < c) return;
-    const free = Object.keys(RELICS).filter((x) => !g.relics.includes(x));
     const old = g.shop.filter((x) => x !== 'heart' && x !== 'help');
-    const fresh = shuffle(free.filter((x) => !old.includes(x))), same = shuffle(free.filter((x) => old.includes(x)));
-    const rel = fresh.concat(same).slice(0, 3);
+    let rel = pickRelics(2, old);
+    if (rel.length < 2) rel = rel.concat(pickRelics(2 - rel.length, rel));
     if (!rel.length) return;
     g.shop = rel.concat(g.shop.filter((x) => x === 'heart' || x === 'help'));
     g.coins -= c; g.rr = (g.rr || 0) + 1; SFX.ll(); view();
   }
-  const SH = () => `<div class="note"><h2>🛒 Loja</h2>${G.shopMsg ? `<p>${G.shopMsg}</p>` : ''}<p>Tens 🪙 ${G.coins}.</p><div class="opts n4">${G.shop.map((k) => {
+  const SH = () => `<div class="note"><h2>🛒 Loja</h2>${G.shopMsg ? `<p>${G.shopMsg}</p>` : ''}<p>Tens 💰 ${G.coins}.</p><div class="opts n4">${G.shop.map((k) => {
     const h = k === 'help', hr = k === 'heart', c = price(k), r = RELICS[k] || [], nb = G.coins < c || (hr && G.lives >= G.max);
-    return `<button class="opt${nb ? ' nb' : ''}" data-buy="${k}" ${nb ? 'disabled' : ''}><span class="ltr">${h ? '🎁' : hr ? '❤️' : r[0]}</span><span><b>${h ? 'Uma ajuda extra' : hr ? 'Uma vida' : r[1]}</b> (🪙 ${c})<br><small>${h ? '+1 uso de uma ajuda à sorte (50:50, público ou amigo).' : hr ? 'Recupera 1 vida.' : r[2]}</small></span></button>`;
-  }).join('')}</div><div class="confirm"><button class="b" data-act="reroll" ${G.coins < rerollCost() ? 'disabled' : ''}>🔄 Reroll (🪙 ${rerollCost()})</button><button class="b go" data-act="tomap">Escolher caminho</button></div></div>`;
+    return `<button class="opt${nb ? ' nb' : ''}" data-buy="${k}" ${nb ? 'disabled' : ''}><span class="ltr">${h ? '🎁' : hr ? '❤️' : r[0]}</span><span><b>${h ? 'Uma ajuda extra' : hr ? 'Uma vida' : r[1]}</b>${h || hr ? '' : ` <span class="rar r${tier(k)}">${RAR_NAME[tier(k)]}</span>`} (💰 ${c})<br><small>${h ? '+1 uso de uma ajuda à sorte (50:50, público ou amigo).' : hr ? 'Recupera 1 vida.' : r[2]}</small></span></button>`;
+  }).join('')}</div><div class="confirm"><button class="b" data-act="reroll" ${G.coins < rerollCost() ? 'disabled' : ''}>🔄 Reroll (💰 ${rerollCost()})</button><button class="b go" data-act="tomap">Escolher caminho</button></div></div>`;
 
   function lifeline(k) {
     const g = G;
@@ -748,7 +790,7 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
     const g = G, ph = g.phase, f = g.f, q = g.q, live = ph === 'ask' || ph === 'confirm', inQ = !!q && ['ask', 'confirm', 'lock', 'reveal'].includes(ph);
     const hearts = '❤️'.repeat(Math.max(0, g.lives)) + '🖤'.repeat(Math.max(0, g.max - g.lives));
     const title = f ? esc(f.name) : ph === 'map' ? 'A corrida' : esc(g.place || 'A corrida');
-    const panel = `<aside class="bl"><div class="blh">${title}</div><div class="blv" aria-label="${g.lives} vidas">${hearts}</div>${f && f.k !== 'q' ? `<div class="blt">Pontua pelo menos<br><b><i class="chip"></i>${fmt(f.target)}</b></div>` : ''}${inQ ? `<div class="blt"><b>Vale ${g.base} × ${mx(MULT(g.streak))}</b></div>` : ''}<div class="bls"><div><small>Fase</small><b>${Math.max(1, g.row + 1)}/${ROWS}</b></div><div><small>Andar</small><b>${g.piso + 1}/${g.pisos}</b></div></div>${f ? `<div class="blt">Perguntas por responder<br><b>${g.left}</b></div>` : ''}<div class="blm">🪙 ${g.coins}</div><div class="rls">${g.relics.map((k) => `<span class="rl" data-tip="${RELICS[k][1]}: ${rdesc(k)}" tabindex="0" aria-label="${RELICS[k][1]}: ${rdesc(k)}">${RELICS[k][0]}${g.up.has(k) ? '<sup>+</sup>' : ''}</span>`).join('') || '<small>Sem relíquias</small>'}</div>${ph === 'map' ? '' : '<button class="b go" data-act="minimap">🗺️ Ver minimapa</button>'}<button class="b go" data-act="colmodal">📚 Coleções</button></aside>`;
+    const panel = `<aside class="bl"><div class="blh">${title}</div><div class="blv" aria-label="${g.lives} vidas">${hearts}</div>${f && f.k !== 'q' ? `<div class="blt">Pontua pelo menos<br><b><i class="chip"></i>${fmt(f.target)}</b></div>` : ''}${inQ ? `<div class="blt"><b>Vale ${g.base} × ${mx(MULT(g.streak))}</b></div>` : ''}<div class="bls"><div><small>Fase</small><b>${Math.max(1, g.row + 1)}/${ROWS}</b></div><div><small>Andar</small><b>${g.piso + 1}/${g.pisos}</b></div></div>${f ? `<div class="blt">Perguntas por responder<br><b>${g.left}</b></div>` : ''}<div class="blm">💰 ${g.coins}</div><div class="rls">${g.relics.map((k) => `<span class="rl" data-tip="${RELICS[k][1]}: ${rdesc(k)}" tabindex="0" aria-label="${RELICS[k][1]}: ${rdesc(k)}">${RELICS[k][0]}${g.up.has(k) ? '<sup>+</sup>' : ''}</span>`).join('') || '<small>Sem relíquias</small>'}</div>${ph === 'map' ? '' : '<button class="b go" data-act="minimap">🗺️ Ver minimapa</button>'}<button class="b go" data-act="colmodal">📚 Coleções</button></aside>`;
     let main = '';
     if (ph === 'map') main = mapHtml();
     else if (ph === 'shop') main = SH();
@@ -813,7 +855,7 @@ ${sec('Multijogador', 'No multijogador (até 4 jogadores, todos contra todos) a 
     else if (kind === 'walk') why = `<b>Desististe</b> no ${where}.`;
     else if (kind === 'win') why = `<b>Conseguiste!</b> Venceste o Exame final no ${where}.`;
     app.innerHTML = `<div class="top"><a class="tb" href="index.html">Voltar ao início</a><span class="sp"></span>${soundBtn()}</div>
-<div class="end"><h1>${title}</h1><div class="amt">${fmt(g.total)} pontos</div><div class="why ${kind}">${why}</div><p>${sub}${newBest ? ' <b>Novo melhor resultado!</b>' : ''}</p><p>Andar ${g.piso + 1} de ${g.pisos}, fase ${Math.max(1, g.row + 1)} de ${ROWS}. Moedas: 🪙 ${g.coins}. Relíquias: ${g.relics.length ? g.relics.map((k) => RELICS[k][0] + ' ' + RELICS[k][1]).join(', ') : 'nenhuma'}.</p>
+<div class="end"><h1>${title}</h1><div class="amt">${fmt(g.total)} pontos</div><div class="why ${kind}">${why}</div><p>${sub}${newBest ? ' <b>Novo melhor resultado!</b>' : ''}</p><p>Andar ${g.piso + 1} de ${g.pisos}, fase ${Math.max(1, g.row + 1)} de ${ROWS}. Moedas: 💰 ${g.coins}. Relíquias: ${g.relics.length ? g.relics.map((k) => RELICS[k][0] + ' ' + RELICS[k][1]).join(', ') : 'nenhuma'}.</p>
 <div class="row"><button class="bigbtn" data-act="again" data-focus>Jogar outra vez</button><button class="bigbtn alt" data-act="menu">Mudar os temas</button></div>
 <details open><summary>Rever as perguntas</summary>${fl}<div class="rvs" data-show="all">${rv}</div></details></div>`;
     const fo = document.querySelector('[data-focus]');
