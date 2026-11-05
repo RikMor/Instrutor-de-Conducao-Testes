@@ -1067,3 +1067,265 @@ h1 {
     font-size: 1rem;
   }
 }
+
+
+/* ---------- Barra de opções em cima (igual à do Milionário): Início, Som, Manual, Desistir ---------- */
+.ob {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 0 0 0.8rem;
+}
+.ob .sp {
+  flex: 1;
+}
+.tb {
+  display: inline-block;
+  padding: 0.35rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--panel) 90%, transparent);
+  color: var(--fg);
+  font: inherit;
+  font-size: 0.92rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+.tb:hover {
+  border-color: var(--acc);
+}
+.tb[aria-pressed='true'] {
+  border-color: var(--skl);
+}
+
+/* ---------- Faixa por baixo da barra: vida, relíquias e etiquetas ---------- */
+.inv {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+  margin: 8px 2px 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+.inv .rl {
+  position: relative;
+  cursor: help;
+  font-size: 1.3rem;
+}
+.inv .rl::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  width: max-content;
+  max-width: min(260px, 70vw);
+  padding: 0.45rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid var(--skl);
+  background: #111827;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 400;
+  line-height: 1.35;
+  text-align: left;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.12s;
+  z-index: 40;
+}
+.inv .rl:hover::after,
+.inv .rl:focus::after,
+.inv .rl:focus-visible::after {
+  opacity: 1;
+  visibility: visible;
+}
+.inv .rl.tg::after {
+  border-color: #e0a020;
+}
+.mut {
+  color: var(--mut);
+}
+
+/* ---------- Cartas melhoradas (+), relíquias, tarots e poção ---------- */
+.card.up {
+  --c: #f5c542;
+  border-color: #f5c542;
+  box-shadow: 0 8px 18px -8px rgba(0, 0, 0, 0.7), 0 0 14px -4px rgba(245, 197, 66, 0.55);
+}
+.card.up .n {
+  color: #ffd866;
+}
+.card.rel {
+  --c: #e0a020;
+  border-color: #e0a020;
+  justify-content: flex-start;
+  font-size: 0.85rem;
+}
+.card.tar {
+  --c: #a070e8;
+  border-color: #a070e8;
+  justify-content: flex-start;
+  font-size: 0.85rem;
+}
+.card.pot {
+  --c: #3ddc84;
+  border-color: #3ddc84;
+  justify-content: flex-start;
+  font-size: 0.85rem;
+}
+.card.rel .t,
+.card.tar .t,
+.card.pot .t {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.7rem;
+}
+.card .usar {
+  margin-top: auto;
+  padding: 3px 14px;
+  border-radius: 99px;
+  background: #a070e8;
+  color: #fff;
+  font-weight: 700;
+}
+.pg .card.pk {
+  cursor: pointer;
+}
+.pg .card.pk:hover:not(:disabled) {
+  transform: translateY(-4px);
+}
+
+/* ---------- Loja (como a do Balatro) ---------- */
+#app.wide {
+  max-width: 1000px;
+}
+.shp {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 12px;
+  margin: 14px 0;
+}
+.shl {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.shn,
+.shr {
+  flex: 1;
+  min-height: 74px;
+  border: 0;
+  border-radius: 14px;
+  color: #fff;
+  font: 700 1.25rem/1.1 Rajdhani, system-ui, sans-serif;
+  cursor: pointer;
+}
+.shn {
+  background: #ff4c40;
+  box-shadow: 0 5px 0 #a52a20;
+}
+.shr {
+  background: #2fb37a;
+  box-shadow: 0 5px 0 #1b7a52;
+}
+.shr b {
+  display: block;
+  font-size: 1.6rem;
+}
+.shn:hover,
+.shr:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+.shr:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.shi,
+.shb {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 34px 12px 14px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--bg) 55%, var(--panel));
+  box-shadow: inset 0 3px 12px rgba(0, 0, 0, 0.45);
+}
+.shb {
+  grid-column: 1 / -1;
+}
+.it {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.ptag {
+  margin-bottom: 6px;
+  padding: 2px 14px;
+  border-radius: 10px;
+  border: 2px solid var(--line);
+  background: #111827;
+  color: #ffb02e;
+  font: 700 1.15rem/1.3 Rajdhani, system-ui, sans-serif;
+}
+.shi .card,
+.shb .card,
+.tbar .card {
+  width: 128px;
+  min-height: 170px;
+}
+.tbar {
+  margin: 8px 0;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px dashed #a070e8;
+  background: color-mix(in srgb, #a070e8 8%, var(--panel));
+}
+.tbar .hand {
+  margin: 6px 0 0;
+}
+@media (max-width: 700px) {
+  .shp {
+    grid-template-columns: 1fr;
+  }
+  .shl {
+    flex-direction: row;
+  }
+}
+
+/* ---------- Etiqueta por baixo do botão Ignorar (como no Balatro) ---------- */
+.btag {
+  display: grid;
+  gap: 2px;
+  justify-items: center;
+  padding: 8px;
+  border-radius: 10px;
+  border: 2px dashed color-mix(in srgb, #e0a020 70%, var(--line));
+  background: color-mix(in srgb, #e0a020 10%, transparent);
+  color: var(--fg);
+}
+.btag .bti {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+.btag b {
+  font-family: Rajdhani, system-ui, sans-serif;
+  font-size: 1.1rem;
+}
+.btag small {
+  color: var(--mut);
+  line-height: 1.25;
+}
+
+/* ---------- Janela de confirmação (Desistir) ---------- */
+.modal > div:not(.mw) {
+  text-align: center;
+}
+
