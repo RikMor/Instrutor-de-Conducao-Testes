@@ -1425,7 +1425,7 @@ h1 {
 }
 .shi,
 .shc,
-.shk {
+.spk {
   position: relative;
   display: flex;
   flex-wrap: wrap;
@@ -1440,7 +1440,7 @@ h1 {
 }
 .shi::before,
 .shc::before,
-.shk::before {
+.spk::before {
   content: attr(data-lbl);
   position: absolute;
   top: 8px;
@@ -1451,7 +1451,7 @@ h1 {
   color: var(--mut);
 }
 .shc .card,
-.shk .card {
+.spk .card {
   width: 112px;
   min-height: 170px;
 }
