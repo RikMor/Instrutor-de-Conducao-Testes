@@ -1953,15 +1953,20 @@ function inRun() {
 }
 
 // Barra de opções em cima (igual à do Milionário): Início, Som, Manual e Desistir.
-function optbar() {
+function optHome() {
+  return '<a class="tb" href="index.html" onclick="return !inRun()||confirm(\'Sair da Torre? O progresso desta partida perde-se.\')">Início</a>';
+}
+function optEnd() {
   return (
-    '<div class="ob"><a class="tb" href="index.html" onclick="return !inRun()||confirm(\'Sair da Torre? O progresso desta partida perde-se.\')">Início</a><span class="sp"></span>' +
     '<button class="tb" data-snd aria-pressed="' + SOUND + '" onclick="toggleSound()">' +
     (SOUND ? 'Som ligado' : 'Som desligado') + '</button>' +
     '<button class="tb" onclick="openManual()">📖 Manual</button>' +
-    (inRun() ? '<button class="tb" onclick="giveUpAsk()">Desistir</button>' : '') +
-    '</div>'
+    (inRun() ? '<button class="tb" onclick="giveUpAsk()">Desistir</button>' : '')
   );
+}
+// Barra de opções separada (menu, ecrã final): Início à esquerda e som, manual e desistir à direita.
+function optbar() {
+  return '<div class="ob">' + optHome() + '<span class="sp"></span>' + optEnd() + '</div>';
 }
 
 // HTML das relíquias que o jogador já tem (a descrição aparece ao passar o rato ou tocar).
@@ -1999,13 +2004,13 @@ function topbar() {
   var s = '<div class="prog">';
   for (var i = 0; i < N; i++) s += '<i class="' + (i <= G.node ? 'on' : '') + '"></i>';
   s +=
-    '</div><div class="top"><span>Andar ' + (Math.floor(G.node / 3) + 1) + '/3 · ' +
+    '</div><div class="top"><div class="tgl">' + optHome() + '<span>Andar ' + (Math.floor(G.node / 3) + 1) + '/3 · ' +
     (G.node % 3 == 2 ? '👑 Boss' : 'Combate ' + ((G.node % 3) + 1)) +
-    '</span><span>❤️ ' + G.hp + '/' + G.max + '</span>' +
+    '</span></div><div class="tgl"><span>❤️ ' + G.hp + '/' + G.max + '</span>' +
     (scr == 'blinds' ? '<span class="tl">Escolhe o teu próximo desafio</span>' : '') +
-    '<span>🪙 ' + G.gold +
-    '</span><button class="btn alt" style="padding:3px 10px;font-size:.85rem" onclick="view(\'deck\')">📚 Baralho (' +
-    G.deck.length + ')</button></div>';
+    '<span>🪙 ' + G.gold + '</span></div><div class="tgl">' +
+    '<button class="btn alt" style="padding:3px 10px;font-size:.85rem" onclick="view(\'deck\')">📚 Baralho (' + G.deck.length + ')</button>' +
+    optEnd() + '</div></div>';
   return s + inv();
 }
 
@@ -2269,12 +2274,12 @@ function render() {
   } else {
     h = endHtml();
   }
-  h = optbar() + h;
+  if (h.indexOf('class="prog"') < 0) h = optbar() + h;
   if (V) h += modal();
   if (GU)
     h +=
       '<div class="modal" onclick="giveUpNo()"><div onclick="event.stopPropagation()"><h3>Desistir?</h3><p>Perdes o progresso desta partida.</p><div class="row"><button class="btn" onclick="giveUp()">Sim, desistir</button><button class="btn alt" onclick="giveUpNo()">Continuar</button></div></div></div>';
-  a.className = ['shop', 'pack', 'rest', 'blinds'].indexOf(scr) >= 0 ? 'wide' : '';
+  a.className = ['shop', 'pack', 'rest', 'blinds', 'battle'].indexOf(scr) >= 0 ? 'wide' : '';
   a.innerHTML = h;
   if (scr == 'menu') Temas.bind(a.querySelector('.tm'), tmInfo), tmInfo();
   doFx();
