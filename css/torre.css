@@ -1336,7 +1336,7 @@ h1 {
 }
 .own {
   display: grid;
-  grid-template-columns: 3fr 1.25fr;
+  grid-template-columns: 1fr auto;
   gap: 12px;
   margin: 10px 0;
 }
@@ -1589,4 +1589,62 @@ h1,
 .bnm,
 .mb {
   font-family: Rajdhani, system-ui, sans-serif, 'Noto Color Emoji';
+}
+
+/* ---------- Texto no meio da barra de cima (escolha do combate) e zonas mais pequenas durante o combate ---------- */
+.top .tl {
+  color: var(--acc);
+  font-weight: 700;
+  text-align: center;
+}
+.own.mini {
+  margin: 8px 0;
+  gap: 8px;
+}
+.own.mini .oz {
+  padding: 5px 8px 7px;
+}
+.own.mini .olb {
+  margin-bottom: 4px;
+  font-size: 0.9rem;
+}
+.own.mini .ozi {
+  gap: 6px;
+}
+.own.mini .card,
+.own.mini .empty {
+  width: 82px;
+  min-height: 92px;
+  height: auto;
+}
+.own.mini .empty {
+  height: 92px;
+}
+.own.mini .card {
+  padding: 4px;
+  font-size: 0.58rem;
+  gap: 2px;
+}
+.own.mini .card .n {
+  font-size: 0.7rem;
+}
+.own.mini .card .t {
+  display: none;
+}
+
+/* ---------- Tudo numa linha: relíquias (5) e tarots (2) lado a lado; barra de cima com as opções ---------- */
+@media (min-width: 901px) {
+  .own .ozi {
+    flex-wrap: nowrap;
+  }
+}
+.top {
+  align-items: center;
+  flex-wrap: wrap;
+}
+.top .tgl {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 12px;
 }
