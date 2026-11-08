@@ -856,7 +856,7 @@ function buyRel(k) {
   }
   if (!pay(RL[k].p)) return;
   giveRelic(k);
-  G.shop.rels.splice(G.shop.rels.indexOf(k), 1);
+  removeTop('rel', k);
   msg = 'Compraste ' + RL[k].n + '.';
   render();
 }
@@ -892,13 +892,53 @@ function rollCards(n) {
   });
 }
 
-// Põe à venda 2 cartas (zona do cupão) e 2 relíquias (que ainda não tenhas).
+// Põe à venda 2 cartas (zona do cupão) e 2 itens em cima (como as casas dos jokers do Balatro):
+// cada um é à sorte uma relíquia (que ainda não tenhas), um tarot ou uma carta.
 function stock() {
-  var r = Object.keys(RL).filter(function (k) {
-    return !hasRel(k);
-  });
+  var r = sh(
+      Object.keys(RL).filter(function (k) {
+        return !hasRel(k);
+      }),
+    ),
+    top = [];
   G.shop.cards = rollCards(2);
-  G.shop.rels = sh(r).slice(0, 2);
+  for (var n = 0; n < 2; n++) {
+    var x = Math.random();
+    if (x < 0.6 && r.length) top.push({ t: 'rel', id: r.pop() });
+    else if (x < 0.8) top.push({ t: 'tar', id: randTarot() });
+    else top.push({ t: 'card', id: rollCards(1)[0] });
+  }
+  G.shop.top = top;
+}
+
+// Tira um item da fila de cima da loja.
+function removeTop(t, id) {
+  G.shop.top = G.shop.top.filter(function (x) {
+    return !(x.t == t && x.id == id);
+  });
+}
+
+// Comprar o item i da fila de cima: relíquia, tarot (vai para a tua lista) ou carta (vai para o baralho).
+function buyTop(i) {
+  var x = G.shop.top[i];
+  if (!x) return;
+  if (x.t == 'rel') return buyRel(x.id);
+  if (x.t == 'tar') {
+    if (G.tar.length >= G.ts) {
+      msg = 'Não tens espaço para mais tarots: usa um primeiro.';
+      return render();
+    }
+    if (!pay(TR[x.id].p)) return;
+    G.tar.push(x.id);
+    removeTop('tar', x.id);
+    msg = 'Compraste ' + TR[x.id].n + '.';
+    return render();
+  }
+  if (!pay(pr(x.id))) return;
+  G.deck.push(x.id);
+  removeTop('card', x.id);
+  msg = 'Compraste ' + CARDS[x.id].n + '.';
+  render();
 }
 
 // ---- Packs (como no Balatro): compras o pack, abre-se e escolhes 1 (ou 2, nos mega) dos itens. ----
@@ -1261,7 +1301,7 @@ function enter() {
 function shop() {
   var s = (G.shop = {
       cards: [],
-      rels: [],
+      top: [],
       packs: [],
       pot: true,
       rr: 0,
@@ -1997,7 +2037,7 @@ function render() {
       '<li><b>Perguntas:</b> para jogar uma carta tens de acertar numa pergunta. Se acertares, a carta funciona; se errares, falha e gasta a energia na mesma.</li>' +
       '<li><b>Sequência 🔥:</b> respostas certas seguidas dão mais dano, e a cada 3 certas seguidas ganhas +1 energia.</li>' +
       '<li><b>Efeitos:</b> <b>Vulnerável</b> (o inimigo leva +50% de dano), <b>Fraco</b> (o inimigo bate -25%), <b>Veneno</b> (dano no fim de cada turno, e vai baixando), <b>Força</b> (+dano em todos os ataques) e <b>Exaurir</b> (a carta só volta no próximo combate).</li>' +
-      '<li><b>Loja:</b> depois de cada combate ganhas moedas 🪙 e recuperas um pouco de vida. Na loja (como no Balatro) há <b>relíquias</b> em cima, <b>cartas</b> em baixo à esquerda e <b>packs</b> em baixo à direita. Podes <b>atualizar</b> a loja por 🪙 5 (sobe 1 de cada vez).</li>' +
+      '<li><b>Loja:</b> depois de cada combate ganhas moedas 🪙 e recuperas um pouco de vida. Na loja (como no Balatro) há 2 itens em cima (<b>relíquias</b>, <b>tarots</b> ou <b>cartas</b>), <b>cartas</b> em baixo à esquerda e <b>packs</b> em baixo à direita. Podes <b>atualizar</b> a loja por 🪙 5 (sobe 1 de cada vez).</li>' +
       '<li><b>Relíquias:</b> só podes ter ' + MAXR + ' ao mesmo tempo. Para ficares com outra, <b>vende</b> uma (recebes metade do preço).</li>' +
       '<li><b>Packs:</b> ao comprar um pack, ele abre e escolhes 1 dos itens (2 nos <b>Mega</b>). O <b>Pack Arcano</b> tem tarots (o que escolheres é usado logo), o <b>Pack Padrão</b> tem cartas e o <b>Pack do Bobo</b> tem relíquias. Os packs <b>Jumbo</b> e <b>Mega</b> têm mais opções.</li>' +
       '<li><b>Tarots:</b> mexem nas cartas do teu baralho (duplicar, eliminar, melhorar, transformar). Quando precisam de cartas, aparecem umas 5 cartas do teu baralho, tiradas à sorte, e escolhes entre elas. Usam-se fora dos combates e só tens espaço para 2.</li>' +
@@ -2121,12 +2161,16 @@ function render() {
     h +=
       '<div class="shp"><div class="shl"><button class="shn" onclick="leave()">Próxima<br>Rodada</button>' +
       '<button class="shr" ' + (G.gold < rrCost() ? 'disabled ' : '') + 'onclick="reroll()">Atualizar<b>' +
-      (rrCost() ? '🪙 ' + rrCost() : 'GRÁTIS') + '</b></button></div><div class="shm"><div class="shi" data-lbl="Relíquias">';
-    sp.rels.forEach(function (k) {
-      var p = price(RL[k].p);
-      h += '<div class="it">' + ptag(p) + relBtn(k, "buyRel('" + k + "')", G.gold < p) + '</div>';
+      (rrCost() ? '🪙 ' + rrCost() : 'GRÁTIS') + '</b></button></div><div class="shm"><div class="shi" data-lbl="Relíquias, tarots e cartas">';
+    sp.top.forEach(function (x, k) {
+      var cb = 'buyTop(' + k + ')',
+        p = price(x.t == 'rel' ? RL[x.id].p : x.t == 'tar' ? TR[x.id].p : pr(x.id));
+      h +=
+        '<div class="it">' + ptag(p) +
+        (x.t == 'rel' ? relBtn(x.id, cb, G.gold < p) : x.t == 'tar' ? tarBtn(x.id, cb, G.gold < p) : cardEl(x.id, k, cb, G.gold < p)) +
+        '</div>';
     });
-    if (!sp.rels.length) h += '<small class="mut">Esgotado. Atualiza a loja.</small>';
+    if (!sp.top.length) h += '<small class="mut">Esgotado. Atualiza a loja.</small>';
     h += '</div><div class="sbt"><div class="shc" data-lbl="Cartas">';
     sp.cards.forEach(function (id) {
       var p = price(pr(id));
