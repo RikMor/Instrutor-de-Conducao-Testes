@@ -2183,7 +2183,7 @@ function render() {
         'onclick="buyPot()"><span class="n">🧪 Poção</span><span class="t">Consumível</span><span>Recupera 20 de vida.</span></button></div>';
     }
     if (!sp.cards.length && !sp.pot) h += '<small class="mut">Esgotado. Atualiza a loja.</small>';
-    h += '</div><div class="shk" data-lbl="Packs">';
+    h += '</div><div class="spk" data-lbl="Packs">';
     sp.packs.forEach(function (pk, i) {
       var p = price(PKS[pk.t].p[pk.s]);
       h += '<div class="it">' + ptag(p) + packBtn(pk, 'buyPack(' + i + ')', G.gold < p) + '</div>';
