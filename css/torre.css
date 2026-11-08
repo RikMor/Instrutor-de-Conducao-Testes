@@ -1672,3 +1672,20 @@ h1,
     white-space: nowrap;
   }
 }
+
+/* ---------- Tu e o inimigo com o mesmo tamanho e alinhados ---------- */
+.arena {
+  align-items: stretch;
+}
+.fighter {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+}
+#pl::before {
+  content: '\00a0';
+  display: block;
+  font-weight: bold;
+  margin-top: 4px;
+}
