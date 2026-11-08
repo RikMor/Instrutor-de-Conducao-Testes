@@ -1540,31 +1540,81 @@ function rest() {
 var HN = 5;
 function tarUse(k, take, done) {
   var t = TR[k];
-  if (scr == 'battle' || (t.can && !t.can())) {
+  if (t.can && !t.can()) {
     msg = 'Não podes usar esse tarot agora.';
     return render();
   }
   if (t.need > 0) {
-    var pool = G.deck.filter(function (id) {
+    // Em combate escolhes entre as cartas da tua mão; fora dele (loja, packs) aparecem HN cartas do baralho à sorte.
+    var live = scr == 'battle',
+      pool = (live ? G.hand : G.deck).filter(function (id) {
         return !t.ok || t.ok(id);
       }),
       n = t.lim ? Math.min(t.need, t.lim()) : t.need;
     if (n < 1 || !pool.length) {
-      msg = 'Não há cartas para esse tarot.';
+      msg = live ? 'Não tens cartas na mão para esse tarot.' : 'Não há cartas para esse tarot.';
       return render();
     }
-    PK = { k: k, hand: sh(pool.slice()).slice(0, HN), sel: [], need: n, take: take, done: done };
+    PK = {
+      k: k,
+      hand: live ? pool.slice() : sh(pool.slice()).slice(0, HN),
+      live: live,
+      sel: [],
+      need: n,
+      take: take,
+      done: done,
+    };
     V = 'pick';
     return render();
   }
   take();
-  t.f();
+  applyTar(k);
   done();
 }
 
 // Usar o tarot i da tua lista (fora dos combates).
+// Aplica o efeito do tarot. Em combate o efeito é imediato: o que mudou no baralho passa também
+// para a mão e as pilhas (cartas melhoradas/transformadas no sítio, eliminadas saem, duplicadas vão para a mão).
+function applyTar(k, ids) {
+  var live = scr == 'battle',
+    before = live ? G.deck.slice() : null;
+  TR[k].f(ids);
+  if (!live) return;
+  var cnt = {},
+    rem = [],
+    add = [];
+  before.forEach(function (id) {
+    cnt[id] = (cnt[id] || 0) + 1;
+  });
+  G.deck.forEach(function (id) {
+    cnt[id] = (cnt[id] || 0) - 1;
+  });
+  Object.keys(cnt).forEach(function (id) {
+    for (var n = cnt[id]; n > 0; n--) rem.push(id);
+    for (var m = cnt[id]; m < 0; m++) add.push(id);
+  });
+  rem.forEach(function (r) {
+    var x = add.indexOf(r + '+');
+    if (x < 0 && add.length) x = 0;
+    var piles = [G.hand, G.dr, G.di],
+      at = -1,
+      pile = null;
+    for (var a = 0; a < piles.length && at < 0; a++) {
+      at = piles[a].indexOf(r);
+      pile = piles[a];
+    }
+    if (x >= 0) {
+      var nid = add.splice(x, 1)[0];
+      if (at >= 0) pile[at] = nid;
+    } else if (at >= 0) pile.splice(at, 1);
+  });
+  add.forEach(function (id) {
+    G.hand.push(id);
+  });
+}
+
 function useTar(i) {
-  if (scr == 'battle' || scr == 'pack' || V || !G.tar[i]) return;
+  if (scr == 'pack' || V || P || G.busy || !G.tar[i]) return;
   tarUse(
     G.tar[i],
     function () {
@@ -1594,7 +1644,7 @@ function finishPick() {
   PK = null;
   V = null;
   p.take();
-  TR[p.k].f(ids);
+  applyTar(p.k, ids);
   p.done();
 }
 
@@ -1681,7 +1731,7 @@ function pickModal() {
       t.n +
       '</h3><p>' +
       t.d +
-      '</p><p class="mut">Estas são ' + PK.hand.length + ' cartas do teu baralho, tiradas à sorte. Escolhe ' +
+      '</p><p class="mut">' + (PK.live ? 'Estas são as cartas da tua mão.' : 'Estas são ' + PK.hand.length + ' cartas do teu baralho, tiradas à sorte.') + ' Escolhe ' +
       (PK.need > 1 ? 'até ' + PK.need : '1') + '.</p><div class="pg">';
   PK.hand.forEach(function (id, i) {
     var c = CARDS[id],
@@ -1940,7 +1990,7 @@ function tagsHtml() {
 
 // Faixa por baixo da barra: relíquias (só nos combates; fora deles aparecem em baixo da barra, nas ranhuras) e etiquetas.
 function inv() {
-  var h = (scr == 'battle' ? relicsHtml() : '') + tagsHtml();
+  var h = tagsHtml();
   return h ? '<div class="inv">' + h + '</div>' : '';
 }
 
@@ -1951,7 +2001,9 @@ function topbar() {
   s +=
     '</div><div class="top"><span>Andar ' + (Math.floor(G.node / 3) + 1) + '/3 · ' +
     (G.node % 3 == 2 ? '👑 Boss' : 'Combate ' + ((G.node % 3) + 1)) +
-    '</span><span>❤️ ' + G.hp + '/' + G.max + '</span><span>🪙 ' + G.gold +
+    '</span><span>❤️ ' + G.hp + '/' + G.max + '</span>' +
+    (scr == 'blinds' ? '<span class="tl">Escolhe o teu próximo desafio</span>' : '') +
+    '<span>🪙 ' + G.gold +
     '</span><button class="btn alt" style="padding:3px 10px;font-size:.85rem" onclick="view(\'deck\')">📚 Baralho (' +
     G.deck.length + ')</button></div>';
   return s + inv();
@@ -1993,20 +2045,20 @@ function relFace(k) {
 
 // As tuas relíquias (máx. MAXR, com botão Vender) e os teus tarots (máx. G.ts, com Usar), como em cima na loja do Balatro.
 // useT = deixa usar os tarots neste ecrã.
-function ownBar(useT) {
+function ownBar(useT, mini) {
   var rs = '',
     ts = '',
     i;
   for (i = 0; i < MAXR; i++)
     rs += G.rels[i]
-      ? '<div class="it">' + relFace(G.rels[i]) + '<button class="sell" onclick="sellRel(' + i + ')">Vender 🪙 ' + sellP(G.rels[i]) + '</button></div>'
+      ? '<div class="it">' + relFace(G.rels[i]) + (mini ? '' : '<button class="sell" onclick="sellRel(' + i + ')">Vender 🪙 ' + sellP(G.rels[i]) + '</button>') + '</div>'
       : '<div class="it"><div class="empty"></div></div>';
   for (i = 0; i < G.ts; i++)
     ts += G.tar[i]
       ? '<div class="it">' + tarBtn(G.tar[i], 'useTar(' + i + ')', !useT, '<span class="usar">Usar</span>') + '</div>'
       : '<div class="it"><div class="empty"></div></div>';
   return (
-    '<div class="own"><div class="oz"><div class="olb"><b>🎁 Relíquias</b><span>' + G.rels.length + '/' + MAXR +
+    '<div class="own' + (mini ? ' mini' : '') + '"><div class="oz"><div class="olb"><b>🎁 Relíquias</b><span>' + G.rels.length + '/' + MAXR +
     '</span></div><div class="ozi">' + rs + '</div></div><div class="oz t"><div class="olb"><b>🔮 Tarots</b><span>' + G.tar.length + '/' + G.ts +
     '</span></div><div class="ozi">' + ts + '</div></div></div>'
   );
@@ -2040,7 +2092,7 @@ function render() {
       '<li><b>Loja:</b> depois de cada combate ganhas moedas 🪙 e recuperas um pouco de vida. Na loja (como no Balatro) há 2 itens em cima (<b>relíquias</b>, <b>tarots</b> ou <b>cartas</b>), <b>cartas</b> em baixo à esquerda e <b>packs</b> em baixo à direita. Podes <b>atualizar</b> a loja por 🪙 5 (sobe 1 de cada vez).</li>' +
       '<li><b>Relíquias:</b> só podes ter ' + MAXR + ' ao mesmo tempo. Para ficares com outra, <b>vende</b> uma (recebes metade do preço).</li>' +
       '<li><b>Packs:</b> ao comprar um pack, ele abre e escolhes 1 dos itens (2 nos <b>Mega</b>). O <b>Pack Arcano</b> tem tarots (o que escolheres é usado logo), o <b>Pack Padrão</b> tem cartas e o <b>Pack do Bobo</b> tem relíquias. Os packs <b>Jumbo</b> e <b>Mega</b> têm mais opções.</li>' +
-      '<li><b>Tarots:</b> mexem nas cartas do teu baralho (duplicar, eliminar, melhorar, transformar). Quando precisam de cartas, aparecem umas 5 cartas do teu baralho, tiradas à sorte, e escolhes entre elas. Usam-se fora dos combates e só tens espaço para 2.</li>' +
+      '<li><b>Tarots:</b> mexem nas cartas do teu baralho (duplicar, eliminar, melhorar, transformar). Quando precisam de cartas, <b>em combate</b> escolhes entre as cartas da tua <b>mão</b> (e o efeito é imediato); <b>na loja ou nos packs</b> aparecem umas 5 cartas do teu baralho, tiradas à sorte. Só tens espaço para 2 tarots e não os podes usar enquanto respondes a uma pergunta.</li>' +
       '<li><b>Depois do boss:</b> descansas (recuperas 35% da vida) ou escolhes uma relíquia permanente, e depois vais à loja.</li>' +
       '<li><b>Perdes</b> quando a tua vida chega a 0. Ao perder ou desistir vês a causa e todas as perguntas que respondeste, certas e erradas. Podes consultar o 📖 <b>Manual</b> a qualquer momento.</li></ul>' +
       '<div class="row"><button class="btn alt" onclick="home()">Voltar</button></div>';
@@ -2067,6 +2119,7 @@ function render() {
         (G.block ? '🛡️ ' + G.block + ' ' : '') + (G.str ? '💪 ' + G.str + ' ' : '') + (G.sk ? '🔥 ' + G.sk : '');
     h =
       topbar() +
+      ownBar(!P && !G.busy, true) +
       '<div class="arena"><div class="fighter" id="pl"><div class="em">🧙</div><b>Tu</b><div class="bar g"><b style="width:' +
       Math.max(0, (G.hp / G.max) * 100) +
       '%"></b></div><div>❤️ ' + G.hp + ' / ' + G.max + '</div><div class="st">' + (ps || '&nbsp;') +
@@ -2128,7 +2181,6 @@ function render() {
     h =
       topbar() +
       ownBar(true) +
-      '<div class="ctr"><h2>Andar ' + (F + 1) + '/3</h2><p>Escolhe o teu próximo desafio</p></div>' +
       (msg ? '<div class="log">' + msg + '</div>' : '') + '<div class="bz">';
     G.pl3.forEach(function (k, i) {
       var f = FOES[k],
