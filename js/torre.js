@@ -7,8 +7,9 @@
 
    Ecrãs (variável scr):
      menu -> blinds (escolher combate; ou ignorar um combate -> etiqueta, como no Balatro)
-          -> battle -> reward (carta nova) -> [rest após boss] -> shop (cartas, relíquias, tarots)
-          -> blinds ... -> win | over
+          -> battle -> shop (relíquias, cartas e packs; já não há recompensa de cartas à parte)
+          -> [pack: escolher 1 ou 2 itens de um pack] -> blinds ... -> [rest após boss] -> win | over
+     O ecrã final (over / win) mostra a causa e todas as perguntas respondidas (certas e erradas).
 
    Dados principais:
      BASE   cartas  { n: nome, c: custo, t: tipo (a/d/s), r: raridade, a: efeito, u: melhoria }
@@ -18,9 +19,10 @@
      FOES   inimigos { n: nome, e: emoji, hp: vida, p: padrão de jogadas [tipo, valor] }
               tipos de jogada do inimigo: a = ataca, d = defende, b = reforça-se
      FL     os 3 andares: { c: inimigos comuns possíveis, b: boss }
-     RL     relíquias permanentes (compram-se na loja ou escolhem-se depois de um boss)
+     RL     relíquias (máximo 5; compram-se na loja ou em packs, escolhem-se depois de um boss e vendem-se)
      TR     tarots (consumíveis que mexem nas cartas do baralho, como no Balatro)
      TAGS   etiquetas (ganham-se ao ignorar um combate, como no Balatro)
+     PKS    packs da loja: Arcano (tarots), Padrão (cartas) e do Bobo (relíquias); normal, jumbo e mega
 
    Estado do jogo (G = jogador, E = inimigo atual) está descrito mais abaixo.
    Depois de qualquer mudança chama-se render(), que redesenha o ecrã todo.
@@ -228,6 +230,7 @@ var FOES = {
   },
   rei: {
     n: 'Rei Goblin',
+    boss: 1,
     e: '👑',
     hp: 65,
     p: [
@@ -239,6 +242,7 @@ var FOES = {
   },
   ogre: {
     n: 'Ogre',
+    boss: 1,
     e: '👹',
     hp: 60,
     p: [
@@ -259,6 +263,7 @@ var FOES = {
   },
   boss: {
     n: 'Dragão Ancião',
+    boss: 1,
     e: '🐉',
     hp: 110,
     p: [
@@ -269,13 +274,135 @@ var FOES = {
       ['a', 22],
     ],
   },
+  morcego: {
+    n: 'Morcego',
+    e: '🦇',
+    hp: 28,
+    p: [
+      ['a', 4],
+      ['a', 4],
+      ['a', 10],
+    ],
+  },
+  aranha: {
+    n: 'Aranha Gigante',
+    e: '🕷️',
+    hp: 34,
+    p: [
+      ['a', 6],
+      ['b', 1],
+      ['a', 9],
+      ['d', 6],
+    ],
+  },
+  cogumelo: {
+    n: 'Cogumelo Brutamontes',
+    e: '🍄',
+    hp: 36,
+    p: [
+      ['d', 8],
+      ['a', 9],
+      ['d', 6],
+      ['a', 12],
+    ],
+  },
+  cobra: {
+    n: 'Serpente',
+    e: '🐍',
+    hp: 31,
+    p: [
+      ['a', 5],
+      ['a', 7],
+      ['b', 2],
+      ['a', 12],
+    ],
+  },
+  golem: {
+    n: 'Golem de Pedra',
+    e: '🗿',
+    hp: 52,
+    p: [
+      ['d', 10],
+      ['a', 14],
+      ['d', 6],
+      ['a', 10],
+    ],
+  },
+  armadura: {
+    n: 'Armadura Viva',
+    e: '🛡️',
+    hp: 48,
+    p: [
+      ['d', 12],
+      ['a', 9],
+      ['d', 12],
+      ['a', 15],
+    ],
+  },
+  fantasma: {
+    n: 'Fantasma',
+    e: '👻',
+    hp: 40,
+    p: [
+      ['d', 6],
+      ['a', 11],
+      ['a', 8],
+    ],
+  },
+  vampiro: {
+    n: 'Vampiro',
+    e: '🧛',
+    hp: 46,
+    p: [
+      ['a', 8],
+      ['b', 2],
+      ['a', 12],
+      ['d', 8],
+    ],
+  },
+  troll: {
+    n: 'Troll das Cavernas',
+    e: '🦍',
+    boss: 1,
+    hp: 70,
+    p: [
+      ['a', 10],
+      ['d', 8],
+      ['a', 14],
+    ],
+  },
+  necro: {
+    n: 'Necromante',
+    e: '🧟',
+    boss: 1,
+    hp: 72,
+    p: [
+      ['b', 2],
+      ['a', 11],
+      ['a', 14],
+      ['d', 10],
+    ],
+  },
+  hidra: {
+    n: 'Hidra',
+    e: '🐲',
+    boss: 1,
+    hp: 115,
+    p: [
+      ['a', 13],
+      ['b', 3],
+      ['a', 16],
+      ['d', 14],
+      ['a', 24],
+    ],
+  },
 };
 
-// ---- Andares: que inimigos comuns podem sair e qual é o boss ----
+// ---- Andares: que inimigos comuns podem sair e que bosses (sai um à sorte) ----
 var FL = [
-  { c: ['slime', 'lobo', 'goblin'], b: 'rei' },
-  { c: ['goblin', 'esq', 'mago'], b: 'ogre' },
-  { c: ['esq', 'mago', 'lobo'], b: 'boss' },
+  { c: ['slime', 'lobo', 'goblin', 'morcego', 'aranha'], b: ['rei', 'troll'] },
+  { c: ['goblin', 'esq', 'mago', 'cogumelo', 'cobra', 'golem'], b: ['ogre', 'necro'] },
+  { c: ['esq', 'mago', 'lobo', 'armadura', 'fantasma', 'vampiro'], b: ['boss', 'hidra'] },
 ];
 
 // Estado global:
@@ -371,7 +498,8 @@ function doFx() {
   FX = [];
 }
 
-// ---- Relíquias permanentes (p = preço na loja) ----
+// ---- Relíquias (p = preço na loja; vendem-se por metade). Só podes ter MAXR ao mesmo tempo. ----
+var MAXR = 5;
 var RL = {
   vida: { n: '💖 Coração de Pedra', d: '+15 vida máxima e cura 15.', p: 35 },
   en: { n: '💎 Cristal de Energia', d: '+1 energia máxima.', p: 45 },
@@ -389,7 +517,24 @@ var RL = {
   ampulheta: { n: '⏳ Ampulheta', d: 'A sequência dá +1 energia a cada 2 respostas certas (em vez de 3).', p: 38 },
   bola: { n: '🔮 Bola de Cristal', d: '+1 espaço para tarots.', p: 26 },
   cartao: { n: '🏷️ Cartão de Cliente', d: 'Tudo 20% mais barato nas lojas.', p: 30 },
+  juros: { n: '🏦 Cofre', d: 'No fim de cada combate ganhas +1 🪙 por cada 5 🪙 que tens (máx. +5).', p: 34 },
+  espinhos: { n: '🌵 Cacto', d: 'Quando um inimigo te ataca, leva 3 de dano.', p: 30 },
+  cafe: { n: '☕ Café', d: 'Compras +2 cartas no primeiro turno de cada combate.', p: 28 },
+  tinta: { n: '🖋️ Tinteiro', d: 'Cada resposta certa dá 2 de escudo.', p: 32 },
+  vampiro: { n: '🧛 Dente de Vampiro', d: 'Cada ataque que jogas cura 2 de vida.', p: 34 },
+  tomo: { n: '📚 Tomo do Saber', d: 'Cada resposta certa causa 1 de dano ao inimigo.', p: 36 },
+  amuleto: { n: '🧿 Amuleto', d: 'Recebes 25% menos dano dos ataques.', p: 40 },
+  cartola: { n: '🎩 Cartola', d: 'Cada carta de custo 0 que jogas dá 3 de escudo.', p: 26 },
+  bandeira: { n: '🚩 Estandarte', d: 'Começas cada combate com +2 de força.', p: 36 },
+  bussola: { n: '🧭 Bússola', d: '+1 opção em todos os packs.', p: 30 },
+  banquete: { n: '🍖 Banquete', d: 'Recuperas +6 de vida depois de cada combate.', p: 32 },
+  dado: { n: '🎲 Dados Viciados', d: 'Atualizar a loja custa menos 2 🪙.', p: 24 },
 };
+
+// Valor de venda de uma relíquia: metade do preço.
+function sellP(k) {
+  return Math.max(1, Math.floor(RL[k].p / 2));
+}
 
 // ---- Etiquetas (como no Balatro): ganhas uma ao ignorar um combate ----
 // As que dizem "agora" têm efeito logo; as outras ficam guardadas até serem precisas.
@@ -401,6 +546,13 @@ var TAGS = {
   tarot: { i: '🔮', n: 'Tarot', d: 'Recebes 1 tarot agora.' },
   vida: { i: '🧪', n: 'Poção', d: 'Recuperas 15 de vida agora.' },
   bolsa: { i: '💰', n: 'Bolsa', d: 'Ganhas 🪙 18 agora.' },
+  economia: { i: '💵', n: 'Economia', d: 'Dobras as tuas moedas agora (máx. +🪙 30).' },
+  melhoria: { i: '⬆️', n: 'Melhoria', d: 'Melhora 1 carta aleatória do baralho agora.' },
+  carta: { i: '🃏', n: 'Carta Extra', d: 'Recebes 1 carta incomum ou rara aleatória agora.' },
+  treino: { i: '🏋️', n: 'Treino', d: '+1 de força permanente.' },
+  arcano: { i: '✨', n: 'Etiqueta Arcana', d: 'Abres já 1 Pack Arcano Mega grátis.' },
+  padrao: { i: '🎴', n: 'Etiqueta Padrão', d: 'Abres já 1 Pack Padrão Mega grátis.' },
+  bobo: { i: '🎪', n: 'Etiqueta do Bobo', d: 'Abres já 1 Pack do Bobo Jumbo grátis (relíquias).' },
 };
 
 // ---- Tarots (como no Balatro): mexem nas cartas do baralho. Usam-se fora dos combates. ----
@@ -539,6 +691,116 @@ var TR = {
       msg = 'Ganhaste 🪙 ' + g + '.';
     },
   },
+  justica: {
+    n: '⚖️ A Justiça',
+    d: 'Cria uma cópia melhorada (+) de 1 carta do baralho.',
+    p: 20,
+    need: 1,
+    ok: canUp,
+    f: function (a) {
+      G.deck.push(a[0] + '+');
+      msg = 'Ganhaste ' + CARDS[a[0] + '+'].n + '.';
+    },
+  },
+  temperanca: {
+    n: '🍷 A Temperança',
+    d: 'Ganhas 🪙 igual ao valor de venda das tuas relíquias (máx. 50).',
+    p: 12,
+    need: 0,
+    f: function () {
+      var g = 0;
+      G.rels.forEach(function (k) {
+        g += sellP(k);
+      });
+      g = Math.min(50, g);
+      G.gold += g;
+      msg = 'Ganhaste 🪙 ' + g + '.';
+    },
+  },
+  torre: {
+    n: '🗼 A Torre',
+    d: 'Transforma 1 carta do baralho numa carta rara aleatória.',
+    p: 18,
+    need: 1,
+    f: function (a) {
+      var c = POOL.filter(function (x) {
+          return BASE[x].r == 3;
+        }),
+        n = c[Math.floor(Math.random() * c.length)];
+      G.deck[G.deck.indexOf(a[0])] = n;
+      msg = CARDS[a[0]].n + ' transformou-se em ' + CARDS[n].n + '.';
+    },
+  },
+  diabo: {
+    n: '😈 O Diabo',
+    d: 'Melhora 2 cartas aleatórias, mas perdes 8 de vida (ficas com pelo menos 1).',
+    p: 16,
+    need: 0,
+    can: function () {
+      return G.deck.some(canUp);
+    },
+    f: function () {
+      G.hp = Math.max(1, G.hp - 8);
+      var n = 0;
+      for (var k = 0; k < 2; k++) {
+        var c = G.deck.filter(canUp);
+        if (!c.length) break;
+        upg(c[Math.floor(Math.random() * c.length)]);
+        n++;
+      }
+      msg = '😈 Melhoraste ' + n + ' carta' + (n > 1 ? 's' : '') + ' e perdeste 8 de vida.';
+    },
+  },
+  hierofante: {
+    n: '🕍 O Hierofante',
+    d: 'Duplica até 2 cartas do baralho à tua escolha.',
+    p: 22,
+    need: 2,
+    f: function (a) {
+      a.forEach(function (id) {
+        G.deck.push(id);
+      });
+      msg = 'Duplicaste ' + a.length + ' carta' + (a.length > 1 ? 's' : '') + '.';
+    },
+  },
+  amantes: {
+    n: '💞 Os Enamorados',
+    d: 'Recuperas 20 de vida.',
+    p: 10,
+    need: 0,
+    f: function () {
+      G.hp = Math.min(G.max, G.hp + 20);
+      msg = 'Recuperaste vida.';
+    },
+  },
+  julgamento: {
+    n: '🔔 O Julgamento',
+    d: 'Cria 1 relíquia aleatória (precisa de espaço).',
+    p: 24,
+    need: 0,
+    can: function () {
+      return G.rels.length < MAXR;
+    },
+    f: function () {
+      var c = Object.keys(RL).filter(function (k) {
+          return !hasRel(k);
+        }),
+        k = c[Math.floor(Math.random() * c.length)];
+      giveRelic(k);
+      msg = 'Recebeste ' + RL[k].n + '.';
+    },
+  },
+  mundo: {
+    n: '🌍 O Mundo',
+    d: '+10 de vida máxima e cura 10.',
+    p: 18,
+    need: 0,
+    f: function () {
+      G.max += 10;
+      G.hp = Math.min(G.max, G.hp + 10);
+      msg = '+10 de vida máxima.';
+    },
+  },
 };
 
 // Tarot aleatório.
@@ -559,9 +821,9 @@ function upg(id) {
   if (i >= 0 && canUp(id)) G.deck[i] = id + '+';
 }
 
-// Preço de uma carta (base): as mais caras de energia e as mais raras custam mais.
+// Preço de uma carta (base): as mais caras de energia e as mais raras custam mais (+12 se já vem melhorada).
 function pr(id) {
-  return 8 + CARDS[id].c * 8 + (CARDS[id].r - 1) * 8;
+  return 8 + CARDS[id].c * 8 + (CARDS[id].r - 1) * 8 + (CARDS[id].up ? 12 : 0);
 }
 
 // Preço final na loja: etiqueta "Cupão" (-50%), "Cartão de Cliente" (-20%) ou "Oferta" (grátis).
@@ -579,7 +841,7 @@ function pay(b) {
   return true;
 }
 
-// Comprar uma carta, uma relíquia ou um tarot na loja.
+// Comprar uma carta ou uma relíquia na loja (os tarots vêm nos packs).
 function buyCard(id) {
   if (!pay(pr(id))) return;
   G.deck.push(id);
@@ -588,17 +850,14 @@ function buyCard(id) {
   render();
 }
 function buyRel(k) {
+  if (G.rels.length >= MAXR) {
+    msg = 'Já tens ' + MAXR + ' relíquias: vende uma para teres espaço.';
+    return render();
+  }
   if (!pay(RL[k].p)) return;
   giveRelic(k);
   G.shop.rels.splice(G.shop.rels.indexOf(k), 1);
   msg = 'Compraste ' + RL[k].n + '.';
-  render();
-}
-function buyTar(k) {
-  if (G.tar.length >= G.ts || !pay(TR[k].p)) return;
-  G.tar.push(k);
-  G.shop.tars.splice(G.shop.tars.indexOf(k), 1);
-  msg = 'Compraste ' + TR[k].n + '.';
   render();
 }
 
@@ -613,7 +872,7 @@ function buyPot() {
 
 // Atualizar a loja: troca as cartas e as relíquias à venda (começa em 5 moedas e sobe 1 de cada vez).
 function rrCost() {
-  return G.shop.fr > 0 ? 0 : 5 + G.shop.rr;
+  return G.shop.fr > 0 ? 0 : (hasRel('dado') ? 3 : 5) + G.shop.rr;
 }
 function reroll() {
   var c = rrCost();
@@ -626,21 +885,129 @@ function reroll() {
   render();
 }
 
-// Põe à venda 3 cartas e 2 relíquias (que ainda não tenhas).
+// Sorteia n cartas da loja (cada uma tem 12% de vir já melhorada).
+function rollCards(n) {
+  return rolls(n).map(function (id) {
+    return canUp(id) && Math.random() < 0.12 ? id + '+' : id;
+  });
+}
+
+// Põe à venda 2 cartas (zona do cupão) e 2 relíquias (que ainda não tenhas).
 function stock() {
   var r = Object.keys(RL).filter(function (k) {
     return !hasRel(k);
   });
-  G.shop.cards = rolls(3);
+  G.shop.cards = rollCards(2);
   G.shop.rels = sh(r).slice(0, 2);
 }
 
-// Sorteia os 3 inimigos do andar atual: 2 comuns à sorte + o boss. Cada combate comum tem
+// ---- Packs (como no Balatro): compras o pack, abre-se e escolhes 1 (ou 2, nos mega) dos itens. ----
+//   t: arcano (tarots, usados logo) · padrao (cartas para o baralho) · bobo (relíquias)
+//   ch = nº de opções [normal, jumbo, mega] · p = preço [normal, jumbo, mega]
+var PKS = {
+  arcano: { n: 'Pack Arcano', i: '🔮', d: 'Tarots: o que escolheres é usado logo.', ch: [3, 5, 5], p: [10, 16, 20] },
+  padrao: { n: 'Pack Padrão', i: '🎴', d: 'Cartas novas para o teu baralho.', ch: [3, 5, 5], p: [8, 14, 18] },
+  bobo: { n: 'Pack do Bobo', i: '🎪', d: 'Relíquias (só cabem se tiveres espaço).', ch: [2, 4, 4], p: [14, 22, 28] },
+};
+var PSN = ['Normal', 'Jumbo', 'Mega'];
+var PPK = [1, 1, 2];
+
+// Sorteia os 2 packs da loja: um é sempre Arcano (os tarots vêm de packs); o outro é à sorte.
+function stockPacks() {
+  var sz = function () {
+      var x = Math.random();
+      return x < 0.6 ? 0 : x < 0.85 ? 1 : 2;
+    },
+    o = Math.random();
+  G.shop.packs = [
+    { t: 'arcano', s: sz() },
+    { t: o < 0.4 ? 'padrao' : o < 0.7 ? 'bobo' : 'arcano', s: sz() },
+  ];
+}
+
+// Comprar um pack da loja: abre logo.
+function buyPack(i) {
+  var pk = G.shop.packs[i];
+  if (!pk || !pay(PKS[pk.t].p[pk.s])) return;
+  G.shop.packs.splice(i, 1);
+  openPack(pk.t, pk.s, 'shop', 'Compraste um ' + PKS[pk.t].n + ' ' + PSN[pk.s] + '.');
+}
+
+// Abre um pack: sorteia as opções. ret = para onde voltar quando acabar ('shop' ou 'blinds').
+function openPack(t, s, ret, note) {
+  var n = PKS[t].ch[s] + (hasRel('bussola') ? 1 : 0),
+    ch;
+  if (t == 'arcano') ch = sh(Object.keys(TR)).slice(0, n);
+  else if (t == 'padrao') ch = rollCards(n);
+  else
+    ch = sh(
+      Object.keys(RL).filter(function (k) {
+        return !hasRel(k);
+      }),
+    ).slice(0, n);
+  PG = { t: t, s: s, ch: ch, left: PPK[s], ret: ret };
+  scr = 'pack';
+  msg = note || '';
+  render();
+}
+
+// Escolheu a opção i do pack.
+function pickPack(i) {
+  if (!PG || PK) return;
+  var id = PG.ch[i];
+  if (PG.t == 'padrao') {
+    G.deck.push(id);
+    msg = 'Adicionaste ' + CARDS[id].n + ' ao baralho.';
+    return gotPick(i);
+  }
+  if (PG.t == 'bobo') {
+    if (G.rels.length >= MAXR) {
+      msg = 'Já tens ' + MAXR + ' relíquias: vende uma para teres espaço.';
+      return render();
+    }
+    giveRelic(id);
+    msg = 'Ficaste com ' + RL[id].n + '.';
+    return gotPick(i);
+  }
+  // Pack Arcano: o tarot é usado logo (se precisar de cartas, aparecem cartas do baralho para escolheres).
+  tarUse(
+    id,
+    function () {
+      PG.ch.splice(i, 1);
+      PG.left--;
+    },
+    function () {
+      if (PG.left <= 0 || !PG.ch.length) closePack();
+      else render();
+    },
+  );
+}
+function gotPick(i) {
+  PG.ch.splice(i, 1);
+  PG.left--;
+  if (PG.left <= 0 || !PG.ch.length) return closePack();
+  render();
+}
+
+// Fecha o pack (o que sobrar perde-se) e volta à loja ou ao mapa.
+function closePack() {
+  var r = PG.ret;
+  PG = null;
+  scr = r;
+  render();
+}
+function skipPack() {
+  if (!PG || PK) return;
+  msg = 'Saltaste o resto do pack.';
+  closePack();
+}
+
+// Sorteia os 3 inimigos do andar atual: 2 comuns à sorte + um boss à sorte. Cada combate comum tem
 // também a etiqueta que ganhas se o ignorares (visível antes de escolheres).
 function plan() {
   var L = FL[Math.floor(G.node / 3)],
     c = sh(L.c.slice());
-  G.pl3 = [c[0], c[1], L.b];
+  G.pl3 = [c[0], c[1], L.b[Math.floor(Math.random() * L.b.length)]];
   G.tg = sh(Object.keys(TAGS)).slice(0, 2);
 }
 
@@ -664,7 +1031,8 @@ function skip() {
   if (scr != 'blinds' || G.node % 3 == 2) return;
   var k = G.tg[G.node % 3],
     t = TAGS[k],
-    extra = '';
+    extra = '',
+    note;
   G.skp[G.node] = true;
   if (k == 'tarot') {
     if (G.tar.length < G.ts) G.tar.push(randTarot());
@@ -674,15 +1042,44 @@ function skip() {
     }
   } else if (k == 'vida') G.hp = Math.min(G.max, G.hp + 15);
   else if (k == 'bolsa') G.gold += 18;
-  else G.tags.push(k);
+  else if (k == 'economia') {
+    var gg = Math.min(G.gold, 30);
+    G.gold += gg;
+    extra = ' (+🪙 ' + gg + ')';
+  } else if (k == 'melhoria') {
+    var up = G.deck.filter(canUp);
+    if (up.length) {
+      var uid = up[Math.floor(Math.random() * up.length)];
+      upg(uid);
+      extra = ' (' + CARDS[uid].n + ' melhorada)';
+    } else {
+      G.gold += 10;
+      extra = ' (nada para melhorar: ganhas 🪙 10)';
+    }
+  } else if (k == 'carta') {
+    var pl = POOL.filter(function (x) {
+        return BASE[x].r >= 2;
+      }),
+      cid = pl[Math.floor(Math.random() * pl.length)];
+    G.deck.push(cid);
+    extra = ' (ganhaste ' + CARDS[cid].n + ')';
+  } else if (k == 'treino') G.bs++;
+  else if (!PKS[k]) G.tags.push(k);
   G.node++;
+  note = 'Ignoraste o combate e ganhaste a etiqueta ' + t.i + ' ' + t.n + '.' + extra;
+  // As etiquetas dos packs abrem logo um pack grátis (depois voltas à escolha do combate).
+  if (PKS[k]) return openPack(k, k == 'bobo' ? 1 : 2, 'blinds', note);
   scr = 'blinds';
-  msg = 'Ignoraste o combate e ganhaste a etiqueta ' + t.i + ' ' + t.n + '.' + extra;
+  msg = note;
   render();
 }
 
 // Aplica a relíquia escolhida depois de um boss e segue para a loja.
 function relic(k) {
+  if (G.rels.length >= MAXR) {
+    msg = 'Já tens ' + MAXR + ' relíquias: vende uma para escolheres esta.';
+    return render();
+  }
   giveRelic(k);
   shop();
 }
@@ -698,6 +1095,34 @@ function giveRelic(k) {
   if (k == 'mao') G.hs++;
   if (k == 'forca') G.bs += 2;
   if (k == 'bola') G.ts++;
+}
+
+// Tira os efeitos permanentes de uma relíquia vendida.
+function loseRelic(k) {
+  if (k == 'vida') {
+    G.max -= 15;
+    G.hp = Math.max(1, Math.min(G.hp, G.max));
+  }
+  if (k == 'en') G.me = Math.max(1, G.me - 1);
+  if (k == 'mao') G.hs = Math.max(1, G.hs - 1);
+  if (k == 'forca') G.bs -= 2;
+  if (k == 'bola') G.ts--;
+}
+
+// Vender a relíquia i (fora dos combates): ganhas metade do preço e libertas espaço.
+function sellRel(i) {
+  if (scr == 'battle' || P || PK) return;
+  var k = G.rels[i];
+  if (!k) return;
+  if (k == 'bola' && G.tar.length >= G.ts) {
+    msg = 'Usa um tarot antes de vender a Bola de Cristal (ficarias sem espaço para ele).';
+    return render();
+  }
+  G.rels.splice(i, 1);
+  loseRelic(k);
+  G.gold += sellP(k);
+  msg = 'Vendeste ' + RL[k].n + ' por 🪙 ' + sellP(k) + '.';
+  render();
 }
 
 // Só a pergunta em si (como no Milionário): tira o "Ficha 2 (Parte II) — " do início e o embrulho "Verdadeiro ou falso? «…»".
@@ -752,6 +1177,7 @@ function draw(n) {
 function start() {
   V = null;
   PK = null;
+  PG = null;
   GU = false;
   TK++;
   SEL = Temas.ler(document.getElementById('app'));
@@ -781,6 +1207,11 @@ function start() {
     fa: false,
     lv: false,
     busy: false,
+    cok: 0,
+    cko: 0,
+    hist: [],
+    end: null,
+    win: '',
     deck: [
       'golpe',
       'golpe',
@@ -801,34 +1232,37 @@ function start() {
   blinds();
 }
 
-// Entra num combate: cria o inimigo (a vida dos comuns cresce 30% por andar; a do boss não),
+// Entra num combate: cria o inimigo (a vida dos comuns cresce 30% por andar; a dos bosses não),
 // baralha o baralho e compra a mão. Aplica as relíquias de início de combate.
 function enter() {
   var F = Math.floor(G.node / 3),
     k = G.pl3[G.node % 3],
     f = FOES[k],
-    hp = Math.round(f.hp * (k == 'boss' ? 1 : 1 + 0.3 * F));
+    hp = Math.round(f.hp * (f.boss ? 1 : 1 + 0.3 * F));
   E = { n: f.n, e: f.e, hp: hp, max: hp, p: f.p, i: 0, block: 0, str: F, vuln: 0, weak: 0, poison: 0 };
   G.dr = sh(G.deck.slice());
   G.di = [];
   G.hand = [];
-  G.str = G.bs;
+  G.str = G.bs + (hasRel('bandeira') ? 2 : 0);
   G.lv = false;
+  G.cok = 0;
+  G.cko = 0;
   scr = 'battle';
   turn();
+  if (hasRel('cafe')) draw(2);
   if (hasRel('armadura')) G.block += 8;
   if (hasRel('sangue')) G.hp = Math.min(G.max, G.hp + 4);
   msg = '';
   render();
 }
 
-// Abre a loja: 3 cartas e 2 relíquias à venda, 2 tarots e a poção. As etiquetas guardadas
+// Abre a loja (como a do Balatro): 2 relíquias, 2 cartas (e a poção) e 2 packs. As etiquetas guardadas
 // (Cupão, Oferta, Dados) aplicam-se agora e gastam-se.
 function shop() {
   var s = (G.shop = {
       cards: [],
       rels: [],
-      tars: sh(Object.keys(TR)).slice(0, 2),
+      packs: [],
       pot: true,
       rr: 0,
       fr: 0,
@@ -838,6 +1272,7 @@ function shop() {
     keep = [],
     used = [];
   stock();
+  stockPacks();
   G.tags.forEach(function (k) {
     if (k == 'desc') s.disc = true;
     else if (k == 'gratis') s.free = true;
@@ -847,7 +1282,8 @@ function shop() {
   });
   G.tags = keep;
   scr = 'shop';
-  msg = used.length ? 'Etiquetas usadas: ' + used.join(', ') + '.' : '';
+  msg = (G.win || '') + (used.length ? (G.win ? ' · ' : '') + 'Etiquetas usadas: ' + used.join(', ') + '.' : '');
+  G.win = '';
   render();
 }
 
@@ -864,7 +1300,6 @@ function turn() {
 
 // Clicou na carta i: em vez de a jogar logo, mostra uma pergunta (P).
 function play(i) {
-  NG = false;
   var id = G.hand[i],
     c = CARDS[id];
   if (G.en < c.c || scr != 'battle' || P || G.busy) return;
@@ -891,7 +1326,7 @@ function answer(k) {
   render();
 }
 
-// Confirma a resposta: regista certo/errado e mostra a explicação.
+// Confirma a resposta: regista certo/errado (também no histórico do fim) e mostra a explicação.
 function confirmA() {
   if (P.done || P.sel == null) return;
   var k = P.sel;
@@ -901,17 +1336,26 @@ function confirmA() {
     // Pergunta anulada: a carta funciona e nada conta (nem certas, nem erradas, nem a série).
     P.ok = true;
     P.nul = true;
+    G.hist.push({ q: P.q, ch: P.o[k], ok: false, nul: true, n: G.node });
     beep(440);
     render();
     return;
   }
   P.ok = P.o[k] == P.q.a;
+  G.hist.push({ q: P.q, ch: P.o[k], ok: P.ok, nul: false, n: G.node });
   if (P.ok) {
     G.ok++;
+    G.cok++;
     G.sk++;
     if (hasRel('penas')) G.gold += 2;
+    if (hasRel('tinta')) G.block += 2;
+    if (hasRel('tomo')) {
+      E.hp -= 1;
+      FX.push(['e', '-1']);
+    }
   } else {
     G.ko++;
+    G.cko++;
     G.sk = 0;
     // Livro Antigo: o primeiro erro de cada combate é perdoado.
     if (hasRel('livro') && !G.lv) {
@@ -943,6 +1387,8 @@ function resolve() {
     if (c.t == 'a') G.fa = true;
     c.f();
     G.pb = 0;
+    if (c.t == 'a' && hasRel('vampiro')) G.hp = Math.min(G.max, G.hp + 2);
+    if (c.c == 0 && hasRel('cartola')) G.block += 3;
     if (!nul && !fg && G.sk > 0 && G.sk % (hasRel('ampulheta') ? 2 : 3) == 0) {
       G.en++;
       msg += ' 🔥 Sequência! +1 energia';
@@ -955,14 +1401,13 @@ function resolve() {
 // Fim do turno: as cartas que jogaste já foram para o descarte; as que não jogaste ficam na mão
 // para o turno seguinte. O inimigo joga e compras só as cartas que faltam para a mão cheia.
 function endTurn() {
-  NG = false;
   if (scr != 'battle' || P || G.busy) return;
   enemyTurn();
 }
 
-// Dano de uma jogada do inimigo (um inimigo fraco bate -25%).
+// Dano de uma jogada do inimigo (um inimigo fraco bate -25%; o Amuleto tira mais 25%).
 function edmg(m) {
-  return Math.floor((m[1] + E.str) * (E.weak > 0 ? 0.75 : 1));
+  return Math.floor((m[1] + E.str) * (E.weak > 0 ? 0.75 : 1) * (hasRel('amuleto') ? 0.75 : 1));
 }
 
 // Turno do inimigo: o veneno atua e ele faz a jogada seguinte do seu padrão. Depois compras a mão nova.
@@ -984,6 +1429,11 @@ function enemyTurn() {
     G.hp -= d - a;
     FX.push(['p', d - a > 0 ? '-' + (d - a) : '🛡️']);
     out += E.n + ' ataca por ' + d + '.';
+    if (hasRel('espinhos')) {
+      E.hp -= 3;
+      FX.push(['e', '-3']);
+      out += ' 🌵 O Cacto devolve 3.';
+    }
   } else if (m[0] == 'd') {
     E.block += m[1];
     out += E.n + ' defende.';
@@ -995,25 +1445,21 @@ function enemyTurn() {
   if (E.weak > 0) E.weak--;
   if (G.hp <= 0) {
     G.hp = 0;
-    G.busy = false;
-    scr = 'over';
     msg = out;
-    return render();
+    return endGame('dead');
   }
+  if (E.hp <= 0) return win();
   turn();
   msg = out;
   render();
 }
 
-// Inimigo derrotado: dá moedas, cura um pouco e mostra a recompensa (ou o ecrã final).
+// Inimigo derrotado: dá moedas e cura um pouco. Depois de um boss escolhes descansar ou uma relíquia;
+// nos outros combates vais logo à loja (já não há escolha de 1 entre 3 cartas: as cartas estão na loja).
 function win() {
   G.busy = false;
-  if (G.node == N - 1) {
-    scr = 'win';
-    return render();
-  }
-  opts = rolls(3);
-  scr = 'reward';
+  if (G.node == N - 1) return endGame('win');
+  var jur = hasRel('juros') ? Math.min(5, Math.floor(G.gold / 5)) : 0;
   G.gain = 10 + Math.floor(Math.random() * 11) + G.node + (hasRel('sorte') ? 8 : 0);
   G.inv = 0;
   if (G.node % 3 == 2) {
@@ -1026,15 +1472,9 @@ function win() {
       return k != 'invest';
     });
   }
-  G.gold += G.gain + G.inv;
-  G.hp = Math.min(G.max, G.hp + 4);
-  msg = '';
-  render();
-}
-
-// Escolher a carta de recompensa (ou saltar). Depois de um boss vai para o descanso, senão para a loja.
-function pick(id) {
-  if (id) G.deck.push(id);
+  G.gold += G.gain + G.inv + jur;
+  G.hp = Math.min(G.max, G.hp + 4 + (hasRel('banquete') ? 6 : 0));
+  G.win = 'Vitória! +🪙 ' + G.gain + (G.inv ? ' (+' + G.inv + ' 📈)' : '') + (jur ? ' (+' + jur + ' 🏦)' : '') + '.';
   if (G.node % 3 == 2) {
     opts = sh(
       Object.keys(RL).filter(function (k) {
@@ -1042,6 +1482,8 @@ function pick(id) {
       }),
     ).slice(0, 3);
     scr = 'rest';
+    msg = G.win;
+    G.win = '';
     render();
   } else shop();
 }
@@ -1052,59 +1494,68 @@ function rest() {
   shop();
 }
 
-// ---- Tarots: usar um tarot (quando precisa de cartas, abre o baralho para escolheres) ----
-function useTar(i) {
-  var k = G.tar[i],
-    t = TR[k];
+// ---- Tarots: usar um tarot ----
+// Quando o tarot precisa de cartas, aparecem HN cartas do baralho tiradas à sorte (como a mão do Balatro)
+// e escolhes entre elas. take() tira o tarot de onde estava (a tua lista ou o pack) e done() redesenha.
+var HN = 5;
+function tarUse(k, take, done) {
+  var t = TR[k];
   if (scr == 'battle' || (t.can && !t.can())) {
     msg = 'Não podes usar esse tarot agora.';
     return render();
   }
   if (t.need > 0) {
-    var n = t.lim ? Math.min(t.need, t.lim()) : t.need;
-    if (n < 1 || (t.ok && !G.deck.some(t.ok))) {
+    var pool = G.deck.filter(function (id) {
+        return !t.ok || t.ok(id);
+      }),
+      n = t.lim ? Math.min(t.need, t.lim()) : t.need;
+    if (n < 1 || !pool.length) {
       msg = 'Não há cartas para esse tarot.';
       return render();
     }
-    PK = { i: i, k: k, got: [], need: n };
+    PK = { k: k, hand: sh(pool.slice()).slice(0, HN), sel: [], need: n, take: take, done: done };
     V = 'pick';
     return render();
   }
-  G.tar.splice(i, 1);
+  take();
   t.f();
+  done();
+}
+
+// Usar o tarot i da tua lista (fora dos combates).
+function useTar(i) {
+  if (scr == 'battle' || scr == 'pack' || V || !G.tar[i]) return;
+  tarUse(
+    G.tar[i],
+    function () {
+      G.tar.splice(i, 1);
+    },
+    render,
+  );
+}
+
+// Marcar / desmarcar a carta i das que apareceram para o tarot em curso.
+function pickDeck(i) {
+  if (!PK) return;
+  var p = PK.sel.indexOf(i);
+  if (p >= 0) PK.sel.splice(p, 1);
+  else if (PK.need == 1) PK.sel = [i];
+  else if (PK.sel.length < PK.need) PK.sel.push(i);
   render();
 }
 
-// Escolheste a carta id no baralho para o tarot em curso.
-function pickDeck(id) {
-  if (!PK) return;
-  var t = TR[PK.k],
-    cnt = {};
-  G.deck.forEach(function (x) {
-    cnt[x] = (cnt[x] || 0) + 1;
-  });
-  PK.got.forEach(function (x) {
-    cnt[x]--;
-  });
-  if (!(cnt[id] > 0) || (t.ok && !t.ok(id))) return;
-  PK.got.push(id);
-  cnt[id]--;
-  var any = Object.keys(cnt).some(function (x) {
-    return cnt[x] > 0 && (!t.ok || t.ok(x));
-  });
-  if (PK.got.length >= PK.need || !any) finishPick();
-  else render();
-}
-
-// Aplica o tarot às cartas escolhidas (e gasta-o).
+// Aplica o tarot às cartas marcadas (e gasta-o).
 function finishPick() {
-  if (!PK || !PK.got.length) return closeV();
-  var t = TR[PK.k];
-  G.tar.splice(PK.i, 1);
-  t.f(PK.got);
+  if (!PK || !PK.sel.length) return;
+  var p = PK,
+    ids = p.sel.map(function (i) {
+      return p.hand[i];
+    });
   PK = null;
   V = null;
-  render();
+  p.take();
+  TR[p.k].f(ids);
+  p.done();
 }
 
 // HTML de uma carta. cb = código a executar ao clicar; dis = carta desativada.
@@ -1117,9 +1568,9 @@ function cardEl(id, i, cb, dis) {
   );
 }
 
-// NG = a confirmar "Novo jogo". V = janela aberta ('deck', 'dr', 'di', 'pick') ou null.
-var NG = false;
+// V = janela aberta ('deck', 'dr', 'di', 'pick') ou null.  PG = pack aberto: { t tipo, s tamanho, ch opções, left escolhas que faltam, ret ecrã a que voltar }.
 var V = null;
+var PG = null;
 
 // Abre a janela com a lista de cartas (baralho, compra ou descarte).
 function view(k) {
@@ -1182,47 +1633,37 @@ function modal() {
   return h + '<div class="row"><button class="btn" onclick="closeV()">Fechar</button></div></div></div>';
 }
 
-// Janela do tarot: escolhes no baralho a(s) carta(s) a que ele se aplica.
+// Janela do tarot: aparecem umas cartas do baralho (à sorte) e marcas a(s) que queres.
 function pickModal() {
   var t = TR[PK.k],
-    c0 = {},
-    left = PK.need - PK.got.length;
-  G.deck.forEach(function (id) {
-    c0[id] = (c0[id] || 0) + 1;
+    h =
+      '<div class="modal" onclick="closeV()"><div class="mw" onclick="event.stopPropagation()"><h3>' +
+      t.n +
+      '</h3><p>' +
+      t.d +
+      '</p><p class="mut">Estas são ' + PK.hand.length + ' cartas do teu baralho, tiradas à sorte. Escolhe ' +
+      (PK.need > 1 ? 'até ' + PK.need : '1') + '.</p><div class="pg">';
+  PK.hand.forEach(function (id, i) {
+    var c = CARDS[id],
+      on = PK.sel.indexOf(i) >= 0;
+    h +=
+      '<button class="card ' + c.t + (c.up ? ' up' : '') + ' face pk' + (on ? ' on' : '') + '" onclick="pickDeck(' + i + ')">' +
+      '<span class="c">' + c.c + '</span><span class="n">' + c.n + '</span><span class="t">' + TN[c.t] +
+      '</span><span>' + c.d + '</span></button>';
   });
-  PK.got.forEach(function (id) {
-    c0[id]--;
-  });
-  var h =
-    '<div class="modal" onclick="closeV()"><div class="mw" onclick="event.stopPropagation()"><h3>' +
-    t.n + ' · escolhe ' + left + (left > 1 ? ' cartas' : ' carta') + '</h3><p>' + t.d +
-    '</p><div class="pg">';
-  Object.keys(c0)
-    .filter(function (id) {
-      return c0[id] > 0;
-    })
-    .sort(byCard)
-    .forEach(function (id) {
-      var c = CARDS[id],
-        n = c0[id],
-        ok = !t.ok || t.ok(id);
-      h +=
-        '<button class="card ' + c.t + (c.up ? ' up' : '') + ' face pk" ' + (ok ? '' : 'disabled ') +
-        'onclick="pickDeck(\'' + id + '\')">' + (n > 1 ? '<span class="qty">×' + n + '</span>' : '') +
-        '<span class="c">' + c.c + '</span><span class="n">' + c.n + '</span><span class="t">' +
-        TN[c.t] + '</span><span>' + c.d + '</span></button>';
-    });
-  h += '</div><div class="row">';
-  if (PK.got.length) h += '<button class="btn" onclick="finishPick()">Concluir</button>';
-  return h + '<button class="btn alt" onclick="closeV()">Cancelar</button></div></div></div>';
+  h +=
+    '</div><div class="row"><button class="btn" ' + (PK.sel.length ? '' : 'disabled ') + 'onclick="finishPick()">Confirmar' +
+    (PK.sel.length ? ' (' + PK.sel.length + ')' : '') +
+    '</button><button class="btn alt" onclick="closeV()">Cancelar</button></div></div></div>';
+  return h;
 }
 
 // Menu inicial (como no Milionário): Solo, Coleções e Regras.
 function home() {
   V = null;
-  NG = false;
   P = null;
   PK = null;
+  PG = null;
   GU = false;
   TK++;
   scr = 'home';
@@ -1237,19 +1678,19 @@ function showRules() {
   render();
 }
 
-// Coleções: todas as cartas, inimigos, relíquias, tarots e etiquetas do jogo.
+// Coleções: todas as cartas, inimigos, relíquias, tarots, packs e etiquetas do jogo.
 function colHtml() {
-  var h = '<h3>🃏 Cartas</h3><p class="mut">Cada carta pode ser melhorada (+) com os tarots A Estrela, O Sol e Roda da Fortuna.</p><div class="pg">';
+  var h = '<h3>🃏 Cartas</h3><p class="mut">Cada carta pode ser melhorada (+) com tarots como A Estrela, O Sol, A Justiça ou a Roda da Fortuna.</p><div class="pg">';
   Object.keys(BASE).forEach(function (id) {
     h += cardFace(id, 1);
   });
-  h += '</div><h3>👾 Inimigos</h3><div class="cl">';
+  h += '</div><h3>👾 Inimigos (' + Object.keys(FOES).length + ')</h3><div class="cl">';
   var mv = { a: '⚔️', d: '🛡️', b: '💪' };
   Object.keys(FOES).forEach(function (k) {
     var f = FOES[k],
       onde = '';
     FL.forEach(function (L, i) {
-      if (L.b == k) onde = '👑 Boss do andar ' + (i + 1);
+      if (L.b.indexOf(k) >= 0) onde += (onde ? ', ' : '') + '👑 Boss do andar ' + (i + 1);
       else if (L.c.indexOf(k) >= 0) onde += (onde ? ', ' : 'Andar ') + (i + 1);
     });
     h +=
@@ -1262,15 +1703,22 @@ function colHtml() {
         .join(' · ') +
       '</small></div>';
   });
-  h += '</div><h3>🎁 Relíquias</h3><div class="cl">';
+  h += '</div><h3>🎁 Relíquias (' + Object.keys(RL).length + ')</h3><p class="mut">Só podes ter ' + MAXR + ' ao mesmo tempo. Vendem-se por metade do preço.</p><div class="cl">';
   Object.keys(RL).forEach(function (k) {
-    h += '<div class="ec"><b>' + RL[k].n + '</b><small>' + RL[k].d + '</small></div>';
+    h += '<div class="ec"><b>' + RL[k].n + '</b><small>' + RL[k].d + '</small><small>🪙 ' + RL[k].p + ' · venda 🪙 ' + sellP(k) + '</small></div>';
   });
-  h += '</div><h3>🔮 Tarots</h3><div class="cl">';
+  h += '</div><h3>🔮 Tarots (' + Object.keys(TR).length + ')</h3><div class="cl">';
   Object.keys(TR).forEach(function (k) {
     h += '<div class="ec"><b>' + TR[k].n + '</b><small>' + TR[k].d + '</small></div>';
   });
-  h += '</div><h3>🏷️ Etiquetas (ao ignorar um combate)</h3><div class="cl">';
+  h += '</div><h3>📦 Packs</h3><div class="cl">';
+  Object.keys(PKS).forEach(function (k) {
+    var d = PKS[k];
+    h +=
+      '<div class="ec"><b>' + d.i + ' ' + d.n + '</b><small>' + d.d + '</small><small>Normal: escolhe 1 de ' + d.ch[0] + ' (🪙 ' + d.p[0] +
+      ') · Jumbo: 1 de ' + d.ch[1] + ' (🪙 ' + d.p[1] + ') · Mega: 2 de ' + d.ch[2] + ' (🪙 ' + d.p[2] + ')</small></div>';
+  });
+  h += '</div><h3>🏷️ Etiquetas (ao ignorar um combate) (' + Object.keys(TAGS).length + ')</h3><div class="cl">';
   Object.keys(TAGS).forEach(function (k) {
     h += '<div class="ec"><b>' + TAGS[k].i + ' ' + TAGS[k].n + '</b><small>' + TAGS[k].d + '</small></div>';
   });
@@ -1279,19 +1727,12 @@ function colHtml() {
 
 function menu() {
   V = null;
-  NG = false;
   P = null;
   PK = null;
+  PG = null;
   GU = false;
   TK++;
   scr = 'menu';
-  render();
-}
-
-// Botão "Novo jogo": pede confirmação no primeiro clique, volta ao menu no segundo.
-function newGame() {
-  if (NG) return menu();
-  NG = true;
   render();
 }
 
@@ -1305,16 +1746,115 @@ function giveUpNo() {
   render();
 }
 function giveUp() {
+  // Se estavas a meio de uma pergunta, ela aparece no fim como "sem resposta".
+  var wq = P && !P.done ? P.q : null,
+    inb = scr == 'battle';
   GU = false;
-  P = null;
-  V = null;
-  PK = null;
   TK++;
+  endGame('walk', { wq: wq, inb: inb });
+}
+
+// Acaba a partida: kind = 'dead' (morreste), 'walk' (desististe) ou 'win' (venceste a torre).
+function endGame(kind, o) {
+  o = o || {};
   G.busy = false;
-  G.walk = true;
-  scr = 'over';
-  msg = 'Desististe da torre.';
+  G.end = { kind: kind, wq: o.wq || null, inb: kind != 'walk' || !!o.inb };
+  P = null;
+  PK = null;
+  PG = null;
+  V = null;
+  scr = kind == 'win' ? 'win' : 'over';
   render();
+  window.scrollTo(0, 0);
+}
+
+// Filtro das perguntas no ecrã final (todas / só certas / só erradas).
+function flt(k, b) {
+  var box = document.querySelector('.rvs');
+  if (box) box.setAttribute('data-show', k);
+  Array.prototype.forEach.call(document.querySelectorAll('[data-flt]'), function (x) {
+    x.setAttribute('aria-pressed', String(x === b));
+  });
+}
+
+// Ecrã final (como o do Milionário): título, causa, resumo e todas as perguntas respondidas, certas e erradas.
+function endHtml() {
+  var g = G,
+    e = g.end,
+    kind = e.kind,
+    F = Math.floor(g.node / 3) + 1,
+    where = 'andar ' + F + ' de 3, ' + (g.node % 3 == 2 ? 'boss' : 'combate ' + ((g.node % 3) + 1)),
+    foe = e.inb && E ? E.e + ' ' + E.n : '',
+    title =
+      kind == 'win' ? '🏆 Venceste a torre!' : kind == 'walk' ? '🏳️ Desististe no andar ' + F : '💀 Caíste no andar ' + F,
+    why = '';
+  if (kind == 'dead') {
+    var lw = null;
+    g.hist.forEach(function (h) {
+      if (!h.ok && !h.nul && h.n == g.node) lw = h;
+    });
+    why =
+      '<b>Como perdeste:</b> ' + foe + ' deixou-te sem vida no ' + where + '. Nesse combate acertaste ' + g.cok +
+      ' e erraste ' + g.cko + (g.cko == 1 ? ' pergunta.' : ' perguntas.');
+    if (lw)
+      why +=
+        '<br><small>Última pergunta que erraste nesse combate: «' + esc(qtxt(lw.q.q)) + '»<br>Resposta certa: ' +
+        esc(lw.q.o[lw.q.a]) + '</small>';
+  } else if (kind == 'walk') {
+    why =
+      '<b>Desististe</b> no ' + where + (foe ? ', a meio do combate contra ' + foe : '') + ', com ❤️ ' + g.hp + '/' + g.max +
+      ' e 🪙 ' + g.gold + '.';
+    if (e.wq) why += '<br><small>Estavas a responder a uma pergunta (aparece em baixo, sem resposta).</small>';
+  } else {
+    why = '<b>Conseguiste!</b> Derrotaste ' + foe + ' e chegaste ao topo da torre com ❤️ ' + g.hp + '/' + g.max + '.';
+  }
+  // As perguntas, pela ordem em que apareceram.
+  var items = g.hist.map(function (h, i) {
+    return { q: h.q, n: i + 1, st: h.nul ? 'nul' : h.ok ? 'ok' : 'ko', ch: h.ch };
+  });
+  if (e.wq) items.push({ q: e.wq, n: items.length + 1, st: 'na', ch: null });
+  var nOk = items.filter(function (i) {
+      return i.st == 'ok';
+    }).length,
+    nKo = items.filter(function (i) {
+      return i.st == 'ko';
+    }).length,
+    lbl = { ok: 'Certa', ko: 'Errada', na: 'Sem resposta', nul: 'Anulada' },
+    fl =
+      '<div class="flt" role="group" aria-label="Filtrar perguntas"><button class="btn alt" data-flt="all" aria-pressed="true" onclick="flt(\'all\',this)">Todas (' +
+      items.length + ')</button><button class="btn alt" data-flt="ok" aria-pressed="false" ' + (nOk ? '' : 'disabled ') +
+      'onclick="flt(\'ok\',this)">Só as certas (' + nOk + ')</button><button class="btn alt" data-flt="ko" aria-pressed="false" ' +
+      (nKo ? '' : 'disabled ') + 'onclick="flt(\'ko\',this)">Só as erradas (' + nKo + ')</button></div>',
+    rv = items
+      .map(function (it) {
+        var q = it.q;
+        return (
+          '<div class="rv s-' + it.st + '"><span class="st ' + it.st + '">' + lbl[it.st] + '</span> <b>' + it.n + '.</b> <span style="white-space:pre-line">' +
+          esc(qtxt(q.q)) + '</span>' +
+          (q.a >= 0 ? '<p>Resposta certa: ' + esc(q.o[q.a]) + '</p>' : '<p>Esta pergunta está anulada (sem resposta certa).</p>') +
+          (it.st == 'ko' ? '<p class="mut">A tua resposta: ' + esc(q.o[it.ch]) + '</p>' : '') +
+          q.e + (window.VerManual ? window.VerManual.btn(q) : '') +
+          (q.u ? '<small class="mut">Esta resposta não está confirmada oficialmente.</small>' : '') +
+          '</div>'
+        );
+      })
+      .join('');
+  return (
+    '<div class="end"><div class="ctr"><h1>' + title + '</h1></div><div class="why ' + kind + '">' + why + '</div>' +
+    '<p class="ctr">Respostas certas: ' + g.ok + ' · erradas: ' + g.ko + ' · 🪙 ' + g.gold + ' · ' + g.deck.length + ' cartas no baralho<br>Relíquias: ' +
+    (g.rels.length
+      ? g.rels
+          .map(function (k) {
+            return RL[k].n;
+          })
+          .join(', ')
+      : 'nenhuma') +
+    '</p><div class="row"><button class="btn" onclick="menu()">' + (kind == 'win' ? 'Jogar outra vez' : 'Tentar de novo') +
+    '</button><button class="btn alt" onclick="home()">Menu</button></div>' +
+    '<details open><summary>Rever as perguntas (' + items.length + ')</summary>' +
+    (items.length ? fl + '<div class="rvs" data-show="all">' + rv + '</div>' : '<p class="mut">Ainda não respondeste a nenhuma pergunta.</p>') +
+    '</details></div>'
+  );
 }
 
 // Estás a meio de uma partida? (Para avisar antes de sair.)
@@ -1358,24 +1898,22 @@ function tagsHtml() {
     .join('');
 }
 
-// Faixa por baixo da barra: vida (fora dos combates), relíquias e etiquetas.
+// Faixa por baixo da barra: relíquias (só nos combates; fora deles aparecem em baixo da barra, nas ranhuras) e etiquetas.
 function inv() {
-  var h = (scr != 'battle' ? '<span>❤️ ' + G.hp + '/' + G.max + '</span>' : '') + relicsHtml() + tagsHtml();
+  var h = (scr == 'battle' ? relicsHtml() : '') + tagsHtml();
   return h ? '<div class="inv">' + h + '</div>' : '';
 }
 
-// Barra de progresso dos 9 combates e, por baixo, andar, moedas, baralho e "Novo jogo".
+// Barra de progresso dos 9 combates e, por baixo, andar, vida, moedas e baralho.
 function topbar() {
   var s = '<div class="prog">';
   for (var i = 0; i < N; i++) s += '<i class="' + (i <= G.node ? 'on' : '') + '"></i>';
   s +=
     '</div><div class="top"><span>Andar ' + (Math.floor(G.node / 3) + 1) + '/3 · ' +
     (G.node % 3 == 2 ? '👑 Boss' : 'Combate ' + ((G.node % 3) + 1)) +
-    '</span><span>🪙 ' + G.gold +
+    '</span><span>❤️ ' + G.hp + '/' + G.max + '</span><span>🪙 ' + G.gold +
     '</span><button class="btn alt" style="padding:3px 10px;font-size:.85rem" onclick="view(\'deck\')">📚 Baralho (' +
-    G.deck.length +
-    ')</button><button class="btn alt" style="padding:3px 10px;font-size:.85rem" onclick="newGame()">' +
-    (NG ? 'Confirmar?' : 'Novo jogo') + '</button></div>';
+    G.deck.length + ')</button></div>';
   return s + inv();
 }
 
@@ -1384,7 +1922,7 @@ function ptag(p) {
   return '<div class="ptag">' + (p ? '🪙 ' + p : 'GRÁTIS') + '</div>';
 }
 
-// Um item da loja: preço por cima e a carta / relíquia / tarot por baixo.
+// Um item da loja: preço por cima e a carta / relíquia / tarot / pack por baixo.
 function relBtn(k, cb, dis) {
   return (
     '<button class="card rel" ' + (dis ? 'disabled ' : '') + 'onclick="' + cb + '"><span class="n">' +
@@ -1397,15 +1935,41 @@ function tarBtn(k, cb, dis, extra) {
     TR[k].n + '</span><span class="t">Tarot</span><span>' + TR[k].d + '</span>' + (extra || '') + '</button>'
   );
 }
+function packBtn(pk, cb, dis) {
+  var d = PKS[pk.t],
+    n = d.ch[pk.s] + (hasRel('bussola') ? 1 : 0);
+  return (
+    '<button class="card pack ' + pk.t + '" ' + (dis ? 'disabled ' : '') + 'onclick="' + cb + '"><span class="pi">' + d.i +
+    '</span><span class="n">' + d.n + '</span><span class="t">' + PSN[pk.s] + '</span><span>Escolhe ' + PPK[pk.s] + ' de ' + n + '</span></button>'
+  );
+}
 
-// Os tarots que tens (usam-se fora dos combates, na loja e no mapa).
-function tarotBar() {
-  var h = '<div class="tbar"><b>🔮 Os teus tarots (' + G.tar.length + '/' + G.ts + ')</b><div class="hand">';
-  if (!G.tar.length) h += '<small class="mut">Nenhum. Compra-os na loja ou ganha-os ao ignorar um combate.</small>';
-  G.tar.forEach(function (k, i) {
-    h += '<div class="it">' + tarBtn(k, 'useTar(' + i + ')', false, '<span class="usar">Usar</span>') + '</div>';
-  });
-  return h + '</div></div>';
+// Uma relíquia que já tens (só para ver; vende-se com o botão por baixo).
+function relFace(k) {
+  return (
+    '<div class="card rel sm" tabindex="0"><span class="n">' + RL[k].n + '</span><span class="t">Relíquia</span><span>' + RL[k].d + '</span></div>'
+  );
+}
+
+// As tuas relíquias (máx. MAXR, com botão Vender) e os teus tarots (máx. G.ts, com Usar), como em cima na loja do Balatro.
+// useT = deixa usar os tarots neste ecrã.
+function ownBar(useT) {
+  var rs = '',
+    ts = '',
+    i;
+  for (i = 0; i < MAXR; i++)
+    rs += G.rels[i]
+      ? '<div class="it">' + relFace(G.rels[i]) + '<button class="sell" onclick="sellRel(' + i + ')">Vender 🪙 ' + sellP(G.rels[i]) + '</button></div>'
+      : '<div class="it"><div class="empty"></div></div>';
+  for (i = 0; i < G.ts; i++)
+    ts += G.tar[i]
+      ? '<div class="it">' + tarBtn(G.tar[i], 'useTar(' + i + ')', !useT, '<span class="usar">Usar</span>') + '</div>'
+      : '<div class="it"><div class="empty"></div></div>';
+  return (
+    '<div class="own"><div class="oz"><div class="olb"><b>🎁 Relíquias</b><span>' + G.rels.length + '/' + MAXR +
+    '</span></div><div class="ozi">' + rs + '</div></div><div class="oz t"><div class="olb"><b>🔮 Tarots</b><span>' + G.tar.length + '/' + G.ts +
+    '</span></div><div class="ozi">' + ts + '</div></div></div>'
+  );
 }
 
 // Redesenha o ecrã conforme scr: home, col, rules, menu, battle, blinds, shop, reward, rest, over ou win.
@@ -1426,21 +1990,23 @@ function render() {
   } else if (scr == 'rules') {
     h =
       '<div class="ctr"><h2>Regras</h2></div><ul class="rules">' +
-      '<li><b>Objetivo:</b> sobe 3 andares e derrota o Dragão Ancião, o boss do último andar.</li>' +
+      '<li><b>Objetivo:</b> sobe 3 andares e derrota o boss do último andar.</li>' +
       '<li><b>Cada andar</b> tem 3 desafios: 2 combates contra inimigos comuns e 1 boss. Carrega em <b>Selecionar</b> para combater.</li>' +
-      '<li><b>Ignorar:</b> nos 2 combates comuns podes carregar em <b>Ignorar</b>. Não combates nem ganhas moedas, cartas ou loja, mas ganhas a <b>etiqueta</b> que está por baixo do botão (por exemplo, um tarot grátis, um desconto na próxima loja ou moedas no fim do boss). O boss não se pode ignorar.</li>' +
+      '<li><b>Ignorar:</b> nos 2 combates comuns podes carregar em <b>Ignorar</b>. Não combates nem ganhas moedas nem loja, mas ganhas a <b>etiqueta</b> que está por baixo do botão (um tarot grátis, um pack grátis, um desconto na próxima loja, moedas...). O boss não se pode ignorar.</li>' +
       '<li><b>Turnos:</b> começas cada turno com a mão cheia e a energia ⚡ cheia. Cada carta custa energia. O inimigo mostra o que vai fazer (por exemplo, "Ataca 6"). As cartas que jogas vão para o descarte; as que não jogas ficam na mão para o turno seguinte, e no início de cada turno compras só até a mão ficar cheia.</li>' +
       '<li><b>Perguntas:</b> para jogar uma carta tens de acertar numa pergunta. Se acertares, a carta funciona; se errares, falha e gasta a energia na mesma.</li>' +
       '<li><b>Sequência 🔥:</b> respostas certas seguidas dão mais dano, e a cada 3 certas seguidas ganhas +1 energia.</li>' +
       '<li><b>Efeitos:</b> <b>Vulnerável</b> (o inimigo leva +50% de dano), <b>Fraco</b> (o inimigo bate -25%), <b>Veneno</b> (dano no fim de cada turno, e vai baixando), <b>Força</b> (+dano em todos os ataques) e <b>Exaurir</b> (a carta só volta no próximo combate).</li>' +
-      '<li><b>Loja:</b> depois de cada combate ganhas moedas 🪙, recuperas um pouco de vida e escolhes 1 de 3 cartas novas (ou saltas). Depois entras na loja: compras cartas, relíquias, tarots e uma poção. Podes <b>atualizar</b> a loja por 🪙 5 (sobe 1 de cada vez).</li>' +
-      '<li><b>Tarots:</b> são como no Balatro. Mexem nas cartas do teu baralho (duplicar, eliminar, melhorar, transformar) e usam-se fora dos combates. Só tens espaço para 2.</li>' +
+      '<li><b>Loja:</b> depois de cada combate ganhas moedas 🪙 e recuperas um pouco de vida. Na loja (como no Balatro) há <b>relíquias</b> em cima, <b>cartas</b> em baixo à esquerda e <b>packs</b> em baixo à direita. Podes <b>atualizar</b> a loja por 🪙 5 (sobe 1 de cada vez).</li>' +
+      '<li><b>Relíquias:</b> só podes ter ' + MAXR + ' ao mesmo tempo. Para ficares com outra, <b>vende</b> uma (recebes metade do preço).</li>' +
+      '<li><b>Packs:</b> ao comprar um pack, ele abre e escolhes 1 dos itens (2 nos <b>Mega</b>). O <b>Pack Arcano</b> tem tarots (o que escolheres é usado logo), o <b>Pack Padrão</b> tem cartas e o <b>Pack do Bobo</b> tem relíquias. Os packs <b>Jumbo</b> e <b>Mega</b> têm mais opções.</li>' +
+      '<li><b>Tarots:</b> mexem nas cartas do teu baralho (duplicar, eliminar, melhorar, transformar). Quando precisam de cartas, aparecem umas 5 cartas do teu baralho, tiradas à sorte, e escolhes entre elas. Usam-se fora dos combates e só tens espaço para 2.</li>' +
       '<li><b>Depois do boss:</b> descansas (recuperas 35% da vida) ou escolhes uma relíquia permanente, e depois vais à loja.</li>' +
-      '<li><b>Perdes</b> quando a tua vida chega a 0. Podes consultar o 📖 <b>Manual</b> a qualquer momento.</li></ul>' +
+      '<li><b>Perdes</b> quando a tua vida chega a 0. Ao perder ou desistir vês a causa e todas as perguntas que respondeste, certas e erradas. Podes consultar o 📖 <b>Manual</b> a qualquer momento.</li></ul>' +
       '<div class="row"><button class="btn alt" onclick="home()">Voltar</button></div>';
   } else if (scr == 'menu') {
     h =
-      '<div class="ctr"><h1>🗼 Torre das Cartas</h1><p>Sobe 3 andares: em cada um enfrentas 2 inimigos comuns e 1 boss, e depois de cada combate tens uma loja. Derrota o Dragão Ancião no fim. Para jogar uma carta tens de responder a uma pergunta do teste: se acertares, a carta funciona; se errares, falha. Se morreres, recomeças.</p><p><b>Escolhe os temas:</b></p><div class="box">' +
+      '<div class="ctr"><h1>🗼 Torre das Cartas</h1><p>Sobe 3 andares: em cada um enfrentas 2 inimigos comuns e 1 boss, e depois de cada combate vais à loja (relíquias, cartas e packs). Derrota o boss do último andar. Para jogar uma carta tens de responder a uma pergunta do teste: se acertares, a carta funciona; se errares, falha. Se morreres, recomeças.</p><p><b>Escolhe os temas:</b></p><div class="box">' +
       Temas.html(SEL) +
       '</div><div class="row" style="flex-direction:column;align-items:center"><button class="btn" id="go" onclick="start()">Começar</button><button class="btn alt" onclick="home()">Voltar</button><small id="avail"></small></div></div>';
   } else if (scr == 'battle') {
@@ -1521,13 +2087,14 @@ function render() {
       sl = G.node % 3;
     h =
       topbar() +
+      ownBar(true) +
       '<div class="ctr"><h2>Andar ' + (F + 1) + '/3</h2><p>Escolhe o teu próximo desafio</p></div>' +
       (msg ? '<div class="log">' + msg + '</div>' : '') + '<div class="bz">';
     G.pl3.forEach(function (k, i) {
       var f = FOES[k],
         b = i == 2,
         nn = F * 3 + i,
-        hp = Math.round(f.hp * (k == 'boss' ? 1 : 1 + 0.3 * F)),
+        hp = Math.round(f.hp * (f.boss ? 1 : 1 + 0.3 * F)),
         st = i < sl ? 'done' : i == sl ? 'cur' : 'fut',
         tg = b ? null : TAGS[G.tg[i]];
       h +=
@@ -1546,27 +2113,24 @@ function render() {
             '</b><small>' + tg.d + '</small></div></div>') +
         '</div>';
     });
-    h += '</div>' + tarotBar();
+    h += '</div>';
   } else if (scr == 'shop') {
     var sp = G.shop;
-    h = topbar() + '<div class="ctr"><h2>🛒 Loja</h2></div>' + (msg ? '<div class="log">' + msg + '</div>' : '');
+    h =
+      topbar() + ownBar(true) + '<div class="ctr"><h2>🛒 Loja</h2></div>' + (msg ? '<div class="log">' + msg + '</div>' : '');
     h +=
       '<div class="shp"><div class="shl"><button class="shn" onclick="leave()">Próxima<br>Rodada</button>' +
       '<button class="shr" ' + (G.gold < rrCost() ? 'disabled ' : '') + 'onclick="reroll()">Atualizar<b>' +
-      (rrCost() ? '🪙 ' + rrCost() : 'GRÁTIS') + '</b></button></div><div class="shi">';
-    sp.cards.forEach(function (id) {
-      var p = price(pr(id));
-      h += '<div class="it">' + ptag(p) + cardEl(id, 0, "buyCard('" + id + "')", G.gold < p) + '</div>';
-    });
+      (rrCost() ? '🪙 ' + rrCost() : 'GRÁTIS') + '</b></button></div><div class="shm"><div class="shi" data-lbl="Relíquias">';
     sp.rels.forEach(function (k) {
       var p = price(RL[k].p);
       h += '<div class="it">' + ptag(p) + relBtn(k, "buyRel('" + k + "')", G.gold < p) + '</div>';
     });
-    if (!sp.cards.length && !sp.rels.length) h += '<small class="mut">Esgotado. Atualiza a loja.</small>';
-    h += '</div><div class="shb">';
-    sp.tars.forEach(function (k) {
-      var p = price(TR[k].p);
-      h += '<div class="it">' + ptag(p) + tarBtn(k, "buyTar('" + k + "')", G.gold < p || G.tar.length >= G.ts) + '</div>';
+    if (!sp.rels.length) h += '<small class="mut">Esgotado. Atualiza a loja.</small>';
+    h += '</div><div class="sbt"><div class="shc" data-lbl="Cartas">';
+    sp.cards.forEach(function (id) {
+      var p = price(pr(id));
+      h += '<div class="it">' + ptag(p) + cardEl(id, 0, "buyCard('" + id + "')", G.gold < p) + '</div>';
     });
     if (sp.pot) {
       var pp = price(25);
@@ -1574,41 +2138,47 @@ function render() {
         '<div class="it">' + ptag(pp) + '<button class="card pot" ' + (G.gold < pp ? 'disabled ' : '') +
         'onclick="buyPot()"><span class="n">🧪 Poção</span><span class="t">Consumível</span><span>Recupera 20 de vida.</span></button></div>';
     }
-    h += '</div></div>' + tarotBar();
-  } else if (scr == 'reward') {
-    h =
-      topbar() +
-      '<div class="ctr"><h2>Vitória! +' + G.gain + ' 🪙' + (G.inv ? ' (+' + G.inv + ' 📈)' : '') +
-      ' Escolhe uma carta</h2></div><div class="hand">';
-    opts.forEach(function (id, i) {
-      h += cardEl(id, i, "pick('" + id + "')");
+    if (!sp.cards.length && !sp.pot) h += '<small class="mut">Esgotado. Atualiza a loja.</small>';
+    h += '</div><div class="shk" data-lbl="Packs">';
+    sp.packs.forEach(function (pk, i) {
+      var p = price(PKS[pk.t].p[pk.s]);
+      h += '<div class="it">' + ptag(p) + packBtn(pk, 'buyPack(' + i + ')', G.gold < p) + '</div>';
     });
-    h += '</div><div class="row"><button class="btn alt" onclick="pick()">Saltar</button></div>';
+    if (!sp.packs.length) h += '<small class="mut">Sem packs.</small>';
+    h += '</div></div></div></div>';
+  } else if (scr == 'pack') {
+    var pd = PKS[PG.t];
+    h =
+      topbar() + ownBar(false) +
+      '<div class="ctr"><h2>' + pd.i + ' ' + pd.n + ' ' + PSN[PG.s] + '</h2><p>' + pd.d + ' Escolhe ' + PG.left +
+      (PG.left > 1 ? ' itens.' : ' item.') + '</p></div>' + (msg ? '<div class="log">' + msg + '</div>' : '') + '<div class="hand">';
+    PG.ch.forEach(function (id, i) {
+      var cb = 'pickPack(' + i + ')';
+      h +=
+        '<div class="it">' +
+        (PG.t == 'padrao' ? cardEl(id, i, cb) : PG.t == 'bobo' ? relBtn(id, cb, false) : tarBtn(id, cb, false)) +
+        '</div>';
+    });
+    h += '</div><div class="row"><button class="btn alt" onclick="skipPack()">Saltar o pack</button></div>';
   } else if (scr == 'rest') {
     h =
-      topbar() +
-      '<div class="ctr"><h2>👑 Boss derrotado!</h2><p>Descansa (recupera 35% da vida) ou escolhe uma relíquia permanente.</p><div class="row"><button class="btn" onclick="rest()">Descansar</button></div><div class="hand">';
+      topbar() + ownBar(true) +
+      '<div class="ctr"><h2>👑 Boss derrotado!</h2>' + (msg ? '<div class="log">' + msg + '</div>' : '') +
+      '<p>Descansa (recupera 35% da vida) ou escolhe uma relíquia permanente (máx. ' + MAXR +
+      '; vende uma se estiveres cheio).</p><div class="row"><button class="btn" onclick="rest()">Descansar</button></div><div class="hand">';
     opts.forEach(function (k) {
       h += relBtn(k, "relic('" + k + "')", false);
     });
     h += '</div></div>';
-  } else if (scr == 'over') {
-    h =
-      '<div class="ctr"><h1>' + (G.walk ? '🏳️ Desististe no andar ' : '💀 Caíste no andar ') + (Math.floor(G.node / 3) + 1) +
-      '</h1><p>' + msg + '</p><p>Respostas certas: ' + G.ok + ' · erradas: ' + G.ko +
-      '</p><div class="row"><button class="btn" onclick="menu()">Tentar de novo</button></div></div>';
   } else {
-    h =
-      '<div class="ctr"><h1>🏆 Venceste o Dragão!</h1><p>Chegaste ao topo com ' + G.hp + ' de vida e ' +
-      G.deck.length + ' cartas.</p><p>Respostas certas: ' + G.ok + ' · erradas: ' + G.ko +
-      '</p><div class="row"><button class="btn" onclick="menu()">Jogar outra vez</button></div></div>';
+    h = endHtml();
   }
   h = optbar() + h;
   if (V) h += modal();
   if (GU)
     h +=
       '<div class="modal" onclick="giveUpNo()"><div onclick="event.stopPropagation()"><h3>Desistir?</h3><p>Perdes o progresso desta partida.</p><div class="row"><button class="btn" onclick="giveUp()">Sim, desistir</button><button class="btn alt" onclick="giveUpNo()">Continuar</button></div></div></div>';
-  a.className = scr == 'shop' ? 'wide' : '';
+  a.className = ['shop', 'pack', 'rest', 'blinds'].indexOf(scr) >= 0 ? 'wide' : '';
   a.innerHTML = h;
   if (scr == 'menu') Temas.bind(a.querySelector('.tm'), tmInfo), tmInfo();
   doFx();

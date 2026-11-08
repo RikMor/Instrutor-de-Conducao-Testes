@@ -1329,3 +1329,264 @@ h1 {
   text-align: center;
 }
 
+
+/* ---------- Zonas "as tuas relíquias" e "os teus tarots" (como em cima na loja do Balatro) ---------- */
+#app.wide {
+  max-width: 1040px;
+}
+.own {
+  display: grid;
+  grid-template-columns: 3fr 1.25fr;
+  gap: 12px;
+  margin: 10px 0;
+}
+.oz {
+  padding: 8px 10px 10px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--bg) 55%, var(--panel));
+  box-shadow: inset 0 3px 12px rgba(0, 0, 0, 0.4);
+}
+.oz.t {
+  border-color: color-mix(in srgb, #a070e8 55%, var(--line));
+}
+.olb {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+  font-family: Rajdhani, system-ui, sans-serif;
+  font-size: 1.05rem;
+}
+.olb span {
+  color: var(--mut);
+  font-weight: 700;
+}
+.ozi {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+.own .card {
+  width: 96px;
+  min-height: 134px;
+  padding: 5px;
+  font-size: 0.68rem;
+  gap: 4px;
+}
+.own .card .n {
+  font-size: 0.85rem;
+}
+.own .card.rel.sm {
+  cursor: default;
+}
+.own .card.rel.sm:hover {
+  transform: none;
+}
+.empty {
+  width: 96px;
+  height: 134px;
+  border-radius: 12px;
+  border: 2px dashed color-mix(in srgb, var(--line) 80%, transparent);
+  opacity: 0.7;
+}
+.sell {
+  margin-top: 6px;
+  width: 100%;
+  padding: 3px 0;
+  border: 0;
+  border-radius: 8px;
+  background: #ffb02e;
+  color: #1a0e00;
+  font: 700 0.85rem Rajdhani, system-ui, sans-serif;
+  cursor: pointer;
+}
+.sell:hover {
+  filter: brightness(1.1);
+}
+@media (max-width: 900px) {
+  .own {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Loja em 3 zonas: relíquias (em cima), cartas (cupão) e packs (em baixo) ---------- */
+.shm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+.sbt {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 12px;
+}
+.shi,
+.shc,
+.shk {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 38px 12px 14px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--bg) 55%, var(--panel));
+  box-shadow: inset 0 3px 12px rgba(0, 0, 0, 0.45);
+}
+.shi::before,
+.shc::before,
+.shk::before {
+  content: attr(data-lbl);
+  position: absolute;
+  top: 8px;
+  left: 14px;
+  font: 700 0.95rem Rajdhani, system-ui, sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mut);
+}
+.shc .card,
+.shk .card {
+  width: 112px;
+  min-height: 170px;
+}
+@media (max-width: 760px) {
+  .sbt {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Packs ---------- */
+.card.pack {
+  --c: #4aa3ff;
+  border-color: var(--c);
+  justify-content: flex-start;
+  font-size: 0.85rem;
+  background: linear-gradient(165deg, color-mix(in srgb, var(--c) 45%, var(--panel)), var(--panel) 85%);
+}
+.card.pack.arcano {
+  --c: #a070e8;
+}
+.card.pack.padrao {
+  --c: #4aa3ff;
+}
+.card.pack.bobo {
+  --c: #ff8a3d;
+}
+.card.pack .pi {
+  font-size: 2.6rem;
+  line-height: 1;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5));
+}
+.card.pack .t {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.7rem;
+}
+
+/* ---------- Cartas do baralho escolhidas por um tarot ---------- */
+.pg .card.pk.on {
+  border-color: #ffd866;
+  box-shadow: 0 0 0 3px rgba(255, 216, 102, 0.55), 0 12px 24px -8px rgba(0, 0, 0, 0.8);
+  transform: translateY(-6px);
+}
+
+/* ---------- Ecrã final: causa e perguntas (como no Milionário) ---------- */
+.end {
+  max-width: 720px;
+  margin: 1rem auto 0;
+}
+.why {
+  margin: 0.6rem 0;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid #e53935;
+  border-radius: 10px;
+  background: rgba(229, 57, 53, 0.14);
+  text-align: left;
+  line-height: 1.5;
+}
+.why.win {
+  border-color: var(--skl);
+  background: rgba(61, 220, 132, 0.14);
+}
+.why.walk {
+  border-color: var(--mut);
+  background: rgba(255, 255, 255, 0.06);
+}
+.why small {
+  color: var(--mut);
+}
+.flt {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.7rem 0;
+}
+.flt .btn {
+  padding: 6px 14px;
+  font-size: 0.92rem;
+}
+.flt .btn[aria-pressed='true'] {
+  background: linear-gradient(180deg, #ffa05e, var(--acc));
+  color: #1a0e00;
+  border-color: transparent;
+}
+.rvs[data-show='ok'] .rv:not(.s-ok),
+.rvs[data-show='ko'] .rv:not(.s-ko) {
+  display: none;
+}
+.rv {
+  border-top: 1px solid var(--line);
+  padding: 0.7rem 0;
+  text-align: left;
+}
+.rv .st {
+  min-height: 0;
+  font-size: inherit;
+  font-weight: 700;
+}
+.rv .st.ok {
+  color: #4cd982;
+}
+.rv .st.ko {
+  color: #ff7b70;
+}
+.rv .st.na,
+.rv .st.nul {
+  color: var(--mut);
+}
+.rv p {
+  margin: 0.2rem 0;
+}
+.end details summary {
+  cursor: pointer;
+  font-weight: 700;
+  margin: 0.4rem 0;
+}
+
+/* ---------- Emojis em PCs antigos (ex.: Windows 10): se o sistema não tem o emoji, usa o Noto Color Emoji ---------- */
+html,
+body,
+button,
+.card,
+.modal {
+  font-family: Barlow, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif, 'Noto Color Emoji';
+}
+h1,
+.top,
+.card .n,
+.pile b,
+.orb,
+.ptag,
+.sell,
+.bsel,
+.bskip,
+.bnm,
+.mb {
+  font-family: Rajdhani, system-ui, sans-serif, 'Noto Color Emoji';
+}
