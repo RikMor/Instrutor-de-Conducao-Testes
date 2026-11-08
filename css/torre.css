@@ -1689,3 +1689,11 @@ h1,
   font-weight: bold;
   margin-top: 4px;
 }
+
+/* A barra de vida tem de manter a largura quando a caixa é flex em coluna. */
+.fighter .bar {
+  width: 100%;
+  max-width: 300px;
+  align-self: center;
+  flex-shrink: 0;
+}
