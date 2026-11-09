@@ -1697,6 +1697,7 @@ function byCard(x, y) {
 // por tipo e custo. Assim a pilha de compra não revela a ordem em que saem.
 function modal() {
   if (V == 'pick') return pickModal();
+  if (V == 'run') return runModal();
   var L = V == 'deck' ? G.deck : V == 'dr' ? G.dr : G.di,
     T =
       V == 'deck'
@@ -1720,6 +1721,49 @@ function modal() {
       });
     h += '</div>';
   } else h += '<p>Vazia.</p>';
+  return h + '<div class="row"><button class="btn" onclick="closeV()">Fechar</button></div></div></div>';
+}
+
+// Janela "Info da run" (como no Balatro): progresso pelos 9 combates, estatísticas, baralho, relíquias, tarots e etiquetas.
+function runModal() {
+  var h = '<div class="modal" onclick="closeV()"><div class="mw" onclick="event.stopPropagation()"><h3>ℹ️ Info da run</h3>',
+    i,
+    f,
+    n,
+    cnt = { a: 0, d: 0, s: 0 };
+  h += '<div class="rmap">';
+  for (f = 0; f < 3; f++) {
+    h += '<div class="rrow"><b>Andar ' + (f + 1) + '</b>';
+    for (n = 0; n < 3; n++) {
+      i = f * 3 + n;
+      h +=
+        '<span class="rn' + (i < G.node ? ' done' : i == G.node ? ' cur' : '') + (n == 2 ? ' boss' : '') + '">' +
+        (n == 2 ? '👑' : '⚔️') + '<small>' + (i < G.node ? '✔' : n == 2 ? 'Boss' : 'C' + (n + 1)) + '</small></span>';
+    }
+    h += '</div>';
+  }
+  h += '</div>';
+  G.deck.forEach(function (id) {
+    cnt[CARDS[id].t]++;
+  });
+  var tot = G.ok + G.ko;
+  h +=
+    '<div class="rst"><span>❤️ ' + G.hp + '/' + G.max + '</span><span>🪙 ' + G.gold + '</span><span>✅ ' + G.ok +
+    '</span><span>❌ ' + G.ko + '</span><span>🎯 ' + (tot ? Math.round((G.ok / tot) * 100) + '%' : '—') +
+    '</span><span>📚 ' + G.deck.length + ' cartas (⚔️ ' + cnt.a + ' · 🛡️ ' + cnt.d + ' · ✨ ' + cnt.s + ')</span>' +
+    (G.str ? '<span>💪 ' + G.str + '</span>' : '') + (G.sk ? '<span>🔥 ' + G.sk + '</span>' : '') + '</div>';
+  h += '<h4>🎁 Relíquias (' + G.rels.length + '/' + MAXR + ')</h4>';
+  h += G.rels.length
+    ? G.rels.map(function (k) { return '<p class="rli"><b>' + RL[k].n + '</b>: ' + RL[k].d + '</p>'; }).join('')
+    : '<p class="mut">Nenhuma.</p>';
+  h += '<h4>🔮 Tarots (' + G.tar.length + '/' + G.ts + ')</h4>';
+  h += G.tar.length
+    ? G.tar.map(function (k) { return '<p class="rli"><b>' + TR[k].n + '</b>: ' + TR[k].d + '</p>'; }).join('')
+    : '<p class="mut">Nenhum.</p>';
+  if ((G.tags || []).length) {
+    h += '<h4>🏷️ Etiquetas</h4>';
+    h += G.tags.map(function (k) { return '<p class="rli"><b>' + TAGS[k].i + ' ' + TAGS[k].n + '</b>: ' + TAGS[k].d + '</p>'; }).join('');
+  }
   return h + '<div class="row"><button class="btn" onclick="closeV()">Fechar</button></div></div></div>';
 }
 
@@ -2010,6 +2054,7 @@ function topbar() {
     (scr == 'blinds' ? '<span class="tl">Escolhe o teu próximo desafio</span>' : '') +
     '<span>🪙 ' + G.gold + '</span></div><div class="tgl">' +
     '<button class="btn alt" style="padding:3px 10px;font-size:.85rem" onclick="view(\'deck\')">📚 Baralho (' + G.deck.length + ')</button>' +
+    '<button class="btn alt" style="padding:3px 10px;font-size:.85rem" onclick="view(\'run\')">ℹ️ Info da run</button>' +
     optEnd() + '</div></div>';
   return s + inv();
 }
