@@ -1706,3 +1706,16 @@ h1,
   border-color: var(--q);
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--q) 30%, transparent), 0 14px 34px -16px var(--q);
 }
+
+/* Info da run */
+.rmap { display: flex; flex-direction: column; gap: 6px; margin: 8px 0; }
+.rrow { display: flex; align-items: center; gap: 8px; }
+.rrow > b { width: 70px; font-size: 0.85rem; color: var(--mut); }
+.rn { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 6px 4px; border: 2px solid var(--line); border-radius: 10px; opacity: 0.55; }
+.rn small { font-size: 0.7rem; }
+.rn.done { opacity: 0.85; border-color: var(--skl); }
+.rn.cur { opacity: 1; border-color: var(--acc); box-shadow: 0 0 10px -2px var(--acc); }
+.rn.boss { border-style: dashed; }
+.rst { display: flex; flex-wrap: wrap; gap: 6px 12px; margin: 10px 0; font-size: 0.9rem; }
+.mw h4 { margin: 12px 0 4px; }
+.rli { margin: 3px 0; font-size: 0.88rem; }
