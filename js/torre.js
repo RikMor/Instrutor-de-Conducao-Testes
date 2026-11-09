@@ -2134,7 +2134,7 @@ function render() {
       '%"></b></div><div>' + E.hp + ' / ' + E.max + '</div><div class="st">' + (st || '&nbsp;') +
       '</div></div></div><div class="log">' + msg + '</div>';
     if (P) {
-      h += '<div class="qbox"><div class="qt">' + esc(qtxt(P.q.q)) + '</div>';
+      h += '<div class="qbox ' + (CARDS[G.hand[P.i]] ? CARDS[G.hand[P.i]].t : '') + '"><div class="qt">' + esc(qtxt(P.q.q)) + '</div>';
       P.o.forEach(function (oi, k) {
         var cl = '';
         if (P.done) {
