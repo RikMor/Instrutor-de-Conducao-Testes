@@ -1697,3 +1697,12 @@ h1,
   align-self: center;
   flex-shrink: 0;
 }
+
+/* cor da caixa da pergunta segue o tipo da carta escolhida */
+.qbox.a { --q: var(--atk); }
+.qbox.d { --q: var(--def); }
+.qbox.s { --q: var(--skl); }
+.qbox.a, .qbox.d, .qbox.s {
+  border-color: var(--q);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--q) 30%, transparent), 0 14px 34px -16px var(--q);
+}
