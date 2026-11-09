@@ -1151,7 +1151,7 @@ function loseRelic(k) {
 
 // Vender a relíquia i (fora dos combates): ganhas metade do preço e libertas espaço.
 function sellRel(i) {
-  if (scr == 'battle' || P || PK) return;
+  if (P || PK || G.busy) return;
   var k = G.rels[i];
   if (!k) return;
   if (k == 'bola' && G.tar.length >= G.ts) {
@@ -1160,8 +1160,29 @@ function sellRel(i) {
   }
   G.rels.splice(i, 1);
   loseRelic(k);
+  if (scr == 'battle') {
+    // Dentro do combate, ajusta já o que a relíquia dava neste combate.
+    if (k == 'forca' || k == 'bandeira') G.str -= 2;
+    if (k == 'en') G.en = Math.min(G.en, G.me);
+  }
   G.gold += sellP(k);
   msg = 'Vendeste ' + RL[k].n + ' por 🪙 ' + sellP(k) + '.';
+  render();
+}
+
+// Valor de venda de um tarot: metade do preço.
+function sellPT(k) {
+  return Math.max(1, Math.floor(TR[k].p / 2));
+}
+
+// Vender o tarot i (também durante o combate): ganhas metade do preço e libertas a ranhura.
+function sellTar(i) {
+  if (P || PK || G.busy || V) return;
+  var k = G.tar[i];
+  if (!k) return;
+  G.tar.splice(i, 1);
+  G.gold += sellPT(k);
+  msg = 'Vendeste ' + TR[k].n + ' por 🪙 ' + sellPT(k) + '.';
   render();
 }
 
@@ -2095,17 +2116,18 @@ function relFace(k) {
 
 // As tuas relíquias (máx. MAXR, com botão Vender) e os teus tarots (máx. G.ts, com Usar), como em cima na loja do Balatro.
 // useT = deixa usar os tarots neste ecrã.
-function ownBar(useT, mini) {
+function ownBar(useT, mini, canSell) {
   var rs = '',
     ts = '',
     i;
   for (i = 0; i < MAXR; i++)
     rs += G.rels[i]
-      ? '<div class="it">' + relFace(G.rels[i]) + (mini ? '' : '<button class="sell" onclick="sellRel(' + i + ')">Vender 🪙 ' + sellP(G.rels[i]) + '</button>') + '</div>'
+      ? '<div class="it">' + relFace(G.rels[i]) + (mini && !canSell ? '' : '<button class="sell" onclick="sellRel(' + i + ')">Vender 🪙 ' + sellP(G.rels[i]) + '</button>') + '</div>'
       : '<div class="it"><div class="empty"></div></div>';
   for (i = 0; i < G.ts; i++)
     ts += G.tar[i]
-      ? '<div class="it">' + tarBtn(G.tar[i], 'useTar(' + i + ')', !useT, '<span class="usar">Usar</span>') + '</div>'
+      ? '<div class="it">' + tarBtn(G.tar[i], 'useTar(' + i + ')', !useT, '<span class="usar">Usar</span>') +
+        (mini && !canSell ? '' : '<button class="sell" onclick="sellTar(' + i + ')">Vender 🪙 ' + sellPT(G.tar[i]) + '</button>') + '</div>'
       : '<div class="it"><div class="empty"></div></div>';
   return (
     '<div class="own' + (mini ? ' mini' : '') + '"><div class="oz"><div class="olb"><b>🎁 Relíquias</b><span>' + G.rels.length + '/' + MAXR +
@@ -2169,7 +2191,7 @@ function render() {
         (G.block ? '🛡️ ' + G.block + ' ' : '') + (G.str ? '💪 ' + G.str + ' ' : '') + (G.sk ? '🔥 ' + G.sk : '');
     h =
       topbar() +
-      ownBar(!P && !G.busy, true) +
+      ownBar(!P && !G.busy, true, !P && !G.busy) +
       '<div class="arena"><div class="fighter" id="pl"><div class="em">🧙</div><b>Tu</b><div class="bar g"><b style="width:' +
       Math.max(0, (G.hp / G.max) * 100) +
       '%"></b></div><div>❤️ ' + G.hp + ' / ' + G.max + '</div><div class="st">' + (ps || '&nbsp;') +
