@@ -1725,3 +1725,17 @@ h1,
   padding: 2px 0;
   margin-top: 3px;
 }
+
+/* Cartas todas do mesmo tamanho (altura fixa em vez de min-height) */
+.card { height: 170px; min-height: 0; overflow: hidden; }
+.fan .card { width: 112px; height: 168px; min-height: 0; }
+.pg .card.face { width: 118px; height: 160px; min-height: 0; }
+.own .card { width: 96px; height: 140px; min-height: 0; }
+.empty { height: 140px; }
+.own.mini .card { height: 92px; min-height: 0; }
+.own.mini .empty { height: 92px; }
+@media (max-width: 560px) {
+  .fan .card { width: 86px; height: 140px; min-height: 0; }
+  .pg .card.face { width: 104px; height: 156px; }
+}
+.modal .colw { text-align: left; }
