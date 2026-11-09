@@ -1719,6 +1719,7 @@ function byCard(x, y) {
 function modal() {
   if (V == 'pick') return pickModal();
   if (V == 'run') return runModal();
+  if (V == 'col') return colModal();
   var L = V == 'deck' ? G.deck : V == 'dr' ? G.dr : G.di,
     T =
       V == 'deck'
@@ -1743,6 +1744,15 @@ function modal() {
     h += '</div>';
   } else h += '<p>Vazia.</p>';
   return h + '<div class="row"><button class="btn" onclick="closeV()">Fechar</button></div></div></div>';
+}
+
+// Janela "Coleção" durante o jogo: tudo o que existe (cartas, inimigos, relíquias, tarots, packs e etiquetas).
+function colModal() {
+  return (
+    '<div class="modal" onclick="closeV()"><div class="mw" onclick="event.stopPropagation()"><h3>📖 Coleção</h3><div class="colw">' +
+    colHtml() +
+    '</div><div class="row"><button class="btn" onclick="closeV()">Fechar</button></div></div></div>'
+  );
 }
 
 // Janela "Info da run" (como no Balatro): progresso pelos 9 combates, estatísticas, baralho, relíquias, tarots e etiquetas.
@@ -2076,6 +2086,7 @@ function topbar() {
     '<span>🪙 ' + G.gold + '</span></div><div class="tgl">' +
     '<button class="btn alt" style="padding:3px 10px;font-size:.85rem" onclick="view(\'deck\')">📚 Baralho (' + G.deck.length + ')</button>' +
     '<button class="btn alt" style="padding:3px 10px;font-size:.85rem" onclick="view(\'run\')">ℹ️ Info da run</button>' +
+    '<button class="btn alt" style="padding:3px 10px;font-size:.85rem" onclick="view(\'col\')">📖 Coleção</button>' +
     optEnd() + '</div></div>';
   return s + inv();
 }
