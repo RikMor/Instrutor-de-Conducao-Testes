@@ -1756,3 +1756,12 @@ h1,
   .own .card .n { font-size: 0.74rem; line-height: 1.1; }
   .empty { height: 156px; }
 }
+
+/* Telemóvel: alturas mais baixas (as anteriores sobravam espaço) */
+@media (max-width: 560px) {
+  .fan .card { height: 140px; }
+  .fan { min-height: 168px; }
+  .pg .card.face { height: 132px; }
+  .own .card { height: 130px; }
+  .empty { height: 130px; }
+}
