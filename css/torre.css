@@ -1765,3 +1765,12 @@ h1,
   .own .card { height: 130px; }
   .empty { height: 130px; }
 }
+
+/* Telemóvel: mais 20px mais baixas */
+@media (max-width: 560px) {
+  .fan .card { height: 120px; }
+  .fan { min-height: 148px; }
+  .pg .card.face { height: 112px; }
+  .own .card { height: 110px; }
+  .empty { height: 110px; }
+}
