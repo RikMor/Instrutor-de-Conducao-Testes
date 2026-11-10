@@ -1739,3 +1739,20 @@ h1,
   .pg .card.face { width: 104px; height: 156px; }
 }
 .modal .colw { text-align: left; }
+
+/* Telemóvel: texto das cartas sem cortes (nomes e descrições longas) */
+.card .n, .card span { overflow-wrap: anywhere; hyphens: auto; }
+@media (max-width: 560px) {
+  .card { gap: 2px; }
+  .card .c { width: 18px; height: 18px; line-height: 18px; font-size: 0.7rem; }
+  .fan .card { width: 90px; height: 178px; font-size: 0.6rem; padding: 4px 3px; }
+  .fan .card .n { font-size: 0.66rem; line-height: 1.1; }
+  .fan .card .t { font-size: 0.58rem; }
+  .fan .slot { margin: 0 -13px; }
+  .fan { min-height: 205px; }
+  .pg .card.face { width: 108px; height: 178px; font-size: 0.68rem; padding: 5px 4px; }
+  .pg .card.face .n { font-size: 0.74rem; line-height: 1.1; }
+  .own .card { height: 156px; font-size: 0.62rem; }
+  .own .card .n { font-size: 0.74rem; line-height: 1.1; }
+  .empty { height: 156px; }
+}
