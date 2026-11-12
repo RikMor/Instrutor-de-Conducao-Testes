@@ -194,7 +194,7 @@ function rolls(n) {
 var FOES = {
   slime: {
     n: 'Slime',
-    e: '🟢',
+    e: '🐸',
     hp: 24,
     p: [
       ['a', 6],
@@ -510,11 +510,11 @@ var RL = {
   en: { n: '💎 Cristal de Energia', d: '+1 energia máxima.', p: 45 },
   mao: { n: '🎒 Bolsa Extra', d: 'Compras +1 carta por turno.', p: 40 },
   forca: { n: '🥊 Luva de Ferro', d: '+2 de força permanente.', p: 35 },
-  escudo: { n: '🪵 Escudo de Madeira', d: 'Começas cada turno com 3 de escudo.', p: 28 },
+  escudo: { n: '🌲 Escudo de Madeira', d: 'Começas cada turno com 3 de escudo.', p: 28 },
   armadura: { n: '🛡️ Armadura Antiga', d: 'Começas cada combate com 8 de escudo.', p: 25 },
-  sangue: { n: '🩸 Frasco de Sangue', d: 'Recuperas 4 de vida no início de cada combate.', p: 25 },
-  penas: { n: '🪶 Pena Dourada', d: '+2 🪙 por cada resposta certa.', p: 30 },
-  sorte: { n: '🍀 Trevo', d: '+8 🪙 depois de cada combate.', p: 28 },
+  sangue: { n: '💉 Frasco de Sangue', d: 'Recuperas 4 de vida no início de cada combate.', p: 25 },
+  penas: { n: '✒️ Pena Dourada', d: '+2 💰 por cada resposta certa.', p: 30 },
+  sorte: { n: '🍀 Trevo', d: '+8 💰 depois de cada combate.', p: 28 },
   livro: { n: '📕 Livro Antigo', d: 'O primeiro erro de cada combate é perdoado: a carta funciona.', p: 40 },
   lupa: { n: '🔍 Lupa', d: 'Elimina uma opção errada em cada pergunta (com 3 ou mais opções).', p: 42 },
   punhal: { n: '🗡️ Punhal', d: 'O primeiro ataque de cada turno causa +4 de dano.', p: 30 },
@@ -522,18 +522,18 @@ var RL = {
   ampulheta: { n: '⏳ Ampulheta', d: 'A sequência dá +1 energia a cada 2 respostas certas (em vez de 3).', p: 38 },
   bola: { n: '🔮 Bola de Cristal', d: '+1 espaço para tarots.', p: 26 },
   cartao: { n: '🏷️ Cartão de Cliente', d: 'Tudo 20% mais barato nas lojas.', p: 30 },
-  juros: { n: '🏦 Cofre', d: 'No fim de cada combate ganhas +1 🪙 por cada 5 🪙 que tens (máx. +5).', p: 34 },
+  juros: { n: '🏦 Cofre', d: 'No fim de cada combate ganhas +1 💰 por cada 5 💰 que tens (máx. +5).', p: 34 },
   espinhos: { n: '🌵 Cacto', d: 'Quando um inimigo te ataca, leva 3 de dano.', p: 30 },
   cafe: { n: '☕ Café', d: 'Compras +2 cartas no primeiro turno de cada combate.', p: 28 },
   tinta: { n: '🖋️ Tinteiro', d: 'Cada resposta certa dá 2 de escudo.', p: 32 },
   vampiro: { n: '🧛 Dente de Vampiro', d: 'Cada ataque que jogas cura 2 de vida.', p: 34 },
   tomo: { n: '📚 Tomo do Saber', d: 'Cada resposta certa causa 1 de dano ao inimigo.', p: 36 },
-  amuleto: { n: '🧿 Amuleto', d: 'Recebes 25% menos dano dos ataques.', p: 40 },
+  amuleto: { n: '☘️ Amuleto', d: 'Recebes 25% menos dano dos ataques.', p: 40 },
   cartola: { n: '🎩 Cartola', d: 'Cada carta de custo 0 que jogas dá 3 de escudo.', p: 26 },
   bandeira: { n: '🚩 Estandarte', d: 'Começas cada combate com +2 de força.', p: 36 },
-  bussola: { n: '🧭 Bússola', d: '+1 opção em todos os packs.', p: 30 },
+  bussola: { n: '🗺️ Bússola', d: '+1 opção em todos os packs.', p: 30 },
   banquete: { n: '🍖 Banquete', d: 'Recuperas +6 de vida depois de cada combate.', p: 32 },
-  dado: { n: '🎲 Dados Viciados', d: 'Atualizar a loja custa menos 2 🪙.', p: 24 },
+  dado: { n: '🎲 Dados Viciados', d: 'Atualizar a loja custa menos 2 💰.', p: 24 },
 };
 
 // Valor de venda de uma relíquia: metade do preço.
@@ -544,14 +544,14 @@ function sellP(k) {
 // ---- Etiquetas (como no Balatro): ganhas uma ao ignorar um combate ----
 // As que dizem "agora" têm efeito logo; as outras ficam guardadas até serem precisas.
 var TAGS = {
-  invest: { i: '📈', n: 'Investimento', d: 'Ganhas 🪙 30 quando derrotares o boss.' },
+  invest: { i: '📈', n: 'Investimento', d: 'Ganhas 💰 30 quando derrotares o boss.' },
   desc: { i: '🏷️', n: 'Cupão', d: 'Tudo 50% mais barato na próxima loja.' },
   gratis: { i: '🎁', n: 'Oferta', d: 'Na próxima loja, o primeiro item que comprares é grátis.' },
   reroll: { i: '🎲', n: 'Dados', d: '2 atualizações grátis na próxima loja.' },
   tarot: { i: '🔮', n: 'Tarot', d: 'Recebes 1 tarot agora.' },
-  vida: { i: '🧪', n: 'Poção', d: 'Recuperas 15 de vida agora.' },
-  bolsa: { i: '💰', n: 'Bolsa', d: 'Ganhas 🪙 18 agora.' },
-  economia: { i: '💵', n: 'Economia', d: 'Dobras as tuas moedas agora (máx. +🪙 30).' },
+  vida: { i: '⚗️', n: 'Poção', d: 'Recuperas 15 de vida agora.' },
+  bolsa: { i: '💰', n: 'Bolsa', d: 'Ganhas 💰 18 agora.' },
+  economia: { i: '💵', n: 'Economia', d: 'Dobras as tuas moedas agora (máx. +💰 30).' },
   melhoria: { i: '⬆️', n: 'Melhoria', d: 'Melhora 1 carta aleatória do baralho agora.' },
   carta: { i: '🃏', n: 'Carta Extra', d: 'Recebes 1 carta incomum ou rara aleatória agora.' },
   treino: { i: '🏋️', n: 'Treino', d: '+1 de força permanente.' },
@@ -592,7 +592,7 @@ var TR = {
     },
   },
   enforcado: {
-    n: '🪢 O Enforcado',
+    n: '🔗 O Enforcado',
     d: 'Elimina até 2 cartas do baralho (o baralho fica com pelo menos 6).',
     p: 18,
     need: 2,
@@ -687,13 +687,13 @@ var TR = {
   },
   eremita: {
     n: '🧙 O Eremita',
-    d: 'Dobra as tuas moedas (máximo +🪙 40).',
+    d: 'Dobra as tuas moedas (máximo +💰 40).',
     p: 12,
     need: 0,
     f: function () {
       var g = Math.min(G.gold, 40);
       G.gold += g;
-      msg = 'Ganhaste 🪙 ' + g + '.';
+      msg = 'Ganhaste 💰 ' + g + '.';
     },
   },
   justica: {
@@ -709,7 +709,7 @@ var TR = {
   },
   temperanca: {
     n: '🍷 A Temperança',
-    d: 'Ganhas 🪙 igual ao valor de venda das tuas relíquias (máx. 50).',
+    d: 'Ganhas 💰 igual ao valor de venda das tuas relíquias (máx. 50).',
     p: 12,
     need: 0,
     f: function () {
@@ -719,7 +719,7 @@ var TR = {
       });
       g = Math.min(50, g);
       G.gold += g;
-      msg = 'Ganhaste 🪙 ' + g + '.';
+      msg = 'Ganhaste 💰 ' + g + '.';
     },
   },
   torre: {
@@ -1083,14 +1083,14 @@ function skip() {
     if (G.tar.length < G.ts) G.tar.push(randTarot());
     else {
       G.gold += 10;
-      extra = ' (sem espaço para o tarot: ganhas 🪙 10)';
+      extra = ' (sem espaço para o tarot: ganhas 💰 10)';
     }
   } else if (k == 'vida') G.hp = Math.min(G.max, G.hp + 15);
   else if (k == 'bolsa') G.gold += 18;
   else if (k == 'economia') {
     var gg = Math.min(G.gold, 30);
     G.gold += gg;
-    extra = ' (+🪙 ' + gg + ')';
+    extra = ' (+💰 ' + gg + ')';
   } else if (k == 'melhoria') {
     var up = G.deck.filter(canUp);
     if (up.length) {
@@ -1099,7 +1099,7 @@ function skip() {
       extra = ' (' + CARDS[uid].n + ' melhorada)';
     } else {
       G.gold += 10;
-      extra = ' (nada para melhorar: ganhas 🪙 10)';
+      extra = ' (nada para melhorar: ganhas 💰 10)';
     }
   } else if (k == 'carta') {
     var pl = POOL.filter(function (x) {
@@ -1171,7 +1171,7 @@ function sellRel(i) {
     if (k == 'en') G.en = Math.min(G.en, G.me);
   }
   G.gold += sellP(k);
-  msg = 'Vendeste ' + RL[k].n + ' por 🪙 ' + sellP(k) + '.';
+  msg = 'Vendeste ' + RL[k].n + ' por 💰 ' + sellP(k) + '.';
   render();
 }
 
@@ -1187,7 +1187,7 @@ function sellTar(i) {
   if (!k) return;
   G.tar.splice(i, 1);
   G.gold += sellPT(k);
-  msg = 'Vendeste ' + TR[k].n + ' por 🪙 ' + sellPT(k) + '.';
+  msg = 'Vendeste ' + TR[k].n + ' por 💰 ' + sellPT(k) + '.';
   render();
 }
 
@@ -1540,7 +1540,7 @@ function win() {
   }
   G.gold += G.gain + G.inv + jur;
   G.hp = Math.min(G.max, G.hp + 4 + (hasRel('banquete') ? 6 : 0));
-  G.win = 'Vitória! +🪙 ' + G.gain + (G.inv ? ' (+' + G.inv + ' 📈)' : '') + (jur ? ' (+' + jur + ' 🏦)' : '') + '.';
+  G.win = 'Vitória! +💰 ' + G.gain + (G.inv ? ' (+' + G.inv + ' 📈)' : '') + (jur ? ' (+' + jur + ' 🏦)' : '') + '.';
   if (G.node % 3 == 2) {
     opts = sh(
       Object.keys(RL).filter(function (k) {
@@ -1784,7 +1784,7 @@ function runModal() {
   });
   var tot = G.ok + G.ko;
   h +=
-    '<div class="rst"><span>❤️ ' + G.hp + '/' + G.max + '</span><span>🪙 ' + G.gold + '</span><span>✅ ' + G.ok +
+    '<div class="rst"><span>❤️ ' + G.hp + '/' + G.max + '</span><span>💰 ' + G.gold + '</span><span>✅ ' + G.ok +
     '</span><span>❌ ' + G.ko + '</span><span>🎯 ' + (tot ? Math.round((G.ok / tot) * 100) + '%' : '—') +
     '</span><span>📚 ' + G.deck.length + ' cartas (⚔️ ' + cnt.a + ' · 🛡️ ' + cnt.d + ' · ✨ ' + cnt.s + ')</span>' +
     (G.str ? '<span>💪 ' + G.str + '</span>' : '') + (G.sk ? '<span>🔥 ' + G.sk + '</span>' : '') + '</div>';
@@ -1875,7 +1875,7 @@ function colHtml() {
   });
   h += '</div><h3>🎁 Relíquias (' + Object.keys(RL).length + ')</h3><p class="mut">Só podes ter ' + MAXR + ' ao mesmo tempo. Vendem-se por metade do preço.</p><div class="cl">';
   Object.keys(RL).forEach(function (k) {
-    h += '<div class="ec"><b>' + RL[k].n + '</b><small>' + RL[k].d + '</small><small>🪙 ' + RL[k].p + ' · venda 🪙 ' + sellP(k) + '</small></div>';
+    h += '<div class="ec"><b>' + RL[k].n + '</b><small>' + RL[k].d + '</small><small>💰 ' + RL[k].p + ' · venda 💰 ' + sellP(k) + '</small></div>';
   });
   h += '</div><h3>🔮 Tarots (' + Object.keys(TR).length + ')</h3><div class="cl">';
   Object.keys(TR).forEach(function (k) {
@@ -1885,8 +1885,8 @@ function colHtml() {
   Object.keys(PKS).forEach(function (k) {
     var d = PKS[k];
     h +=
-      '<div class="ec"><b>' + d.i + ' ' + d.n + '</b><small>' + d.d + '</small><small>Normal: escolhe 1 de ' + d.ch[0] + ' (🪙 ' + d.p[0] +
-      ') · Jumbo: 1 de ' + d.ch[1] + ' (🪙 ' + d.p[1] + ') · Mega: 2 de ' + d.ch[2] + ' (🪙 ' + d.p[2] + ')</small></div>';
+      '<div class="ec"><b>' + d.i + ' ' + d.n + '</b><small>' + d.d + '</small><small>Normal: escolhe 1 de ' + d.ch[0] + ' (💰 ' + d.p[0] +
+      ') · Jumbo: 1 de ' + d.ch[1] + ' (💰 ' + d.p[1] + ') · Mega: 2 de ' + d.ch[2] + ' (💰 ' + d.p[2] + ')</small></div>';
   });
   h += '</div><h3>🏷️ Etiquetas (ao ignorar um combate) (' + Object.keys(TAGS).length + ')</h3><div class="cl">';
   Object.keys(TAGS).forEach(function (k) {
@@ -1973,7 +1973,7 @@ function endHtml() {
   } else if (kind == 'walk') {
     why =
       '<b>Desististe</b> no ' + where + (foe ? ', a meio do combate contra ' + foe : '') + ', com ❤️ ' + g.hp + '/' + g.max +
-      ' e 🪙 ' + g.gold + '.';
+      ' e 💰 ' + g.gold + '.';
     if (e.wq) why += '<br><small>Estavas a responder a uma pergunta (aparece em baixo, sem resposta).</small>';
   } else {
     why = '<b>Conseguiste!</b> Derrotaste ' + foe + ' e chegaste ao topo da torre com ❤️ ' + g.hp + '/' + g.max + '.';
@@ -2011,7 +2011,7 @@ function endHtml() {
       .join('');
   return (
     '<div class="end"><div class="ctr"><h1>' + title + '</h1></div><div class="why ' + kind + '">' + why + '</div>' +
-    '<p class="ctr">Respostas certas: ' + g.ok + ' · erradas: ' + g.ko + ' · 🪙 ' + g.gold + ' · ' + g.deck.length + ' cartas no baralho<br>Relíquias: ' +
+    '<p class="ctr">Respostas certas: ' + g.ok + ' · erradas: ' + g.ko + ' · 💰 ' + g.gold + ' · ' + g.deck.length + ' cartas no baralho<br>Relíquias: ' +
     (g.rels.length
       ? g.rels
           .map(function (k) {
@@ -2088,7 +2088,7 @@ function topbar() {
     (G.node % 3 == 2 ? '👑 Boss' : 'Combate ' + ((G.node % 3) + 1)) +
     '</span></div><div class="tgl"><span>❤️ ' + G.hp + '/' + G.max + '</span>' +
     (scr == 'blinds' ? '<span class="tl">Escolhe o teu próximo desafio</span>' : '') +
-    '<span>🪙 ' + G.gold + '</span></div><div class="tgl">' +
+    '<span>💰 ' + G.gold + '</span></div><div class="tgl">' +
     '<button class="btn alt" style="padding:3px 10px;font-size:.85rem" onclick="view(\'deck\')">📚 Baralho (' + G.deck.length + ')</button>' +
     '<button class="btn alt" style="padding:3px 10px;font-size:.85rem" onclick="view(\'run\')">ℹ️ Info da run</button>' +
     '<button class="btn alt" style="padding:3px 10px;font-size:.85rem" onclick="view(\'col\')">📖 Coleção</button>' +
@@ -2098,7 +2098,7 @@ function topbar() {
 
 // Etiqueta de preço por cima de um item da loja (como no Balatro).
 function ptag(p) {
-  return '<div class="ptag">' + (p ? '🪙 ' + p : 'GRÁTIS') + '</div>';
+  return '<div class="ptag">' + (p ? '💰 ' + p : 'GRÁTIS') + '</div>';
 }
 
 // Um item da loja: preço por cima e a carta / relíquia / tarot / pack por baixo.
@@ -2138,12 +2138,12 @@ function ownBar(useT, mini, canSell) {
     i;
   for (i = 0; i < MAXR; i++)
     rs += G.rels[i]
-      ? '<div class="it">' + relFace(G.rels[i]) + (mini && !canSell ? '' : '<button class="sell" onclick="sellRel(' + i + ')">Vender 🪙 ' + sellP(G.rels[i]) + '</button>') + '</div>'
+      ? '<div class="it">' + relFace(G.rels[i]) + (mini && !canSell ? '' : '<button class="sell" onclick="sellRel(' + i + ')">Vender 💰 ' + sellP(G.rels[i]) + '</button>') + '</div>'
       : '<div class="it"><div class="empty"></div></div>';
   for (i = 0; i < G.ts; i++)
     ts += G.tar[i]
       ? '<div class="it">' + tarBtn(G.tar[i], 'useTar(' + i + ')', !useT, '<span class="usar">Usar</span>') +
-        (mini && !canSell ? '' : '<button class="sell" onclick="sellTar(' + i + ')">Vender 🪙 ' + sellPT(G.tar[i]) + '</button>') + '</div>'
+        (mini && !canSell ? '' : '<button class="sell" onclick="sellTar(' + i + ')">Vender 💰 ' + sellPT(G.tar[i]) + '</button>') + '</div>'
       : '<div class="it"><div class="empty"></div></div>';
   return (
     '<div class="own' + (mini ? ' mini' : '') + '"><div class="oz"><div class="olb"><b>🎁 Relíquias</b><span>' + G.rels.length + '/' + MAXR +
@@ -2177,7 +2177,7 @@ function render() {
       '<li><b>Perguntas:</b> para jogar uma carta tens de acertar numa pergunta. Se acertares, a carta funciona; se errares, falha e gasta a energia na mesma.</li>' +
       '<li><b>Sequência 🔥:</b> respostas certas seguidas dão mais dano, e a cada 3 certas seguidas ganhas +1 energia.</li>' +
       '<li><b>Efeitos:</b> <b>Vulnerável</b> (o inimigo leva +50% de dano), <b>Fraco</b> (o inimigo bate -25%), <b>Veneno</b> (dano no fim de cada turno, e vai baixando), <b>Força</b> (+dano em todos os ataques) e <b>Exaurir</b> (a carta só volta no próximo combate).</li>' +
-      '<li><b>Loja:</b> depois de cada combate ganhas moedas 🪙 e recuperas um pouco de vida. Na loja (como no Balatro) há 2 itens em cima (<b>relíquias</b>, <b>tarots</b> ou <b>cartas</b>), <b>cartas</b> em baixo à esquerda e <b>packs</b> em baixo à direita. Podes <b>atualizar</b> a loja por 🪙 5 (sobe 1 de cada vez).</li>' +
+      '<li><b>Loja:</b> depois de cada combate ganhas moedas 💰 e recuperas um pouco de vida. Na loja (como no Balatro) há 2 itens em cima (<b>relíquias</b>, <b>tarots</b> ou <b>cartas</b>), <b>cartas</b> em baixo à esquerda e <b>packs</b> em baixo à direita. Podes <b>atualizar</b> a loja por 💰 5 (sobe 1 de cada vez).</li>' +
       '<li><b>Relíquias:</b> só podes ter ' + MAXR + ' ao mesmo tempo. Para ficares com outra, <b>vende</b> uma (recebes metade do preço).</li>' +
       '<li><b>Packs:</b> ao comprar um pack, ele abre e escolhes 1 dos itens (2 nos <b>Mega</b>). O <b>Pack Arcano</b> tem tarots (o que escolheres é usado logo), o <b>Pack Padrão</b> tem cartas e o <b>Pack do Bobo</b> tem relíquias. Os packs <b>Jumbo</b> e <b>Mega</b> têm mais opções.</li>' +
       '<li><b>Tarots:</b> mexem nas cartas do teu baralho (duplicar, eliminar, melhorar, transformar). Quando precisam de cartas, <b>em combate</b> escolhes entre as cartas da tua <b>mão</b> (e o efeito é imediato); <b>na loja ou nos packs</b> aparecem umas 5 cartas do teu baralho, tiradas à sorte. Só tens espaço para 2 tarots e não os podes usar enquanto respondes a uma pergunta.</li>' +
@@ -2284,7 +2284,7 @@ function render() {
         '</button><div class="bnm">' + (b ? '👑 Boss' : 'Combate ' + (i + 1)) +
         '</div><div class="bmed">' + f.e + '</div><div class="bnn">' + f.n +
         '</div><div class="bbox">Vida · Força<b>❤️ ' + hp + ' · 💪 +' + F +
-        '</b>Recompensa: <em>🪙 ' + (10 + nn) + '–' + (20 + nn) + '</em></div>' +
+        '</b>Recompensa: <em>💰 ' + (10 + nn) + '–' + (20 + nn) + '</em></div>' +
         (b
           ? '<div class="bskipw"><small>O boss não pode ser ignorado</small></div>'
           : '<div class="bor">OU</div><div class="bskipw"><button class="bskip" ' +
@@ -2301,7 +2301,7 @@ function render() {
     h +=
       '<div class="shp"><div class="shl"><button class="shn" onclick="leave()">Próxima<br>Rodada</button>' +
       '<button class="shr" ' + (G.gold < rrCost() ? 'disabled ' : '') + 'onclick="reroll()">Atualizar<b>' +
-      (rrCost() ? '🪙 ' + rrCost() : 'GRÁTIS') + '</b></button></div><div class="shm"><div class="shi" data-lbl="Relíquias, tarots e cartas">';
+      (rrCost() ? '💰 ' + rrCost() : 'GRÁTIS') + '</b></button></div><div class="shm"><div class="shi" data-lbl="Relíquias, tarots e cartas">';
     sp.top.forEach(function (x, k) {
       var cb = 'buyTop(' + k + ')',
         p = price(x.t == 'rel' ? RL[x.id].p : x.t == 'tar' ? TR[x.id].p : pr(x.id));
@@ -2320,7 +2320,7 @@ function render() {
       var pp = price(25);
       h +=
         '<div class="it">' + ptag(pp) + '<button class="card pot" ' + (G.gold < pp ? 'disabled ' : '') +
-        'onclick="buyPot()"><span class="n">🧪 Poção</span><span class="t">Consumível</span><span>Recupera 20 de vida.</span></button></div>';
+        'onclick="buyPot()"><span class="n">⚗️ Poção</span><span class="t">Consumível</span><span>Recupera 20 de vida.</span></button></div>';
     }
     if (!sp.cards.length && !sp.pot) h += '<small class="mut">Esgotado. Atualiza a loja.</small>';
     h += '</div><div class="spk" data-lbl="Packs">';

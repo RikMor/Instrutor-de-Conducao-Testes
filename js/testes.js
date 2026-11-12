@@ -72,7 +72,7 @@ function route() {
 function landing() {
   window.mpMode = false;
   main.innerHTML = `<h1 class="t">Testes — Instrutor de Condução</h1><p class="bc">Como queres fazer o teste?</p>${S && S.live ? '<p><a class="btn" href="#/quiz/run">▶ Continuar o teste em curso</a></p>' : ''}
-<div class="cards"><a class="card" href="#/solo"><b>🧍 Sozinho</b><small>Escolhe os temas, o número de perguntas e o tempo e faz o teste ao teu ritmo.</small></a><a class="card" href="#/multi"><b>👥 Multijogador</b><small>Cria uma sala ou entra com um código e compete com outras pessoas em direto.</small></a></div>`;
+<div class="cards"><a class="card" href="#/solo"><b>🚶 Sozinho</b><small>Escolhe os temas, o número de perguntas e o tempo e faz o teste ao teu ritmo.</small></a><a class="card" href="#/multi"><b>👥 Multijogador</b><small>Cria uma sala ou entra com um código e compete com outras pessoas em direto.</small></a></div>`;
 }
 
 // Botão "Escolher o modo": volta ao ecrã inicial sem recarregar a página.
