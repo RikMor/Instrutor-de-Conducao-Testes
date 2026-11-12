@@ -164,6 +164,11 @@ Object.keys(BASE).forEach(function (id) {
   CARDS[id + '+'] = mk(b.n + '+', b.u.c != null ? b.u.c : b.c, ua, true);
 });
 
+// Golpe Pesado: texto mais curto ("(+50%)" em vez de "(+50% dano)").
+['pesado', 'pesado+'].forEach(function (id) {
+  CARDS[id].d = CARDS[id].d.replace('(+50% dano)', '(+50%)');
+});
+
 // Nome de cada tipo de carta (a = ataque, d = defesa, s = habilidade).
 var TN = { a: 'Ataque', d: 'Defesa', s: 'Habilidade' };
 
