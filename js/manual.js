@@ -205,17 +205,28 @@
     HL.termos.forEach(function (t) { if (!t) return; var p = 0; while ((p = cs.indexOf(t, p)) >= 0) { rg.push([p, p + t.length]); p += t.length; } });
     rg.sort(function (a, b) { return a[0] - b[0]; });
     var fund = []; rg.forEach(function (r) { var u = fund[fund.length - 1]; if (u && r[0] <= u[1]) u[1] = Math.max(u[1], r[1]); else fund.push([r[0], r[1]]); });
-    var por = {};
-    fund.forEach(function (r) {
+    // Um pedaço de cada frase encontrada por nó de texto. Só entram pedaços com letras: os espaços e
+    // as quebras de linha entre <tr>, <td>, <li>... ficam de fora, porque uma <mark> ali dentro
+    // estragava a tabela (células a mais, barras amarelas soltas) e as listas.
+    var por = {}, grupos = [];
+    fund.forEach(function (r, g) {
       var s = mp[r[0]], e = mp[r[1] - 1];
-      for (var k = s[0]; k <= e[0]; k++) { var a = k === s[0] ? s[1] : 0, b = k === e[0] ? e[1] + 1 : nos[k].nodeValue.length; if (b > a) (por[k] = por[k] || []).push([a, b]); }
+      for (var k = s[0]; k <= e[0]; k++) {
+        var t = nos[k].nodeValue, a = k === s[0] ? s[1] : 0, b = k === e[0] ? e[1] + 1 : t.length;
+        while (a < b && /\s/.test(t.charAt(a))) a++;
+        while (b > a && /\s/.test(t.charAt(b - 1))) b--;
+        if (b > a) (por[k] = por[k] || []).push({ a: a, b: b, g: g });
+      }
+      grupos[g] = [];
     });
-    MARCAS = [];
     Object.keys(por).forEach(function (k) {
-      var nd = nos[k]; por[k].sort(function (x, y) { return y[0] - x[0]; });
-      por[k].forEach(function (r) { var mid = nd.splitText(r[0]); mid.splitText(r[1] - r[0]); var mk = document.createElement('mark'); mk.className = 'hl'; mid.parentNode.replaceChild(mk, mid); mk.appendChild(mid); MARCAS.push(mk); });
+      var nd = nos[k]; por[k].sort(function (x, y) { return y.a - x.a; });
+      por[k].forEach(function (r) { var mid = nd.splitText(r.a); mid.splitText(r.b - r.a); var mk = document.createElement('mark'); mk.className = 'hl'; mid.parentNode.replaceChild(mk, mid); mk.appendChild(mid); grupos[r.g].push(mk); });
     });
-    MARCAS.sort(function (a, b) { return a.compareDocumentPosition(b) & 4 ? -1 : 1; });
+    // Uma ocorrência = uma frase encontrada (pode ter várias <mark>, uma por célula, item, etc.).
+    MARCAS = grupos.filter(function (m) { return m.length; });
+    MARCAS.forEach(function (m) { m.sort(function (a, b) { return a.compareDocumentPosition(b) & 4 ? -1 : 1; }); });
+    MARCAS.sort(function (a, b) { return a[0].compareDocumentPosition(b[0]) & 4 ? -1 : 1; });
     var barra = document.createElement('div'); barra.className = 'barra-hl';
     barra.innerHTML = '<span id="hl-info"></span><button type="button" data-a="ant" aria-label="Ocorrência anterior">▲</button><button type="button" data-a="seg" aria-label="Ocorrência seguinte">▼</button>' + (HL.ext ? '' : '<button type="button" data-a="res">← Resultados</button>') + '<button type="button" data-a="lim">Limpar</button>';
     main.insertBefore(barra, main.firstChild);
@@ -229,8 +240,8 @@
   }
   function ir(i) {
     if (!MARCAS.length) return;
-    MARCAS[POS].classList.remove('atual'); POS = (i + MARCAS.length) % MARCAS.length;
-    var m = MARCAS[POS]; m.classList.add('atual'); m.scrollIntoView({ block: 'center' });
+    MARCAS[POS].forEach(function (x) { x.classList.remove('atual'); }); POS = (i + MARCAS.length) % MARCAS.length;
+    MARCAS[POS].forEach(function (x) { x.classList.add('atual'); }); MARCAS[POS][0].scrollIntoView({ block: 'center' });
     $('#hl-info').textContent = '«' + HL.q + '» — ocorrência ' + (POS + 1) + ' de ' + MARCAS.length;
   }
 
