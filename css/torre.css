@@ -1823,3 +1823,14 @@ h1,
   .own.mini .card { height: 107px; }
   .own.mini .empty { height: 107px; }
 }
+
+/* Computador: mais +3px de altura */
+@media (min-width: 561px) {
+  .card { height: 188px; }
+  .fan .card { height: 186px; }
+  .pg .card.face { height: 178px; }
+  .own .card { height: 158px; }
+  .empty { height: 158px; }
+  .own.mini .card { height: 110px; }
+  .own.mini .empty { height: 110px; }
+}
