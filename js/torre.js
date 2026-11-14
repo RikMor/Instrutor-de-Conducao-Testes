@@ -1054,6 +1054,37 @@ function plan() {
     c = sh(L.c.slice());
   G.pl3 = [c[0], c[1], L.b[Math.floor(Math.random() * L.b.length)]];
   G.tg = sh(Object.keys(TAGS)).slice(0, 2);
+  (G.hist = G.hist || [])[Math.floor(G.node / 3)] = { p: G.pl3.slice(), t: G.tg.slice() };
+}
+
+// Os 3 cartões de um andar (Combate 1, Combate 2, Boss). live = ecrã de escolha (botões ativos);
+// senão é só informação (janela Info da run).
+function blindCards(F, pl3, tgs, sl, live) {
+  var h = '';
+  pl3.forEach(function (k, i) {
+    var f = FOES[k],
+      b = i == 2,
+      nn = F * 3 + i,
+      hp = Math.round(f.hp * (f.boss ? 1 : 1 + 0.3 * F)),
+      st = i < sl ? 'done' : i == sl ? 'cur' : 'fut',
+      tg = b ? null : TAGS[tgs[i]];
+    h +=
+      '<div class="bc c' + i + ' ' + st + '"><button class="bsel" ' +
+      (live && st == 'cur' ? 'onclick="enter()"' : 'disabled') + '>' +
+      (st == 'cur' ? (live ? 'Selecionar' : 'Atual') : st == 'fut' ? 'Próximo' : G.skp[nn] ? 'Ignorado' : 'Derrotado') +
+      '</button><div class="bnm">' + (b ? '👑 Boss' : 'Combate ' + (i + 1)) +
+      '</div><div class="bmed">' + f.e + '</div><div class="bnn">' + f.n +
+      '</div><div class="bbox">Vida · Força<b>❤️ ' + hp + ' · 💪 +' + F +
+      '</b>Recompensa: <em>💰 ' + (10 + nn) + '–' + (20 + nn) + '</em></div>' +
+      (b
+        ? '<div class="bskipw"><small>O boss não pode ser ignorado</small></div>'
+        : '<div class="bor">OU</div><div class="bskipw"><button class="bskip" ' +
+          (live && st == 'cur' ? 'onclick="skip()"' : 'disabled') +
+          '>Ignorar</button><div class="btag"><span class="bti">' + tg.i + '</span><b>' + tg.n +
+          '</b><small>' + tg.d + '</small></div></div>') +
+      '</div>';
+  });
+  return h;
 }
 
 // Vai para o ecrã de escolha do próximo combate.
@@ -1686,15 +1717,22 @@ function cardEl(id, i, cb, dis) {
 
 // V = janela aberta ('deck', 'dr', 'di', 'pick') ou null.  PG = pack aberto: { t tipo, s tamanho, ch opções, left escolhas que faltam, ret ecrã a que voltar }.
 var V = null;
+var RF = null; // andar mostrado na janela Info da run
 var PG = null;
 
 // Abre a janela com a lista de cartas (baralho, compra ou descarte).
 function view(k) {
   V = k;
+  if (k == 'run') RF = null;
   render();
 }
 
 // Fecha a janela de cartas (e cancela a escolha de um tarot, que não se gasta).
+// Muda o andar mostrado na janela Info da run.
+function runTab(f) {
+  RF = f;
+  render();
+}
 function closeV() {
   V = null;
   PK = null;
@@ -1767,17 +1805,15 @@ function runModal() {
     f,
     n,
     cnt = { a: 0, d: 0, s: 0 };
-  h += '<div class="rmap">';
-  for (f = 0; f < 3; f++) {
-    h += '<div class="rrow"><b>Andar ' + (f + 1) + '</b>';
-    for (n = 0; n < 3; n++) {
-      i = f * 3 + n;
-      h +=
-        '<span class="rn' + (i < G.node ? ' done' : i == G.node ? ' cur' : '') + (n == 2 ? ' boss' : '') + '">' +
-        (n == 2 ? '👑' : '⚔️') + '<small>' + (i < G.node ? '✔' : n == 2 ? 'Boss' : 'C' + (n + 1)) + '</small></span>';
-    }
-    h += '</div>';
-  }
+  var cur = Math.floor(G.node / 3),
+    sf = RF == null ? cur : RF,
+    hs = (G.hist || [])[sf] || (sf == cur ? { p: G.pl3, t: G.tg } : null);
+  h += '<div class="rtabs">';
+  for (f = 0; f < 3; f++)
+    h += '<button class="rtab' + (f == sf ? ' on' : '') + '" onclick="runTab(' + f + ')">Andar ' + (f + 1) + (f == cur ? ' ●' : '') + '</button>';
+  h += '</div><div class="bz rbz">';
+  if (hs) h += blindCards(sf, hs.p, hs.t, sf < cur ? 3 : sf > cur ? -1 : G.node % 3, false);
+  else h += '<p class="mut">Os inimigos deste andar só aparecem quando lá chegares.</p>';
   h += '</div>';
   G.deck.forEach(function (id) {
     cnt[CARDS[id].t]++;
@@ -2270,29 +2306,7 @@ function render() {
       topbar() +
       ownBar(true) +
       (msg ? '<div class="log">' + msg + '</div>' : '') + '<div class="bz">';
-    G.pl3.forEach(function (k, i) {
-      var f = FOES[k],
-        b = i == 2,
-        nn = F * 3 + i,
-        hp = Math.round(f.hp * (f.boss ? 1 : 1 + 0.3 * F)),
-        st = i < sl ? 'done' : i == sl ? 'cur' : 'fut',
-        tg = b ? null : TAGS[G.tg[i]];
-      h +=
-        '<div class="bc c' + i + ' ' + st + '"><button class="bsel" ' +
-        (st == 'cur' ? 'onclick="enter()"' : 'disabled') + '>' +
-        (st == 'cur' ? 'Selecionar' : st == 'fut' ? 'Próximo' : G.skp[nn] ? 'Ignorado' : 'Derrotado') +
-        '</button><div class="bnm">' + (b ? '👑 Boss' : 'Combate ' + (i + 1)) +
-        '</div><div class="bmed">' + f.e + '</div><div class="bnn">' + f.n +
-        '</div><div class="bbox">Vida · Força<b>❤️ ' + hp + ' · 💪 +' + F +
-        '</b>Recompensa: <em>💰 ' + (10 + nn) + '–' + (20 + nn) + '</em></div>' +
-        (b
-          ? '<div class="bskipw"><small>O boss não pode ser ignorado</small></div>'
-          : '<div class="bor">OU</div><div class="bskipw"><button class="bskip" ' +
-            (st == 'cur' ? 'onclick="skip()"' : 'disabled') +
-            '>Ignorar</button><div class="btag"><span class="bti">' + tg.i + '</span><b>' + tg.n +
-            '</b><small>' + tg.d + '</small></div></div>') +
-        '</div>';
-    });
+    h += blindCards(F, G.pl3, G.tg, sl, true);
     h += '</div>';
   } else if (scr == 'shop') {
     var sp = G.shop;
