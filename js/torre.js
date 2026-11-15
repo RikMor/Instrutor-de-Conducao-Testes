@@ -2123,7 +2123,6 @@ function topbar() {
     '</div><div class="top"><div class="tgl">' + optHome() + '<span>Andar ' + (Math.floor(G.node / 3) + 1) + '/3 · ' +
     (G.node % 3 == 2 ? '👑 Boss' : 'Combate ' + ((G.node % 3) + 1)) +
     '</span></div><div class="tgl"><span>❤️ ' + G.hp + '/' + G.max + '</span>' +
-    (scr == 'blinds' ? '<span class="tl">Escolhe o teu próximo desafio</span>' : '') +
     '<span>💰 ' + G.gold + '</span></div><div class="tgl">' +
     '<button class="btn alt" style="padding:3px 10px;font-size:.85rem" onclick="view(\'deck\')">📚 Baralho (' + G.deck.length + ')</button>' +
     '<button class="btn alt" style="padding:3px 10px;font-size:.85rem" onclick="view(\'run\')">ℹ️ Info da run</button>' +
