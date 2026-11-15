@@ -1807,12 +1807,9 @@ function runModal() {
     n,
     cnt = { a: 0, d: 0, s: 0 };
   var cur = Math.floor(G.node / 3),
-    sf = RF == null ? cur : RF,
+    sf = cur,
     hs = (G.fh || [])[sf] || (sf == cur ? { p: G.pl3, t: G.tg } : null);
-  h += '<div class="rtabs">';
-  for (f = 0; f < 3; f++)
-    h += '<button class="rtab' + (f == sf ? ' on' : '') + '" onclick="runTab(' + f + ')">Andar ' + (f + 1) + (f == cur ? ' ●' : '') + '</button>';
-  h += '</div><div class="bz rbz">';
+  h += '<h4>Andar ' + (cur + 1) + ' de 3</h4><div class="bz rbz">';
   if (hs) h += blindCards(sf, hs.p, hs.t, sf < cur ? 3 : sf > cur ? -1 : G.node % 3, false);
   else h += '<p class="mut">Os inimigos deste andar só aparecem quando lá chegares.</p>';
   h += '</div>';
