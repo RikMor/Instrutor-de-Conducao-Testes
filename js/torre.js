@@ -1054,7 +1054,7 @@ function plan() {
     c = sh(L.c.slice());
   G.pl3 = [c[0], c[1], L.b[Math.floor(Math.random() * L.b.length)]];
   G.tg = sh(Object.keys(TAGS)).slice(0, 2);
-  (G.hist = G.hist || [])[Math.floor(G.node / 3)] = { p: G.pl3.slice(), t: G.tg.slice() };
+  (G.fh = G.fh || [])[Math.floor(G.node / 3)] = { p: G.pl3.slice(), t: G.tg.slice() };
 }
 
 // Os 3 cartões de um andar (Combate 1, Combate 2, Boss). live = ecrã de escolha (botões ativos);
@@ -1307,6 +1307,7 @@ function start() {
     cok: 0,
     cko: 0,
     hist: [],
+    fh: [],
     end: null,
     win: '',
     deck: [
@@ -1807,7 +1808,7 @@ function runModal() {
     cnt = { a: 0, d: 0, s: 0 };
   var cur = Math.floor(G.node / 3),
     sf = RF == null ? cur : RF,
-    hs = (G.hist || [])[sf] || (sf == cur ? { p: G.pl3, t: G.tg } : null);
+    hs = (G.fh || [])[sf] || (sf == cur ? { p: G.pl3, t: G.tg } : null);
   h += '<div class="rtabs">';
   for (f = 0; f < 3; f++)
     h += '<button class="rtab' + (f == sf ? ' on' : '') + '" onclick="runTab(' + f + ')">Andar ' + (f + 1) + (f == cur ? ' ●' : '') + '</button>';
