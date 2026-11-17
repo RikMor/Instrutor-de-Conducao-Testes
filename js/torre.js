@@ -1048,10 +1048,17 @@ function skipPack() {
   closePack();
 }
 
+// Vida de um inimigo no andar F (0 = andar 1). Os comuns crescem 30% por andar; os bosses só crescem
+// depois do andar 3 (modo infinito).
+function foeHp(f, F) {
+  var m = f.boss ? (F > 2 ? 1 + 0.3 * (F - 2) : 1) : 1 + 0.3 * F;
+  return Math.round(f.hp * m);
+}
+
 // Sorteia os 3 inimigos do andar atual: 2 comuns à sorte + um boss à sorte. Cada combate comum tem
 // também a etiqueta que ganhas se o ignorares (visível antes de escolheres).
 function plan() {
-  var L = FL[Math.floor(G.node / 3)],
+  var L = FL[Math.floor(G.node / 3) % FL.length],
     c = sh(L.c.slice());
   G.pl3 = [c[0], c[1], L.b[Math.floor(Math.random() * L.b.length)]];
   G.tg = sh(Object.keys(TAGS)).slice(0, 2);
@@ -1066,7 +1073,7 @@ function blindCards(F, pl3, tgs, sl, live) {
     var f = FOES[k],
       b = i == 2,
       nn = F * 3 + i,
-      hp = Math.round(f.hp * (f.boss ? 1 : 1 + 0.3 * F)),
+      hp = foeHp(f, F),
       st = i < sl ? 'done' : i == sl ? 'cur' : 'fut',
       tg = b ? null : TAGS[tgs[i]];
     h +=
@@ -1337,7 +1344,7 @@ function enter() {
   var F = Math.floor(G.node / 3),
     k = G.pl3[G.node % 3],
     f = FOES[k],
-    hp = Math.round(f.hp * (f.boss ? 1 : 1 + 0.3 * F));
+    hp = foeHp(f, F);
   E = { n: f.n, e: f.e, hp: hp, max: hp, p: f.p, i: 0, block: 0, str: F, vuln: 0, weak: 0, poison: 0 };
   G.dr = sh(G.deck.slice());
   G.di = [];
@@ -1560,7 +1567,7 @@ function enemyTurn() {
 // nos outros combates vais logo à loja (já não há escolha de 1 entre 3 cartas: as cartas estão na loja).
 function win() {
   G.busy = false;
-  if (G.node == N - 1) return endGame('win');
+  if (G.node == N - 1 && !G.endless) return endGame('win');
   var jur = hasRel('juros') ? Math.min(5, Math.floor(G.gold / 5)) : 0;
   G.gain = 10 + Math.floor(Math.random() * 11) + G.node + (hasRel('sorte') ? 8 : 0);
   G.inv = 0;
@@ -1588,6 +1595,14 @@ function win() {
     G.win = '';
     render();
   } else shop();
+}
+
+// Continuar depois de vencer o boss do andar 3: modo infinito (os andares repetem-se e os inimigos ficam cada vez mais fortes).
+function endless() {
+  G.endless = true;
+  G.end = null;
+  win();
+  window.scrollTo(0, 0);
 }
 
 // Descansar após o boss: recupera 35% da vida.
@@ -1813,7 +1828,7 @@ function runModal() {
   var cur = Math.floor(G.node / 3),
     sf = cur,
     hs = (G.fh || [])[sf] || (sf == cur ? { p: G.pl3, t: G.tg } : null);
-  h += '<h4>Andar ' + (cur + 1) + ' de 3</h4><div class="bz rbz">';
+  h += '<h4>Andar ' + (cur + 1) + (G.endless ? ' ♾️ (modo infinito)' : ' de 3') + '</h4><div class="bz rbz">';
   if (hs) h += blindCards(sf, hs.p, hs.t, sf < cur ? 3 : sf > cur ? -1 : G.node % 3, false);
   else h += '<p class="mut">Os inimigos deste andar só aparecem quando lá chegares.</p>';
   h += '</div>';
@@ -1976,6 +1991,14 @@ function endGame(kind, o) {
   window.scrollTo(0, 0);
 }
 
+// Abre a lista de perguntas do ecrã final e desce até lá.
+function showAns() {
+  var d = document.getElementById('rev');
+  if (!d) return;
+  d.open = true;
+  d.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 // Filtro das perguntas no ecrã final (todas / só certas / só erradas).
 function flt(k, b) {
   var box = document.querySelector('.rvs');
@@ -1991,10 +2014,14 @@ function endHtml() {
     e = g.end,
     kind = e.kind,
     F = Math.floor(g.node / 3) + 1,
-    where = 'andar ' + F + ' de 3, ' + (g.node % 3 == 2 ? 'boss' : 'combate ' + ((g.node % 3) + 1)),
+    where = 'andar ' + F + (g.endless ? '' : ' de 3') + ', ' + (g.node % 3 == 2 ? 'boss' : 'combate ' + ((g.node % 3) + 1)),
     foe = e.inb && E ? E.e + ' ' + E.n : '',
     title =
-      kind == 'win' ? '🏆 Venceste a torre!' : kind == 'walk' ? '🏳️ Desististe no andar ' + F : '💀 Caíste no andar ' + F,
+      kind == 'win'
+        ? '🏆 Venceste a torre!'
+        : kind == 'walk'
+          ? '🏳️ Desististe no andar ' + F + (g.endless ? ' (modo infinito ♾️)' : '')
+          : '💀 Caíste no andar ' + F + (g.endless ? ' (modo infinito ♾️)' : ''),
     why = '';
   if (kind == 'dead') {
     var lw = null;
@@ -2057,9 +2084,11 @@ function endHtml() {
           })
           .join(', ')
       : 'nenhuma') +
-    '</p><div class="row"><button class="btn" onclick="menu()">' + (kind == 'win' ? 'Jogar outra vez' : 'Tentar de novo') +
+    '</p><div class="row">' +
+    (kind == 'win' ? '<button class="btn" onclick="endless()">♾️ Continuar (modo infinito)</button><button class="btn alt" onclick="showAns()">📋 Ver respostas</button>' : '') +
+    '<button class="btn' + (kind == 'win' ? ' alt' : '') + '" onclick="menu()">' + (kind == 'win' ? 'Jogar outra vez' : 'Tentar de novo') +
     '</button><button class="btn alt" onclick="home()">Menu</button></div>' +
-    '<details open><summary>Rever as perguntas (' + items.length + ')</summary>' +
+    '<details id="rev"' + (kind == 'win' ? '' : ' open') + '><summary>Rever as perguntas (' + items.length + ')</summary>' +
     (items.length ? fl + '<div class="rvs" data-show="all">' + rv + '</div>' : '<p class="mut">Ainda não respondeste a nenhuma pergunta.</p>') +
     '</details></div>'
   );
@@ -2120,9 +2149,9 @@ function inv() {
 // Barra de progresso dos 9 combates e, por baixo, andar, vida, moedas e baralho.
 function topbar() {
   var s = '<div class="prog">';
-  for (var i = 0; i < N; i++) s += '<i class="' + (i <= G.node ? 'on' : '') + '"></i>';
+  for (var i = 0; i < N; i++) s += '<i class="' + (i <= G.node || G.endless ? 'on' : '') + '"></i>';
   s +=
-    '</div><div class="top"><div class="tgl">' + optHome() + '<span>Andar ' + (Math.floor(G.node / 3) + 1) + '/3 · ' +
+    '</div><div class="top"><div class="tgl">' + optHome() + '<span>Andar ' + (Math.floor(G.node / 3) + 1) + (G.endless ? ' ♾️' : '/3') + ' · ' +
     (G.node % 3 == 2 ? '👑 Boss' : 'Combate ' + ((G.node % 3) + 1)) +
     '</span></div><div class="tgl"><span>❤️ ' + G.hp + '/' + G.max + '</span>' +
     '<span>💰 ' + G.gold + '</span></div><div class="tgl">' +
@@ -2207,7 +2236,7 @@ function render() {
   } else if (scr == 'rules') {
     h =
       '<div class="ctr"><h2>Regras</h2></div><ul class="rules">' +
-      '<li><b>Objetivo:</b> sobe 3 andares e derrota o boss do último andar.</li>' +
+      '<li><b>Objetivo:</b> sobe 3 andares e derrota o boss do último andar. Depois podes terminar ou continuar no <b>modo infinito ♾️</b>: os andares repetem-se, os inimigos (bosses incluídos) ficam cada vez mais fortes e jogas até caíres.</li>' +
       '<li><b>Cada andar</b> tem 3 desafios: 2 combates contra inimigos comuns e 1 boss. Carrega em <b>Selecionar</b> para combater.</li>' +
       '<li><b>Ignorar:</b> nos 2 combates comuns podes carregar em <b>Ignorar</b>. Não combates nem ganhas moedas nem loja, mas ganhas a <b>etiqueta</b> que está por baixo do botão (um tarot grátis, um pack grátis, um desconto na próxima loja, moedas...). O boss não se pode ignorar.</li>' +
       '<li><b>Turnos:</b> começas cada turno com a mão cheia e a energia ⚡ cheia. Cada carta custa energia. O inimigo mostra o que vai fazer (por exemplo, "Ataca 6"). As cartas que jogas vão para o descarte; as que não jogas ficam na mão para o turno seguinte, e no início de cada turno compras só até a mão ficar cheia.</li>' +
