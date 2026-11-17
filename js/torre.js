@@ -505,35 +505,36 @@ function doFx() {
 
 // ---- Relíquias (p = preço na loja; vendem-se por metade). Só podes ter MAXR ao mesmo tempo. ----
 var MAXR = 5;
+var CG = 3; // 💰 por resposta certa
 var RL = {
-  vida: { n: '💖 Coração de Pedra', d: '+15 vida máxima e cura 15.', p: 35 },
-  en: { n: '💎 Cristal de Energia', d: '+1 energia máxima.', p: 45 },
-  mao: { n: '🎒 Bolsa Extra', d: 'Compras +1 carta por turno.', p: 40 },
-  forca: { n: '🥊 Luva de Ferro', d: '+2 de força permanente.', p: 35 },
-  escudo: { n: '🌲 Escudo de Madeira', d: 'Começas cada turno com 3 de escudo.', p: 28 },
-  armadura: { n: '🛡️ Armadura Antiga', d: 'Começas cada combate com 8 de escudo.', p: 25 },
-  sangue: { n: '💉 Frasco de Sangue', d: 'Recuperas 4 de vida no início de cada combate.', p: 25 },
-  penas: { n: '✒️ Pena Dourada', d: '+2 💰 por cada resposta certa.', p: 30 },
-  sorte: { n: '🍀 Trevo', d: '+8 💰 depois de cada combate.', p: 28 },
-  livro: { n: '📕 Livro Antigo', d: 'O primeiro erro de cada combate é perdoado: a carta funciona.', p: 40 },
-  lupa: { n: '🔍 Lupa', d: 'Elimina uma opção errada em cada pergunta (com 3 ou mais opções).', p: 42 },
-  punhal: { n: '🗡️ Punhal', d: 'O primeiro ataque de cada turno causa +4 de dano.', p: 30 },
-  presa: { n: '🕷️ Presa Venenosa', d: 'O veneno que aplicas é +3.', p: 28 },
-  ampulheta: { n: '⏳ Ampulheta', d: 'A sequência dá +1 energia a cada 2 respostas certas (em vez de 3).', p: 38 },
-  bola: { n: '🔮 Bola de Cristal', d: '+1 espaço para tarots.', p: 26 },
-  cartao: { n: '🏷️ Cartão de Cliente', d: 'Tudo 20% mais barato nas lojas.', p: 30 },
-  juros: { n: '🏦 Cofre', d: 'No fim de cada combate ganhas +1 💰 por cada 5 💰 que tens (máx. +5).', p: 34 },
-  espinhos: { n: '🌵 Cacto', d: 'Quando um inimigo te ataca, leva 3 de dano.', p: 30 },
-  cafe: { n: '☕ Café', d: 'Compras +2 cartas no primeiro turno de cada combate.', p: 28 },
-  tinta: { n: '🖋️ Tinteiro', d: 'Cada resposta certa dá 2 de escudo.', p: 32 },
-  vampiro: { n: '🧛 Dente de Vampiro', d: 'Cada ataque que jogas cura 2 de vida.', p: 34 },
-  tomo: { n: '📚 Tomo do Saber', d: 'Cada resposta certa causa 1 de dano ao inimigo.', p: 36 },
-  amuleto: { n: '☘️ Amuleto', d: 'Recebes 25% menos dano dos ataques.', p: 40 },
-  cartola: { n: '🎩 Cartola', d: 'Cada carta de custo 0 que jogas dá 3 de escudo.', p: 26 },
-  bandeira: { n: '🚩 Estandarte', d: 'Começas cada combate com +2 de força.', p: 36 },
-  bussola: { n: '🗺️ Bússola', d: '+1 opção em todos os packs.', p: 30 },
-  banquete: { n: '🍖 Banquete', d: 'Recuperas +6 de vida depois de cada combate.', p: 32 },
-  dado: { n: '🎲 Dados Viciados', d: 'Atualizar a loja custa menos 2 💰.', p: 24 },
+  vida: { n: '💖 Coração de Pedra', d: '+15 vida máxima e cura 15.', p: 26 },
+  en: { n: '💎 Cristal de Energia', d: '+1 energia máxima.', p: 34 },
+  mao: { n: '🎒 Bolsa Extra', d: 'Compras +1 carta por turno.', p: 30 },
+  forca: { n: '🥊 Luva de Ferro', d: '+2 de força permanente.', p: 26 },
+  escudo: { n: '🌲 Escudo de Madeira', d: 'Começas cada turno com 3 de escudo.', p: 21 },
+  armadura: { n: '🛡️ Armadura Antiga', d: 'Começas cada combate com 8 de escudo.', p: 19 },
+  sangue: { n: '💉 Frasco de Sangue', d: 'Recuperas 4 de vida no início de cada combate.', p: 19 },
+  penas: { n: '✒️ Pena Dourada', d: '+2 💰 por cada resposta certa.', p: 22 },
+  sorte: { n: '🍀 Trevo', d: '+8 💰 depois de cada combate.', p: 21 },
+  livro: { n: '📕 Livro Antigo', d: 'O primeiro erro de cada combate é perdoado: a carta funciona.', p: 30 },
+  lupa: { n: '🔍 Lupa', d: 'Elimina uma opção errada em cada pergunta (com 3 ou mais opções).', p: 32 },
+  punhal: { n: '🗡️ Punhal', d: 'O primeiro ataque de cada turno causa +4 de dano.', p: 22 },
+  presa: { n: '🕷️ Presa Venenosa', d: 'O veneno que aplicas é +3.', p: 21 },
+  ampulheta: { n: '⏳ Ampulheta', d: 'A sequência dá +1 energia a cada 2 respostas certas (em vez de 3).', p: 28 },
+  bola: { n: '🔮 Bola de Cristal', d: '+1 espaço para tarots.', p: 20 },
+  cartao: { n: '🏷️ Cartão de Cliente', d: 'Tudo 20% mais barato nas lojas.', p: 22 },
+  juros: { n: '🏦 Cofre', d: 'No fim de cada combate ganhas +1 💰 por cada 5 💰 que tens (máx. +5).', p: 26 },
+  espinhos: { n: '🌵 Cacto', d: 'Quando um inimigo te ataca, leva 3 de dano.', p: 22 },
+  cafe: { n: '☕ Café', d: 'Compras +2 cartas no primeiro turno de cada combate.', p: 21 },
+  tinta: { n: '🖋️ Tinteiro', d: 'Cada resposta certa dá 2 de escudo.', p: 24 },
+  vampiro: { n: '🧛 Dente de Vampiro', d: 'Cada ataque que jogas cura 2 de vida.', p: 26 },
+  tomo: { n: '📚 Tomo do Saber', d: 'Cada resposta certa causa 1 de dano ao inimigo.', p: 27 },
+  amuleto: { n: '☘️ Amuleto', d: 'Recebes 25% menos dano dos ataques.', p: 30 },
+  cartola: { n: '🎩 Cartola', d: 'Cada carta de custo 0 que jogas dá 3 de escudo.', p: 20 },
+  bandeira: { n: '🚩 Estandarte', d: 'Começas cada combate com +2 de força.', p: 27 },
+  bussola: { n: '🗺️ Bússola', d: '+1 opção em todos os packs.', p: 22 },
+  banquete: { n: '🍖 Banquete', d: 'Recuperas +6 de vida depois de cada combate.', p: 24 },
+  dado: { n: '🎲 Dados Viciados', d: 'Atualizar a loja custa menos 2 💰.', p: 18 },
 };
 
 // Valor de venda de uma relíquia: metade do preço.
@@ -952,7 +953,7 @@ function buyTop(i) {
 var PKS = {
   arcano: { n: 'Pack Arcano', i: '🔮', d: 'Tarots: o que escolheres é usado logo.', ch: [3, 5, 5], p: [10, 16, 20] },
   padrao: { n: 'Pack Padrão', i: '🎴', d: 'Cartas novas para o teu baralho.', ch: [3, 5, 5], p: [8, 14, 18] },
-  bobo: { n: 'Pack do Bobo', i: '🎪', d: 'Relíquias (só cabem se tiveres espaço).', ch: [2, 4, 4], p: [14, 22, 28] },
+  bobo: { n: 'Pack do Bobo', i: '🎪', d: 'Relíquias (só cabem se tiveres espaço).', ch: [2, 4, 4], p: [11, 17, 22] },
 };
 var PSN = ['Normal', 'Jumbo', 'Mega'];
 var PPK = [1, 1, 2];
@@ -1345,6 +1346,7 @@ function enter() {
   G.lv = false;
   G.cok = 0;
   G.cko = 0;
+  G.cg = 0;
   scr = 'battle';
   turn();
   if (hasRel('cafe')) draw(2);
@@ -1445,6 +1447,8 @@ function confirmA() {
     G.ok++;
     G.cok++;
     G.sk++;
+    G.gold += CG;
+    G.cg += CG;
     if (hasRel('penas')) G.gold += 2;
     if (hasRel('tinta')) G.block += 2;
     if (hasRel('tomo')) {
@@ -1572,7 +1576,7 @@ function win() {
   }
   G.gold += G.gain + G.inv + jur;
   G.hp = Math.min(G.max, G.hp + 4 + (hasRel('banquete') ? 6 : 0));
-  G.win = 'Vitória! +💰 ' + G.gain + (G.inv ? ' (+' + G.inv + ' 📈)' : '') + (jur ? ' (+' + jur + ' 🏦)' : '') + '.';
+  G.win = 'Vitória! +💰 ' + G.gain + (G.cg ? ' (+' + G.cg + ' por respostas certas)' : '') + (G.inv ? ' (+' + G.inv + ' 📈)' : '') + (jur ? ' (+' + jur + ' 🏦)' : '') + '.';
   if (G.node % 3 == 2) {
     opts = sh(
       Object.keys(RL).filter(function (k) {
@@ -2210,7 +2214,7 @@ function render() {
       '<li><b>Perguntas:</b> para jogar uma carta tens de acertar numa pergunta. Se acertares, a carta funciona; se errares, falha e gasta a energia na mesma.</li>' +
       '<li><b>Sequência 🔥:</b> respostas certas seguidas dão mais dano, e a cada 3 certas seguidas ganhas +1 energia.</li>' +
       '<li><b>Efeitos:</b> <b>Vulnerável</b> (o inimigo leva +50% de dano), <b>Fraco</b> (o inimigo bate -25%), <b>Veneno</b> (dano no fim de cada turno, e vai baixando), <b>Força</b> (+dano em todos os ataques) e <b>Exaurir</b> (a carta só volta no próximo combate).</li>' +
-      '<li><b>Loja:</b> depois de cada combate ganhas moedas 💰 e recuperas um pouco de vida. Na loja (como no Balatro) há 2 itens em cima (<b>relíquias</b>, <b>tarots</b> ou <b>cartas</b>), <b>cartas</b> em baixo à esquerda e <b>packs</b> em baixo à direita. Podes <b>atualizar</b> a loja por 💰 5 (sobe 1 de cada vez).</li>' +
+      '<li><b>Loja:</b> depois de cada combate ganhas moedas 💰 (e ganhas ainda 💰 3 por cada resposta certa, sem limite) e recuperas um pouco de vida. Na loja (como no Balatro) há 2 itens em cima (<b>relíquias</b>, <b>tarots</b> ou <b>cartas</b>), <b>cartas</b> em baixo à esquerda e <b>packs</b> em baixo à direita. Podes <b>atualizar</b> a loja por 💰 5 (sobe 1 de cada vez).</li>' +
       '<li><b>Relíquias:</b> só podes ter ' + MAXR + ' ao mesmo tempo. Para ficares com outra, <b>vende</b> uma (recebes metade do preço).</li>' +
       '<li><b>Packs:</b> ao comprar um pack, ele abre e escolhes 1 dos itens (2 nos <b>Mega</b>). O <b>Pack Arcano</b> tem tarots (o que escolheres é usado logo), o <b>Pack Padrão</b> tem cartas e o <b>Pack do Bobo</b> tem relíquias. Os packs <b>Jumbo</b> e <b>Mega</b> têm mais opções.</li>' +
       '<li><b>Tarots:</b> mexem nas cartas do teu baralho (duplicar, eliminar, melhorar, transformar). Quando precisam de cartas, <b>em combate</b> escolhes entre as cartas da tua <b>mão</b> (e o efeito é imediato); <b>na loja ou nos packs</b> aparecem umas 5 cartas do teu baralho, tiradas à sorte. Só tens espaço para 2 tarots e não os podes usar enquanto respondes a uma pergunta.</li>' +
