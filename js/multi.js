@@ -21,6 +21,7 @@
          pub    false = sala privada (não aparece na lista; só entra quem tiver o código)
          state  'lobby' | 'play' | 'done'
          qids   ids das perguntas      ord  'sh' (baralhadas) | 'orig' (ordem original)
+         ts     testes marcados (para mostrar os resultados pela ordem original)
          lim    limite de tempo (ms, 0 = sem limite)
          criada hora de criação (ms)   mode 'race', per, cur, rev  (campos antigos, já não usados)
      rooms/{CÓDIGO}/players/{uid}   cada jogador:
@@ -325,6 +326,7 @@ async function create() {
         ? Math.max(1, +$('#qm').value || 120) * 60000
         : 0,
     ord = document.querySelector('[name=qo]:checked').value,
+    ts = [...document.querySelectorAll('.tc:checked')].map((c) => +c.value), // testes marcados
     hp = $('#mh').checked,
     pub = document.querySelector('[name=vis]:checked').value === 'pub',
     btn = $('#mk');
@@ -360,6 +362,7 @@ async function create() {
       state: 'lobby',
       qids: p.slice(0, n).map((q) => q.id),
       ord,
+      ts,
       lim,
       per: 20,
       cur: -1,
@@ -729,7 +732,10 @@ const info = (q) =>
 // Posições (qi) das perguntas da sala pela ordem original dos testes (teste e, dentro dele, nº da pergunta),
 // mesmo que a sala tenha sido criada com as perguntas baralhadas. É a ordem usada nos resultados.
 const ordemOrig = () => {
-  const k = (q) => Math.min(...q.t.map((t, j) => t * 1000 + q.p[j]));
+  // Só contam os testes que o dono marcou (room.ts), como em quizPick: uma pergunta que está em vários testes
+  // fica no primeiro dos marcados. Salas antigas, sem room.ts, usam todos os testes.
+  const sel = room.ts ? new Set(room.ts) : null,
+    k = (q) => Math.min(...q.t.map((t, j) => (!sel || sel.has(t) ? t * 1000 + q.p[j] : 1e9)));
   return room.qids.map((_, qi) => qi).sort((a, b) => k(QS[room.qids[a]]) - k(QS[room.qids[b]]));
 };
 
