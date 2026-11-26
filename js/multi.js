@@ -796,11 +796,11 @@ function playerView(id) {
       ? list
           .map(
             ({ q, qi, c, st }) =>
-              `<div class="ri"><b>${qi + 1}. ${st === 'ok' ? '✅' : st === 'ko' ? '❌' : st === 'sem' ? '➖' : ''}</b> <span class="qt">${E(q.q)}</span>` +
+              `<div class="ri"><b>${qi + 1}.</b> <span class="qt">${E(q.q)}</span>` +
               q.o
                 .map(
                   (o, k) =>
-                    `<div class="opt ${k === q.a ? 'ok' : k === c ? 'ko' : ''}"><b>${L(k)})</b> ${E(o)}${k === c ? ' ← resposta de ' + E(p.name) : ''}</div>`,
+                    `<div class="opt ${k === q.a ? 'ok' : k === c ? 'ko' : ''}"><b>${L(k)})</b> ${E(o)}</div>`,
                 )
                 .join('') +
               (st === 'sem' ? '<small>Sem resposta.</small>' : '') +
