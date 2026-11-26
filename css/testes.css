@@ -751,3 +751,25 @@ header h1 {
     margin: 0.4rem 0;
   }
 }
+
+/* ---------- Multijogador: lista de salas e painel do anfitrião ---------- */
+.sala {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  margin: 0.6rem 0;
+}
+.sala .cd {
+  font-family: Rajdhani, sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: 0.15em;
+  color: var(--ac);
+}
+.sala small {
+  color: var(--mu);
+}
+.hb {
+  border-style: dashed;
+}
