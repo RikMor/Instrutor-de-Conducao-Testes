@@ -6,7 +6,7 @@
      quizCfg()  ecrã de configuração: temas, número de perguntas e tempo
      runView()  mostra a pergunta atual enquanto o teste decorre
      finish()   calcula e mostra o resultado
-   O modo multijogador (salas, ranking) está em js/multi.js.
+   O modo multijogador (nome, salas, ranking) está em js/multi.js.
 
    Dados (vêm de quiz.js):
      TESTS  lista de testes  { s: tema, n: nome do teste }
@@ -161,10 +161,21 @@ function pickList(upd) {
 // o botão "Começar teste", que baralha as perguntas dos temas escolhidos e inicia S.
 function quizCfg() {
   if (!MODE) return landing();
-  const mp = MODE === 'multi',
-    subs = [...new Set(T.map((t) => t.s))];
+  // Multijogador: o fluxo (nome, criar/juntar-se, lista de salas) está em multi.js (mpHub).
+  // O formulário de configuração só aparece ao criar uma sala (quizCfgForm).
+  if (MODE === 'multi') {
+    window.mpMode = true;
+    return window.mpHub && window.mpHub();
+  }
+  cfgForm(false);
+}
+
+// Formulário de configuração (temas, nº de perguntas, tempo, ordem).
+// mp = true: usado ao criar uma sala; back = função do botão "← Voltar".
+function cfgForm(mp, back) {
+  const subs = [...new Set(T.map((t) => t.s))];
   main.innerHTML =
-    `<p><a class="btn" href="testes.html" onclick="home(event)">← Escolher o modo</a></p><h1 class="t">${mp ? 'Multijogador' : 'Teste sozinho'}</h1>${!mp && S && S.live ? '<p><a class="btn" href="#/quiz/run">▶ Continuar o teste em curso</a></p>' : ''}
+    `<p>${mp ? '<button class="btn" id="bkc" type="button">← Voltar</button>' : '<a class="btn" href="testes.html" onclick="home(event)">← Escolher o modo</a>'}</p><h1 class="t">${mp ? 'Criar sala' : 'Teste sozinho'}</h1>${!mp && S && S.live ? '<p><a class="btn" href="#/quiz/run">▶ Continuar o teste em curso</a></p>' : ''}
 <div class="box"><b>Número de perguntas</b> <label>Perguntas: <input type="number" id="qn" value="100" min="1"> <small id="qmax"></small></label></div>
 <div class="box"><b>Temas</b>  <button class="btn" id="of" type="button">Selecionar só testes com correção oficial</button>` +
     subs
@@ -211,7 +222,8 @@ ${mp ? '' : '<button class="btn p" id="go">Começar teste</button>'} <small id="
     upd();
   };
   window.mpMode = mp;
-  mp && window.mpCfg && window.mpCfg();
+  if (mp && $('#bkc')) $('#bkc').onclick = back;
+  mp && window.mpCreateBox && window.mpCreateBox();
   if ($('#go'))
     $('#go').onclick = () => {
       const p = window.quizPick(),
@@ -227,6 +239,8 @@ ${mp ? '' : '<button class="btn p" id="go">Começar teste</button>'} <small id="
       scrollTo(0, 0);
     };
 }
+
+window.quizCfgForm = cfgForm;
 
 // Converte milissegundos para texto mm:ss (ou h:mm:ss).
 const fmt = (ms) => {
