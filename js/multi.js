@@ -18,6 +18,7 @@
      rooms/{CÓDIGO}            a sala:
          host   id do anfitrião        hostName  nome do anfitrião
          hp     true se o anfitrião também joga
+         pub    false = sala privada (não aparece na lista; só entra quem tiver o código)
          state  'lobby' | 'play' | 'done'
          qids   ids das perguntas      ord  'sh' (baralhadas) | 'orig' (ordem original)
          lim    limite de tempo (ms, 0 = sem limite)
@@ -238,6 +239,7 @@ async function hubSalas() {
         .filter(
           (r) =>
             r.game !== 'milionario' &&
+            r.pub !== false &&
             Array.isArray(r.qids) &&
             Date.now() - (r.criada || 0) < SALA_ABERTA_MS,
         )
@@ -299,6 +301,8 @@ window.mpCreateBox = () => {
   const b = document.createElement('div');
   b.className = 'box';
   b.innerHTML = `<b>👥 Sala</b>
+<label><input type="radio" name="vis" value="pub" checked> 🌐 Sala pública — aparece na lista de salas abertas</label>
+<label><input type="radio" name="vis" value="priv"> 🔒 Sala privada — não aparece na lista, só entra quem tiver o código</label>
 <label><input type="checkbox" id="mh" checked> Participar também no teste (desmarca para só acompanhar a sala)</label>
 <p><small>Durante o teste só tu (anfitrião) vês quem acertou, o progresso e o tempo. Os outros jogadores só veem os resultados quando todos acabarem ou quando terminares o teste.</small></p>
 <p><button class="btn p" id="mk">Criar sala</button> <small id="me" style="color:var(--ko)"></small></p>`;
@@ -322,6 +326,7 @@ async function create() {
         : 0,
     ord = document.querySelector('[name=qo]:checked').value,
     hp = $('#mh').checked,
+    pub = document.querySelector('[name=vis]:checked').value === 'pub',
     btn = $('#mk');
   btn.disabled = true;
   err('');
@@ -350,6 +355,7 @@ async function create() {
       host: uid,
       hostName: name,
       hp,
+      pub,
       mode: 'race',
       state: 'lobby',
       qids: p.slice(0, n).map((q) => q.id),
@@ -571,7 +577,7 @@ function lobby() {
   main.dataset.k = '';
   main.innerHTML =
     `<h1 class="t">Sala <span style="letter-spacing:.2em">${E(code)}</span></h1><p>${regras(room)}</p>
-<p>Os amigos entram escolhendo esta sala na lista (ou com o código).</p><div class="box"><b>Jogadores (${pl.length})</b><br>${pl.map((p) => E(p.name) + (p.id === room.host ? ' 👑' : '')).join(' · ') || '—'}</div>` +
+<p>${room.pub === false ? '🔒 Sala privada: dá o código aos amigos, ela não aparece na lista.' : '🌐 Sala pública: os amigos veem-na na lista de salas (ou entram com o código).'}</p><div class="box"><b>Jogadores (${pl.length})</b><br>${pl.map((p) => E(p.name) + (p.id === room.host ? ' 👑' : '')).join(' · ') || '—'}</div>` +
     (host
       ? `<p>${spec() ? 'Estás só a acompanhar (não participas no teste).' : 'Vais participar no teste.'}</p><button class="btn p" id="st">Começar</button> ${hostBtn()} `
       : '<p>À espera do anfitrião…</p>') +
