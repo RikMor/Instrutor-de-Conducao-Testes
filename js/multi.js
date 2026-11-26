@@ -750,22 +750,24 @@ function stats(qi) {
 
 // "Visão geral do teste": percentagem de jogadores que escolheu cada opção, por pergunta.
 function overview() {
-  const open = new Set(
+  const eu = pl.find((p) => p.id === uid),
+    open = new Set(
     [...document.querySelectorAll('#ovl details[open]')].map((d) => d.dataset.i),
   );
   return (
-    '<h2>Visão geral do teste</h2><p>Clica numa pergunta para ver a percentagem de jogadores que escolheu cada resposta.</p><div id="ovl">' +
+    '<h2>Visão geral do teste</h2><p>Clica numa pergunta para ver a percentagem de jogadores que escolheu cada resposta. Verde = resposta certa; vermelho = a tua resposta, se errada; azul = outras opções erradas.</p><div id="ovl">' +
     ordemOrig()
       .map((qi, pos) => {
         const q = QS[room.qids[qi]],
           { c, t } = stats(qi),
+          mine = eu && eu.a ? eu.a[qi] : null, // a minha resposta nesta pergunta
           pc = (k) => (t ? Math.round((100 * c[k]) / t) : 0);
         return (
           `<details class="co" data-i="${qi}"${open.has(String(qi)) ? ' open' : ''}><summary><b>${pos + 1}.</b> ${E(q.q.slice(0, 90))}${q.q.length > 90 ? '…' : ''} — <b>${q.a < 0 ? 'anulada' : t ? pc(q.a) + '% acertaram' : 'sem respostas'}</b> (${q.a < 0 ? t + ' respostas' : c[q.a] + '/' + t})</summary><div class="qt">${E(q.q)}</div>` +
           q.o
             .map(
               (o, k) =>
-                `<div class="opt ${k === q.a ? 'ok' : ''}" style="background:linear-gradient(90deg,color-mix(in srgb,var(${k === q.a ? '--ok' : '--ac'}) 30%,transparent) ${pc(k)}%,transparent ${pc(k)}%)"><b>${L(k)})</b> ${E(o)}<span style="float:right"><b>${pc(k)}%</b> (${c[k]})</span></div>`,
+                `<div class="opt ${k === q.a ? 'ok' : k === mine ? 'ko' : ''}" style="background:linear-gradient(90deg,color-mix(in srgb,var(${k === q.a ? '--ok' : k === mine ? '--ko' : '--ac'}) 30%,transparent) ${pc(k)}%,transparent ${pc(k)}%)"><b>${L(k)})</b> ${E(o)}${k === mine ? ' <small>← a tua resposta</small>' : ''}<span style="float:right"><b>${pc(k)}%</b> (${c[k]})</span></div>`,
             )
             .join('') +
           info(q) +
