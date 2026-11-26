@@ -37,23 +37,43 @@ const db = getFirestore(app);
 let veu = null;
 function ecra(html) {
   if (!veu) {
+    estiloEcra();
     veu = document.createElement('div');
-    veu.style.cssText =
-      'position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;' +
-      'padding:1rem;background:#12151c;color:#eef1f6;font:16px/1.5 Barlow,system-ui,sans-serif;';
+    veu.className = 'dd-veu';
     document.body.appendChild(veu);
   }
-  veu.innerHTML = '<div style="max-width:24rem;width:100%;text-align:center">' + html + '</div>';
+  veu.innerHTML = '<div class="dd-caixa">' + html + '</div>';
 }
 function tirarEcra() {
   if (veu) veu.remove();
   veu = null;
 }
-const ESTILO_INPUT =
-  'width:100%;box-sizing:border-box;padding:.7rem .8rem;margin:.8rem 0 .5rem;border-radius:.5rem;' +
-  'border:1px solid #556;background:#1c212c;color:inherit;font:inherit;text-align:center;letter-spacing:.05em';
-const ESTILO_BOTAO =
-  'padding:.7rem 1.4rem;border:0;border-radius:.5rem;background:#f5b700;color:#111;font:inherit;font-weight:600;cursor:pointer';
+// Estilo do ecrã por cima da página (claro ou escuro, conforme o sistema).
+function estiloEcra() {
+  if (document.getElementById('dd-estilo')) return;
+  const st = document.createElement('style');
+  st.id = 'dd-estilo';
+  st.textContent = `
+    .dd-veu{--f:#f3f5f8;--c:#fff;--t:#132033;--m:#4d5a6e;--l:#d6dce6;--a:#0b57b7;--af:#fff;--e:#c0321f;
+      position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:1rem;
+      background:var(--f);color:var(--t);font:17px/1.55 'Atkinson Hyperlegible',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+    @media (prefers-color-scheme:dark){.dd-veu{--f:#0d141f;--c:#152031;--t:#e8edf5;--m:#a6b3c7;--l:#2a3a54;--a:#6aa8ff;--af:#07172e;--e:#ff8a7a}}
+    .dd-caixa{width:100%;max-width:25rem;padding:1.6rem 1.5rem;border:1px solid var(--l);border-radius:16px;background:var(--c);text-align:center;
+      box-shadow:0 10px 28px -14px rgba(0,0,0,.35)}
+    .dd-caixa p{margin:0}
+    .dd-titulo{margin:0 0 .4rem;font:800 1.5rem/1.2 Archivo,system-ui,sans-serif}
+    .dd-sub{color:var(--m)}
+    .dd-campo{width:100%;box-sizing:border-box;min-height:46px;padding:.6rem .8rem;margin:1rem 0 .4rem;border:1.5px solid var(--l);border-radius:10px;
+      background:var(--f);color:var(--t);font:inherit;text-align:center;letter-spacing:.05em}
+    .dd-campo:focus-visible{outline:3px solid var(--a);outline-offset:1px}
+    .dd-ver{background:none;border:0;color:var(--a);font:inherit;font-size:.93rem;cursor:pointer;text-decoration:underline;padding:.3rem}
+    .dd-aviso{min-height:1.5em;margin:0 0 .6rem;color:var(--e);font-weight:700}
+    .dd-botao{min-height:46px;padding:.6rem 1.6rem;border:0;border-radius:10px;background:var(--a);color:var(--af);font:inherit;font-weight:700;cursor:pointer}
+    .dd-botao:disabled{opacity:.5;cursor:not-allowed}
+    .dd-botao:focus-visible{outline:3px solid var(--a);outline-offset:2px}
+  `;
+  document.head.appendChild(st);
+}
 
 // ---------- Autenticação anónima (a mesma conta que o multijogador usa) ----------
 async function entrar() {
@@ -74,12 +94,12 @@ async function jaTemAcesso(uid) {
 function pedirCodigo(uid, aviso) {
   return new Promise((resolve) => {
     ecra(
-      '<h2 style="margin:0 0 .3rem">Instrutor de Condução</h2>' +
-        '<p style="margin:0;opacity:.8">Este site é de acesso reservado. Escreve o teu código de acesso.</p>' +
-        '<input id="dd-codigo" type="password" autocomplete="new-password" autocapitalize="off" spellcheck="false" style="' + ESTILO_INPUT + '" />' +
-        '<button id="dd-ver" type="button" style="background:none;border:0;color:#9fb0c8;font:inherit;font-size:.9rem;cursor:pointer;text-decoration:underline">Mostrar código</button>' +
-        '<p id="dd-aviso" style="min-height:1.5em;margin:0 0 .5rem;color:#ff8a80">' + (aviso || '') + '</p>' +
-        '<button id="dd-ok" style="' + ESTILO_BOTAO + '">Entrar</button>',
+      '<h2 class="dd-titulo">Instrutor de Condução</h2>' +
+        '<p class="dd-sub">Este site é de acesso reservado. Escreve o teu código de acesso.</p>' +
+        '<input id="dd-codigo" type="password" autocomplete="new-password" autocapitalize="off" spellcheck="false" class="dd-campo" aria-label="Código de acesso" />' +
+        '<button id="dd-ver" type="button" class="dd-ver">Mostrar código</button>' +
+        '<p id="dd-aviso" class="dd-aviso" role="alert">' + (aviso || '') + '</p>' +
+        '<button id="dd-ok" class="dd-botao">Entrar</button>',
     );
     const campo = veu.querySelector('#dd-codigo'),
       msg = veu.querySelector('#dd-aviso'),
@@ -188,7 +208,7 @@ export async function iniciar(opc) {
     console.error(e);
     ecra(
       '<p>Não foi possível carregar o conteúdo. Verifica a ligação e tenta outra vez.</p>' +
-        '<button id="dd-r" style="' + ESTILO_BOTAO + '">Tentar outra vez</button>',
+        '<button id="dd-r" class="dd-botao">Tentar outra vez</button>',
     );
     veu.querySelector('#dd-r').onclick = () => location.reload();
   }

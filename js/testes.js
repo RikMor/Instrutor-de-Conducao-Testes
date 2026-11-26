@@ -47,8 +47,8 @@ try {
 const unc = (i) => Q.filter((q) => q.t.includes(i) && q.u).length,
   ofi = (i) =>
     unc(i)
-      ? `<span class="bd">⚠️ ${unc(i)} em dúvida</span>`
-      : '<span class="bd ok">✅ Correção oficial</span>';
+      ? `<span class="bd">${unc(i)} em dúvida</span>`
+      : '<span class="bd ok">Correção oficial</span>';
 
 // HTML da caixa de seleção (checkbox) de um teste, com nº de perguntas e etiqueta.
 const tl = (t, i) =>
@@ -71,8 +71,8 @@ function route() {
 // Ecrã inicial: escolher entre fazer o teste Sozinho ou em Multijogador.
 function landing() {
   window.mpMode = false;
-  main.innerHTML = `<h1 class="t">Testes — Instrutor de Condução</h1><p class="bc">Como queres fazer o teste?</p>${S && S.live ? '<p><a class="btn" href="#/quiz/run">▶ Continuar o teste em curso</a></p>' : ''}
-<div class="cards"><a class="card" href="#/solo"><b>🚶 Sozinho</b><small>Escolhe os temas, o número de perguntas e o tempo e faz o teste ao teu ritmo.</small></a><a class="card" href="#/multi"><b>👥 Multijogador</b><small>Cria uma sala ou entra com um código e compete com outras pessoas em direto.</small></a></div>`;
+  main.innerHTML = `<h1 class="t">Testes — Instrutor de Condução</h1><p class="bc">Como queres fazer o teste?</p>${S && S.live ? '<p><a class="btn p" href="#/quiz/run">Continuar o teste em curso</a></p>' : ''}
+<div class="cards"><a class="card" href="#/solo"><b>Sozinho</b><small>Escolhe os temas, o número de perguntas e o tempo e faz o teste ao teu ritmo.</small></a><a class="card" href="#/multi"><b>Multijogador</b><small>Cria uma sala ou entra com um código e compete com outras pessoas.</small></a></div>`;
 }
 
 // Botão "Escolher o modo": volta ao ecrã inicial sem recarregar a página.
@@ -175,9 +175,9 @@ function quizCfg() {
 function cfgForm(mp, back) {
   const subs = [...new Set(T.map((t) => t.s))];
   main.innerHTML =
-    `<p>${mp ? '<button class="btn" id="bkc" type="button">← Voltar</button>' : '<a class="btn" href="testes.html" onclick="home(event)">← Escolher o modo</a>'}</p><h1 class="t">${mp ? 'Criar sala' : 'Teste sozinho'}</h1>${!mp && S && S.live ? '<p><a class="btn" href="#/quiz/run">▶ Continuar o teste em curso</a></p>' : ''}
+    `<p>${mp ? '<button class="btn" id="bkc" type="button">← Voltar</button>' : '<a class="btn" href="testes.html" onclick="home(event)">← Escolher o modo</a>'}</p><h1 class="t">${mp ? 'Criar sala' : 'Teste sozinho'}</h1>${!mp && S && S.live ? '<p><a class="btn p" href="#/quiz/run">Continuar o teste em curso</a></p>' : ''}
 <div class="box"><b>Número de perguntas</b> <label>Perguntas: <input type="number" id="qn" value="100" min="1"> <small id="qmax"></small></label></div>
-<div class="box"><b>Temas</b>  <button class="btn" id="of" type="button">Selecionar só testes com correção oficial</button>` +
+<div class="box"><b>Temas</b>  <button class="btn" id="of" type="button">Só testes com correção oficial</button>` +
     subs
       .map(
         (s) =>
@@ -259,9 +259,9 @@ function tick() {
     el = $('#tm');
   if (!el) return;
   if (S.lim) {
-    el.textContent = '⏱ ' + fmt(S.lim - e);
+    el.textContent = fmt(S.lim - e);
     if (e >= S.lim) finish(true);
-  } else el.textContent = '⏱ ' + fmt(e);
+  } else el.textContent = fmt(e);
 }
 
 // Desenha a pergunta atual, a grelha de navegação (1, 2, 3...) e os botões Anterior / Seguinte.
@@ -329,7 +329,7 @@ function finish(auto) {
     nul = S.qs.filter(an).length,
     n = S.qs.length - nul;
   main.innerHTML = `<h1 class="t">Resultado</h1>${auto ? '<p><b>O tempo terminou.</b></p>' : ''}<div class="res">${ok}/${n} <small>(${Math.round((ok / Math.max(n, 1)) * 100)}%)</small></div><p>Certas: ${ok} · Erradas: ${n - ok - un} · Por responder: ${un}${nul ? ' · Anuladas: ' + nul : ''} · Tempo: ${fmt(Math.min(used, S.lim || used))}</p>
-<p>${wr.length ? `<button class="btn p" id="rt">🔁 Refazer as erradas (${wr.length})</button>` : '<a class="btn p" href="#/solo">Novo teste</a>'}</p><div id="rv"></div>`;
+<p>${wr.length ? `<button class="btn p" id="rt">Refazer as erradas (${wr.length})</button>` : '<a class="btn p" href="#/solo">Novo teste</a>'}</p><div id="rv"></div>`;
   const show = (all) =>
     ($('#rv').innerHTML =
       S.qs
@@ -348,7 +348,7 @@ function finish(auto) {
             exHtml(q) +
             '</div>',
         )
-        .join('') || '<p>Sem erros. 🎉</p>');
+        .join('') || '<p>Sem erros. Muito bem!</p>');
   show(false);
   if ($('#rt'))
     $('#rt').onclick = () => {
