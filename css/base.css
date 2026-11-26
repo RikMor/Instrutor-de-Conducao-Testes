@@ -1,0 +1,183 @@
+/* base.css — identidade visual partilhada (Início, Testes e Manual).
+   Inspirada na sinalização rodoviária: azul de informação, vermelho de proibição, amarelo de aviso.
+   Segue o tema claro/escuro do sistema. */
+
+:root {
+  --bg: #f3f5f8;
+  --pa: #ffffff;
+  --pa2: #eef1f6;
+  --fg: #132033;
+  --mu: #4d5a6e;
+  --bd: #d6dce6;
+  --ac: #0b57b7;
+  --ac-fg: #ffffff;
+  --ac-suave: #e4eefb;
+  --ok: #12793a;
+  --ko: #c0321f;
+  --wa: #8f5b00;
+  --am: #f2b400;
+  --r: 14px;
+  --sh: 0 1px 2px rgba(19, 32, 51, 0.06), 0 8px 24px -12px rgba(19, 32, 51, 0.18);
+  --fonte: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --titulos: 'Archivo', 'Atkinson Hyperlegible', system-ui, sans-serif;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d141f;
+    --pa: #152031;
+    --pa2: #1b2940;
+    --fg: #e8edf5;
+    --mu: #a6b3c7;
+    --bd: #2a3a54;
+    --ac: #6aa8ff;
+    --ac-fg: #07172e;
+    --ac-suave: #1a2c4a;
+    --ok: #4cc27a;
+    --ko: #ff8a7a;
+    --wa: #e8b84d;
+    --sh: 0 10px 28px -14px rgba(0, 0, 0, 0.7);
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  margin: 0;
+  min-height: 100vh;
+  font: 17px/1.65 var(--fonte);
+  color: var(--fg);
+  background: var(--bg);
+}
+h1,
+h2,
+h3 {
+  font-family: var(--titulos);
+  line-height: 1.2;
+}
+a {
+  color: var(--ac);
+}
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+:focus-visible {
+  outline: 3px solid var(--ac);
+  outline-offset: 2px;
+}
+input[type='checkbox'],
+input[type='radio'] {
+  accent-color: var(--ac);
+}
+
+/* ---------- Cabeçalho (igual em todas as páginas) ---------- */
+.topo {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  min-height: 56px;
+  padding: 0.5rem 1.1rem;
+  padding-top: max(0.5rem, env(safe-area-inset-top));
+  background: color-mix(in srgb, var(--pa) 92%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--bd);
+}
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-right: auto;
+  min-width: 0;
+  color: var(--fg);
+  font: 800 1.12rem/1.1 var(--titulos);
+  text-decoration: none;
+}
+.marca svg {
+  flex: none;
+  width: 30px;
+  height: 30px;
+}
+.marca span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ligacoes {
+  display: flex;
+  gap: 0.25rem;
+}
+.ligacoes a {
+  padding: 0.4rem 0.85rem;
+  border-radius: 99px;
+  color: var(--mu);
+  font-weight: 700;
+  font-size: 0.97rem;
+  text-decoration: none;
+}
+.ligacoes a:hover {
+  background: var(--pa2);
+  color: var(--fg);
+}
+.ligacoes a[aria-current='page'] {
+  background: var(--ac-suave);
+  color: var(--ac);
+}
+
+/* ---------- Botões ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  padding: 0.5rem 1.15rem;
+  border: 1.5px solid var(--bd);
+  border-radius: 10px;
+  background: var(--pa);
+  color: var(--fg);
+  font-weight: 700;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s;
+}
+.btn:hover:not(:disabled) {
+  border-color: var(--ac);
+  background: var(--ac-suave);
+}
+.btn.p {
+  background: var(--ac);
+  border-color: var(--ac);
+  color: var(--ac-fg);
+}
+.btn.p:hover:not(:disabled) {
+  background: var(--ac);
+  filter: brightness(1.1);
+}
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+@media (max-width: 560px) {
+  .marca span {
+    font-size: 1rem;
+  }
+}
