@@ -3,18 +3,29 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
     <title>Manual — Instrutor de Condução</title>
     <meta name="description" content="Manual de estudo do curso de instrutor de condução: psicologia, pedagogia, trânsito, mecânica e primeiros socorros." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/base.css" />
     <link rel="stylesheet" href="css/manual.css" />
   </head>
   <body>
     <header class="topo">
       <button id="menu" class="btn-menu" aria-label="Abrir índice" aria-expanded="false">☰</button>
-      <h1><a href="index.html">📖 Manual — Instrutor de Condução</a></h1>
-      <a class="lnk-testes" href="testes.html">Fazer testes</a>
+      <a class="marca" href="index.html">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="7" fill="#0b57b7" /><rect x="3.5" y="3.5" width="25" height="25" rx="5" fill="none" stroke="#fff" stroke-width="1.6" /><path d="M16 24V10m0 0-5 5m5-5 5 5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        <span>Instrutor de Condução</span>
+      </a>
+      <nav class="ligacoes" aria-label="Principal">
+        <a href="manual.html" aria-current="page">Manual</a>
+        <a href="testes.html">Testes</a>
+      </nav>
     </header>
     <div class="corpo">
       <nav id="lateral" class="lateral" aria-label="Índice do manual">

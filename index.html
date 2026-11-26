@@ -3,78 +3,99 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
     <title>Instrutor de Condução</title>
     <meta name="description" content="Manual, testes por tema e jogos para estudar para o curso de instrutor de condução." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500&family=Rajdhani:wght@600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="css/base.css" />
     <link rel="stylesheet" href="css/index.css" />
   </head>
   <body>
-    <header class="topo conteudo">
-      <h1>Instrutor de Condução</h1>
-      <p class="lema">Liga o motor e escolhe como queres estudar.</p>
-
-      <!-- Números em estilo conta-quilómetros -->
-      <div class="odometros">
-        <div class="odo"><span>1</span><span>4</span><span>0</span><span>4</span><small>perguntas</small></div>
-        <div class="odo"><span>1</span><span>8</span><small>testes</small></div>
-        <div class="odo"><span>5</span><small>temas</small></div>
-        <div class="odo"><span>1</span><span>2</span><small>módulos de manual</small></div>
-      </div>
+    <header class="topo">
+      <a class="marca" href="index.html">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="7" fill="#0b57b7" /><rect x="3.5" y="3.5" width="25" height="25" rx="5" fill="none" stroke="#fff" stroke-width="1.6" /><path d="M16 24V10m0 0-5 5m5-5 5 5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        <span>Instrutor de Condução</span>
+      </a>
+      <nav class="ligacoes" aria-label="Principal">
+        <a href="manual.html">Manual</a>
+        <a href="testes.html">Testes</a>
+      </nav>
     </header>
 
-    <!-- Painel de instrumentos: cada modo é um mostrador com ponteiro -->
-    <main class="painel conteudo">
-      <a class="modo" style="--c: var(--amarelo); --v: 55deg" href="manual.html">
-        <div class="mostrador">
-          <i class="agulha"></i><b class="eixo"></b>
-          <span class="icone">📖</span>
-        </div>
-        <h2>Manual</h2>
-        <p>Estuda a matéria: manuais, resumos das aulas, legislação e relatório de sinistralidade.</p>
-        <span class="ir">Ler o manual</span>
-      </a>
+    <main class="pagina">
+      <section class="intro">
+        <h1>Estuda para o curso de instrutor de condução</h1>
+        <p>Lê a matéria no manual, treina com testes por tema e revê jogando.</p>
+      </section>
 
-      <a class="modo" style="--c: var(--azul); --v: 35deg" href="testes.html">
-        <div class="mostrador">
-          <i class="agulha"></i><b class="eixo"></b>
-          <span class="icone">📝</span>
-        </div>
-        <h2>Testes</h2>
-        <p>Testes convencionais por tema, com tempo, correção e modo multijogador.</p>
-        <span class="ir">Fazer um teste</span>
-      </a>
+      <section aria-labelledby="h-estudar">
+        <h2 id="h-estudar" class="grupo">Estudar</h2>
+        <div class="grelha dois">
+          <a class="modo grande" href="manual.html">
+            <svg class="sinal" viewBox="0 0 64 64" aria-hidden="true">
+              <rect x="3" y="3" width="58" height="58" rx="10" fill="#0b57b7" />
+              <rect x="7" y="7" width="50" height="50" rx="7" fill="none" stroke="#fff" stroke-width="2.4" />
+              <path d="M32 22c-4-3-10-3.6-15-3v22c5-.6 11 0 15 3 4-3 10-3.600 15-3V19c-5-.6-11 0-15 3Zm0 0v22" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" />
+            </svg>
+            <div>
+              <h3>Manual</h3>
+              <p>Manuais por módulo, resumos das aulas, legislação e relatório de sinistralidade, com pesquisa.</p>
+              <span class="ir">Abrir o manual</span>
+            </div>
+          </a>
 
-      <a class="modo" style="--c: var(--laranja); --v: 80deg" href="Torre_das_Cartas.html">
-        <div class="mostrador">
-          <i class="agulha"></i><b class="eixo"></b>
-          <span class="icone">🏰</span>
+          <a class="modo grande" href="testes.html">
+            <svg class="sinal" viewBox="0 0 64 64" aria-hidden="true">
+              <circle cx="32" cy="32" r="29" fill="#0b57b7" />
+              <circle cx="32" cy="32" r="25" fill="none" stroke="#fff" stroke-width="2.4" />
+              <path d="m20 33 8 8 17-18" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <div>
+              <h3>Testes</h3>
+              <p>Testes por tema, com tempo e correção. Faz sozinho ou em sala com outras pessoas.</p>
+              <span class="ir">Fazer um teste</span>
+            </div>
+          </a>
         </div>
-        <h2>Torre do Código de Condução</h2>
-        <p>Sobe a torre derrotando inimigos e vence cada andar respondendo às perguntas.</p>
-        <span class="ir">AUTÓMATO</span>
-      </a>
+      </section>
 
-      <a class="modo" style="--c: var(--verde); --v: 120deg" href="milionario.html">
-        <div class="mostrador">
-          <i class="agulha"></i><b class="eixo"></b>
-          <span class="icone">💰</span>
+      <section aria-labelledby="h-jogar">
+        <h2 id="h-jogar" class="grupo">Rever a jogar</h2>
+        <div class="grelha dois">
+          <a class="modo" href="Torre_das_Cartas.html">
+            <svg class="sinal" viewBox="0 0 64 64" aria-hidden="true">
+              <path d="M32 5 60 56H4Z" fill="#fff" stroke="#c0321f" stroke-width="6" stroke-linejoin="round" />
+              <path d="M24 46V28h3v-4h3v4h4v-4h3v4h3v18Zm5-8h6v8h-6Z" fill="#111" fill-rule="evenodd" />
+            </svg>
+            <div>
+              <h3>Torre do Código de Condução</h3>
+              <p>Sobe a torre: cada combate é decidido pelas respostas às perguntas do curso.</p>
+              <span class="ir">Jogar</span>
+            </div>
+          </a>
+
+          <a class="modo" href="milionario.html">
+            <svg class="sinal" viewBox="0 0 64 64" aria-hidden="true">
+              <circle cx="32" cy="32" r="28" fill="#fff" stroke="#c0321f" stroke-width="6" />
+              <path d="M40 22.500a11 11 0 1 0 0 19M20 28h15M20 36h15" fill="none" stroke="#111" stroke-width="4" stroke-linecap="round" />
+            </svg>
+            <div>
+              <h3>Quem quer ser milionário?</h3>
+              <p>Junta pontos a responder, usa relíquias e escolhe o caminho no mapa.</p>
+              <span class="ir">Jogar</span>
+            </div>
+          </a>
         </div>
-        <h2>Quem quer ser milionário?</h2>
-        <p>15 perguntas do curso, três ajudas e patamares seguros. Chega ao milhão.</p>
-        <span class="ir">Subir ao milhão</span>
-      </a>
+      </section>
     </main>
 
-    <footer class="conteudo rodape">
-      <p>
-        Temas: Psicologia na Condução, Trânsito e Segurança Rodoviária, Código da Estrada e Mecânica, Métodos de
-        Ensino e Pedagogia, Legislação.
-      </p>
+    <footer class="rodape">
+      <p>Temas: Psicologia na Condução · Trânsito e Segurança Rodoviária · Código da Estrada e Mecânica · Métodos de Ensino e Pedagogia · Legislação</p>
     </footer>
   </body>
 </html>
